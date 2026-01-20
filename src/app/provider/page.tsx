@@ -122,7 +122,7 @@ export default function ProviderDashboard() {
               <Link href="/" className="flex items-center gap-2">
                 <Eye className="h-8 w-8 text-primary-600" />
                 <span className="text-xl font-semibold text-primary-900">
-                  EyeCare
+                  Klara
                 </span>
               </Link>
               <span className="text-sm bg-primary-100 text-primary-700 px-2 py-1 rounded">

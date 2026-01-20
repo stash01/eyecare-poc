@@ -28,7 +28,7 @@ export default function LoginPage() {
         <nav className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Eye className="h-8 w-8 text-primary-600" />
-            <span className="text-xl font-semibold text-primary-900">EyeCare</span>
+            <span className="text-xl font-semibold text-primary-900">Klara</span>
           </Link>
         </nav>
       </header>

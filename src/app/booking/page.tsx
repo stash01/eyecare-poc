@@ -101,7 +101,7 @@ export default function BookingPage() {
         <nav className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Eye className="h-8 w-8 text-primary-600" />
-            <span className="text-xl font-semibold text-primary-900">EyeCare</span>
+            <span className="text-xl font-semibold text-primary-900">Klara</span>
           </Link>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Video className="h-4 w-4" />
@@ -114,10 +114,10 @@ export default function BookingPage() {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Book Your Consultation
+              Let's Find a Time That Works for You
             </h1>
             <p className="text-gray-600">
-              Select a provider, date, and time for your video consultation
+              Choose a provider and a time that fits your schedule — all consultations happen from the comfort of your home
             </p>
           </div>
 

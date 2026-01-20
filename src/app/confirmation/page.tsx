@@ -34,7 +34,7 @@ export default function ConfirmationPage() {
         <nav className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Eye className="h-8 w-8 text-primary-600" />
-            <span className="text-xl font-semibold text-primary-900">EyeCare</span>
+            <span className="text-xl font-semibold text-primary-900">Klara</span>
           </Link>
         </nav>
       </header>
@@ -46,11 +46,11 @@ export default function ConfirmationPage() {
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Booking Confirmed!
+              You're All Set!
             </h1>
             <p className="text-gray-600">
-              Your consultation has been scheduled. We&apos;ve sent a confirmation
-              email with all the details.
+              We're looking forward to helping you feel better. Check your email for
+              all the details — and don't hesitate to reach out if you have any questions.
             </p>
           </div>
 
@@ -184,8 +184,8 @@ export default function ConfirmationPage() {
               Manage your appointment
             </Link>{" "}
             or contact us at{" "}
-            <a href="mailto:support@eyecare.ca" className="text-primary-600 underline">
-              support@eyecare.ca
+            <a href="mailto:support@klarahealth.ca" className="text-primary-600 underline">
+              support@klarahealth.ca
             </a>
           </p>
         </div>

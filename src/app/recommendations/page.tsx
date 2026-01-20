@@ -36,16 +36,16 @@ const recommendations: RecommendationCategory[] = [
   {
     category: "Artificial Tears",
     icon: Droplets,
-    description: "The foundation of dry eye treatment",
+    description: "A gentle first step that helps many people",
     items: [
       {
         name: "Preservative-Free Artificial Tears",
-        details: "Use 4-6 times daily or as needed. Look for brands like Systane Ultra, Refresh Optive, or TheraTears.",
+        details: "These are the gentlest option for your eyes. Use 4-6 times daily or whenever you need relief. Brands like Systane Ultra, Refresh Optive, or TheraTears are widely available.",
         priority: "high",
       },
       {
         name: "Gel Drops for Nighttime",
-        details: "Thicker formulation for overnight relief. Apply before bed. GenTeal Gel or Systane Gel are good options.",
+        details: "If you wake up with dry, uncomfortable eyes, a thicker gel before bed can help. Try GenTeal Gel or Systane Gel for overnight comfort.",
         priority: "medium",
       },
     ],
@@ -53,16 +53,16 @@ const recommendations: RecommendationCategory[] = [
   {
     category: "Warm Compresses",
     icon: Sun,
-    description: "Helps unblock oil glands in your eyelids",
+    description: "A soothing ritual that can make a real difference",
     items: [
       {
         name: "Daily Warm Compress Routine",
-        details: "Apply a warm, damp cloth to closed eyes for 10 minutes, 1-2 times daily. Use a microwaveable eye mask for consistent heat.",
+        details: "This feels wonderful and actually helps! Apply a warm, damp cloth to closed eyes for 10 minutes, once or twice daily. A microwaveable eye mask makes this easier and more consistent.",
         priority: "high",
       },
       {
-        name: "Lid Massage",
-        details: "After warm compress, gently massage eyelids in a circular motion to help express oils.",
+        name: "Gentle Lid Massage",
+        details: "After your warm compress, gently massage your eyelids in small circles. This helps release natural oils that protect your tears.",
         priority: "medium",
       },
     ],
@@ -70,16 +70,16 @@ const recommendations: RecommendationCategory[] = [
   {
     category: "Lid Hygiene",
     icon: Eye,
-    description: "Keep your eyelids clean and healthy",
+    description: "Small habits that support healthier eyes",
     items: [
       {
         name: "Eyelid Cleansing Wipes",
-        details: "Use pre-moistened lid wipes (OCuSOFT, Systane Lid Wipes) daily to remove debris and bacteria.",
+        details: "Pre-moistened lid wipes (like OCuSOFT or Systane Lid Wipes) make daily cleaning quick and easy. Just a gentle wipe along your lash line each day.",
         priority: "high",
       },
       {
-        name: "Baby Shampoo Scrub",
-        details: "Alternative: Dilute baby shampoo, apply with cotton swab along lash line, rinse thoroughly.",
+        name: "Baby Shampoo Alternative",
+        details: "If you prefer a DIY approach: dilute a drop of baby shampoo in water, apply gently with a cotton swab along your lash line, then rinse well.",
         priority: "low",
       },
     ],
@@ -87,21 +87,21 @@ const recommendations: RecommendationCategory[] = [
   {
     category: "Screen Habits",
     icon: Monitor,
-    description: "Reduce digital eye strain",
+    description: "Your screen time doesn't have to hurt",
     items: [
       {
-        name: "20-20-20 Rule",
-        details: "Every 20 minutes, look at something 20 feet away for 20 seconds. Set a timer as a reminder.",
+        name: "The 20-20-20 Rule",
+        details: "Every 20 minutes, look at something 20 feet away for 20 seconds. It sounds simple, but it really helps! Try setting a gentle reminder.",
         priority: "high",
       },
       {
-        name: "Blink Reminders",
-        details: "We blink 66% less when using screens. Make a conscious effort to blink fully and frequently.",
+        name: "Remember to Blink",
+        details: "Here's something surprising: we blink 66% less when looking at screens. Make a conscious effort to blink fully and often — your eyes will thank you.",
         priority: "medium",
       },
       {
-        name: "Screen Position",
-        details: "Position your screen slightly below eye level to reduce the exposed eye surface area.",
+        name: "Screen Position Matters",
+        details: "Position your screen slightly below eye level. This small change reduces how much of your eye surface is exposed to air.",
         priority: "medium",
       },
     ],
@@ -109,16 +109,16 @@ const recommendations: RecommendationCategory[] = [
   {
     category: "Environment",
     icon: Wind,
-    description: "Optimize your surroundings",
+    description: "Small changes to where you spend time",
     items: [
       {
-        name: "Humidifier",
-        details: "Use a humidifier in dry environments, especially during winter months with indoor heating.",
+        name: "Add a Humidifier",
+        details: "Dry air is tough on eyes. A humidifier can make a noticeable difference, especially during winter when heating dries out indoor air.",
         priority: "medium",
       },
       {
-        name: "Avoid Direct Airflow",
-        details: "Position yourself away from fans, air vents, and air conditioning that blow directly on your face.",
+        name: "Watch for Air Currents",
+        details: "Fans, air vents, and AC blowing on your face can really aggravate symptoms. Try repositioning yourself or redirecting the airflow.",
         priority: "medium",
       },
     ],
@@ -126,16 +126,16 @@ const recommendations: RecommendationCategory[] = [
   {
     category: "Nutrition",
     icon: Fish,
-    description: "Support eye health from within",
+    description: "Nourishing your eyes from the inside",
     items: [
       {
-        name: "Omega-3 Supplements",
-        details: "Take 1000-2000mg of fish oil or flaxseed oil daily. May take 2-3 months to see benefits.",
+        name: "Omega-3 Fatty Acids",
+        details: "Fish oil or flaxseed oil supplements (1000-2000mg daily) can support your tear film. Be patient — it may take 2-3 months to notice the benefits.",
         priority: "medium",
       },
       {
         name: "Stay Hydrated",
-        details: "Drink 8+ glasses of water daily. Dehydration worsens dry eye symptoms.",
+        details: "It seems obvious, but drinking enough water throughout the day really does help. Aim for 8+ glasses — your whole body will benefit, including your eyes.",
         priority: "high",
       },
     ],
@@ -155,7 +155,7 @@ export default function RecommendationsPage() {
         <nav className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Eye className="h-8 w-8 text-primary-600" />
-            <span className="text-xl font-semibold text-primary-900">EyeCare</span>
+            <span className="text-xl font-semibold text-primary-900">Klara</span>
           </Link>
           <Link href="/results">
             <Button variant="ghost" size="sm">
@@ -169,10 +169,10 @@ export default function RecommendationsPage() {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Your Treatment Recommendations
+              Here's What Can Help
             </h1>
             <p className="text-gray-600">
-              Over-the-counter treatments and lifestyle changes for dry eye relief
+              Gentle, proven approaches to help you feel more comfortable — start wherever feels right for you
             </p>
           </div>
 
@@ -193,11 +193,11 @@ export default function RecommendationsPage() {
                 <Clock className="h-5 w-5 text-primary-600 mt-0.5" />
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">
-                    Give it time
+                    Be patient with yourself
                   </h3>
                   <p className="text-sm text-gray-700">
-                    Most dry eye treatments take 2-4 weeks of consistent use to show
-                    improvement. Be patient and stick with your routine.
+                    Healing takes time — most people start noticing improvement after 2-4 weeks of consistent care.
+                    It's okay if progress feels slow. You're doing something good for your eyes.
                   </p>
                 </div>
               </div>
@@ -246,15 +246,15 @@ export default function RecommendationsPage() {
             <CardContent className="pt-6">
               <div className="text-center">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Symptoms not improving?
+                  Still struggling? We're here for you.
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  If you&apos;ve tried these recommendations for 2-4 weeks without
-                  relief, a consultation can help identify prescription options.
+                  If you've been trying these approaches for a few weeks and still aren't feeling better,
+                  that's okay — sometimes you need a little extra help. Our specialists can explore prescription options with you.
                 </p>
                 <Link href="/register">
                   <Button size="lg">
-                    Book a Consultation
+                    Talk to a Specialist
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
@@ -264,11 +264,11 @@ export default function RecommendationsPage() {
 
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-500 mb-2">
-              Want to track your progress?
+              Curious how you're progressing?
             </p>
             <Link href="/assessment">
               <Button variant="ghost" size="sm">
-                Retake Assessment in 4 Weeks
+                Check In Again in a Few Weeks
               </Button>
             </Link>
           </div>

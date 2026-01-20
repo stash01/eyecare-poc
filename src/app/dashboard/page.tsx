@@ -65,7 +65,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
               <Eye className="h-8 w-8 text-primary-600" />
-              <span className="text-xl font-semibold text-primary-900">EyeCare</span>
+              <span className="text-xl font-semibold text-primary-900">Klara</span>
             </Link>
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="icon">
@@ -140,7 +140,7 @@ export default function DashboardPage() {
                   Welcome back, John
                 </h1>
                 <p className="text-gray-600">
-                  Manage your appointments and health records
+                  We're here to support you on your journey to healthier eyes
                 </p>
               </div>
               <Link href="/booking">
@@ -287,10 +287,10 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <div className="font-medium text-gray-900">
-                          Retake Assessment
+                          Check In on Your Symptoms
                         </div>
                         <div className="text-sm text-gray-500">
-                          Track your symptom changes
+                          See how you're progressing
                         </div>
                       </div>
                     </div>
@@ -306,10 +306,10 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <div className="font-medium text-gray-900">
-                          View Recommendations
+                          Self-Care Tips
                         </div>
                         <div className="text-sm text-gray-500">
-                          OTC treatments & self-care tips
+                          Gentle treatments to feel better
                         </div>
                       </div>
                     </div>

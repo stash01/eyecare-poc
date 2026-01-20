@@ -34,45 +34,45 @@ interface SeverityConfig {
 const severityConfigs: Record<Severity, SeverityConfig> = {
   mild: {
     level: "mild",
-    title: "Mild Dry Eye Symptoms",
+    title: "Good News — Your Symptoms are Mild",
     description:
-      "Your symptoms suggest mild dry eye. The good news is that many people find relief with simple self-care measures and over-the-counter treatments.",
+      "We hear you — even mild discomfort can be frustrating. The good news is that many people in your situation find real relief with simple self-care steps and over-the-counter treatments. You've taken an important first step by learning more about what's happening.",
     color: "text-green-700",
     bgColor: "bg-green-50",
     borderColor: "border-green-200",
     icon: CheckCircle,
     recommendation:
-      "We recommend starting with over-the-counter treatments. Monitor your symptoms and return if they persist or worsen.",
+      "We've put together some gentle, effective treatments you can start today. Keep track of how you're feeling — and remember, we're here if things change.",
     showBooking: false,
     bookingUrgency: "",
   },
   moderate: {
     level: "moderate",
-    title: "Moderate Dry Eye Symptoms",
+    title: "We Understand — These Symptoms Can Be Tough",
     description:
-      "Your symptoms indicate moderate dry eye disease. While self-care can help, you may benefit from professional guidance to find the most effective treatment plan.",
+      "Living with moderate dry eye can really affect your quality of life, and we want you to know that relief is absolutely possible. While self-care helps many people, you may also benefit from personalized guidance from a specialist who can create a treatment plan just for you.",
     color: "text-amber-700",
     bgColor: "bg-amber-50",
     borderColor: "border-amber-200",
     icon: AlertTriangle,
     recommendation:
-      "We recommend trying over-the-counter treatments first. If symptoms don't improve in 2-4 weeks, consider booking a consultation.",
+      "Let's start with some proven over-the-counter options. If you don't see improvement in a couple of weeks, connecting with one of our caring specialists could help you find faster relief.",
     showBooking: true,
-    bookingUrgency: "Consider a consultation if symptoms persist",
+    bookingUrgency: "We're here when you're ready",
   },
   severe: {
     level: "severe",
-    title: "Significant Dry Eye Symptoms",
+    title: "You Deserve Better Than This",
     description:
-      "Your symptoms suggest more significant dry eye disease that would benefit from professional evaluation. Prescription treatments may provide better relief than over-the-counter options alone.",
+      "We know how much you've been struggling — significant dry eye symptoms can be exhausting and really impact your daily life. Please know that you don't have to keep dealing with this alone. With the right treatment plan, many people experience meaningful relief.",
     color: "text-red-700",
     bgColor: "bg-red-50",
     borderColor: "border-red-200",
     icon: AlertCircle,
     recommendation:
-      "We strongly recommend booking a consultation with one of our eye care specialists to discuss prescription treatment options.",
+      "Based on what you've shared, we'd love to connect you with one of our compassionate eye care specialists. They can discuss prescription options that may give you the relief you've been looking for.",
     showBooking: true,
-    bookingUrgency: "Consultation recommended",
+    bookingUrgency: "Let's get you help",
   },
 };
 
@@ -93,10 +93,10 @@ function ResultsContent() {
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Your Assessment Results
+          Thank You for Sharing
         </h1>
         <p className="text-gray-600">
-          Based on your responses, here&apos;s what we found
+          We've carefully reviewed your responses — here's what we found and how we can help
         </p>
       </div>
 
@@ -126,7 +126,7 @@ function ResultsContent() {
         <CardContent className="pt-6">
           <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary-600" />
-            Our Recommendation
+            Your Path Forward
           </h3>
           <p className="text-gray-700">{config.recommendation}</p>
         </CardContent>
@@ -139,7 +139,7 @@ function ResultsContent() {
             className="w-full justify-between"
             variant={severity === "severe" ? "secondary" : "default"}
           >
-            <span>View Treatment Recommendations</span>
+            <span>See What Can Help You Feel Better</span>
             <ArrowRight className="h-5 w-5" />
           </Button>
         </Link>
@@ -153,7 +153,7 @@ function ResultsContent() {
             >
               <span className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Book a Consultation
+                Talk to a Specialist
               </span>
               <span className="text-sm opacity-80">{config.bookingUrgency}</span>
             </Button>
@@ -171,15 +171,15 @@ function ResultsContent() {
         <Card className="mt-8 border-primary-200 bg-primary-50">
           <CardContent className="pt-6">
             <h3 className="font-semibold text-gray-900 mb-2">
-              Still want to talk to a specialist?
+              We're here if you need us
             </h3>
             <p className="text-gray-600 text-sm mb-4">
-              Even with mild symptoms, some patients prefer professional guidance.
-              You can always book a consultation if you&apos;d like personalized advice.
+              Even with mild symptoms, sometimes it helps to talk to someone who truly understands what you're experiencing.
+              Our specialists are here whenever you're ready — no pressure, just support.
             </p>
             <Link href="/register">
               <Button variant="secondary" size="sm">
-                Book Optional Consultation
+                Connect with a Specialist
               </Button>
             </Link>
           </CardContent>
@@ -187,9 +187,9 @@ function ResultsContent() {
       )}
 
       <p className="text-center text-xs text-gray-500 mt-8">
-        This assessment is for informational purposes only and does not constitute
-        a medical diagnosis. For severe or persistent symptoms, please consult
-        a healthcare provider.
+        This assessment helps us understand your experience but isn't a medical diagnosis.
+        If your symptoms are severe or you're worried, please don't hesitate to reach out
+        to a healthcare provider — your comfort and wellbeing matter.
       </p>
     </div>
   );
@@ -211,7 +211,7 @@ export default function ResultsPage() {
         <nav className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Eye className="h-8 w-8 text-primary-600" />
-            <span className="text-xl font-semibold text-primary-900">EyeCare</span>
+            <span className="text-xl font-semibold text-primary-900">Klara</span>
           </Link>
         </nav>
       </header>

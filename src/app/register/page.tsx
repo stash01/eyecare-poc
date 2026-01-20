@@ -51,7 +51,7 @@ export default function RegisterPage() {
         <nav className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Eye className="h-8 w-8 text-primary-600" />
-            <span className="text-xl font-semibold text-primary-900">EyeCare</span>
+            <span className="text-xl font-semibold text-primary-900">Klara</span>
           </Link>
           <Link href="/login" className="text-primary-700 hover:text-primary-800">
             Already have an account? Sign In
@@ -63,10 +63,10 @@ export default function RegisterPage() {
         <div className="max-w-xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Create Your Account
+              Let's Get You Started
             </h1>
             <p className="text-gray-600">
-              Register to book a consultation with an eye care specialist
+              Just a few details so we can connect you with the right care
             </p>
           </div>
 
@@ -240,7 +240,7 @@ export default function RegisterPage() {
                   className="w-full"
                   disabled={!isFormValid}
                 >
-                  Create Account & Book Consultation
+                  Continue to Book Your Appointment
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </form>
@@ -249,7 +249,7 @@ export default function RegisterPage() {
 
           <div className="flex items-center justify-center gap-2 mt-6 text-sm text-gray-500">
             <Shield className="h-4 w-4" />
-            <span>Your information is encrypted and stored securely in Canada</span>
+            <span>Your privacy matters — all information is encrypted and stored securely in Canada</span>
           </div>
         </div>
       </main>
