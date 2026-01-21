@@ -63,10 +63,10 @@ export default function RegisterPage() {
         <div className="max-w-xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Let's Get You Started
+              Connect with an Ophthalmologist
             </h1>
             <p className="text-gray-600">
-              Just a few details so we can connect you with the right care
+              Just a few details so we can connect you with one of our board-certified ophthalmologists
             </p>
           </div>
 

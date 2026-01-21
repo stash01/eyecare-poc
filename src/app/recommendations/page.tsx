@@ -1,5 +1,7 @@
 "use client";
 
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -14,10 +16,21 @@ import {
   ArrowRight,
   Printer,
   Mail,
+  Pill,
+  Syringe,
+  AlertTriangle,
+  Info,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  PRESCRIPTION_TREATMENTS,
+  PROCEDURAL_TREATMENTS,
+  MGD_INFO,
+} from "@/lib/constants";
 
 type Priority = "high" | "medium" | "low";
+type Severity = "mild" | "moderate" | "severe";
 
 interface RecommendationItem {
   name: string;
@@ -148,6 +161,277 @@ const priorityColors: Record<Priority, string> = {
   low: "bg-gray-50 text-gray-600 border-gray-100",
 };
 
+function RecommendationsContent() {
+  const searchParams = useSearchParams();
+  const severity = (searchParams.get("severity") || "mild") as Severity;
+  const hasMGD = searchParams.get("mgd") === "true";
+
+  const showPrescription = severity === "moderate" || severity === "severe";
+  const showProcedural = severity === "severe";
+
+  return (
+    <div className="max-w-3xl mx-auto">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Here's What Can Help
+        </h1>
+        <p className="text-gray-600">
+          Gentle, proven approaches to help you feel more comfortable — start wherever feels right for you
+        </p>
+      </div>
+
+      <div className="flex justify-center gap-4 mb-8">
+        <Button variant="secondary" size="sm">
+          <Printer className="h-4 w-4 mr-2" />
+          Print List
+        </Button>
+        <Button variant="secondary" size="sm">
+          <Mail className="h-4 w-4 mr-2" />
+          Email to Me
+        </Button>
+      </div>
+
+      <Card className="mb-8 border-primary-200 bg-primary-50">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <Clock className="h-5 w-5 text-primary-600 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-1">
+                Be patient with yourself
+              </h3>
+              <p className="text-sm text-gray-700">
+                Healing takes time — most people start noticing improvement after 2-4 weeks of consistent care.
+                It's okay if progress feels slow. You're doing something good for your eyes.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* MGD Information Card */}
+      {hasMGD && (
+        <Card className="mb-8 border-amber-200 bg-amber-50">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-amber-600 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  {MGD_INFO.title}
+                </h3>
+                <p className="text-sm text-gray-700 mb-3">
+                  {MGD_INFO.description}
+                </p>
+                <ul className="text-sm text-gray-700 space-y-1">
+                  {MGD_INFO.symptoms.map((symptom, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-amber-600" />
+                      {symptom}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* OTC Recommendations - Always shown */}
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+          <Droplets className="h-5 w-5 text-primary-600" />
+          Over-the-Counter Treatments
+        </h2>
+        {recommendations.map((category) => (
+          <Card key={category.category}>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-3 text-lg">
+                <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                  <category.icon className="h-5 w-5 text-primary-600" />
+                </div>
+                <div>
+                  <span className="block">{category.category}</span>
+                  <span className="text-sm font-normal text-gray-500">
+                    {category.description}
+                  </span>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {category.items.map((item, index) => (
+                  <div
+                    key={index}
+                    className={`p-4 rounded-lg border ${priorityColors[item.priority]}`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium mb-1">{item.name}</h4>
+                        <p className="text-sm opacity-90">{item.details}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Prescription Treatments - Moderate + Severe */}
+      {showPrescription && (
+        <div className="mt-10 space-y-6">
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <Pill className="h-5 w-5 text-amber-600" />
+            Prescription Treatments
+            <span className="text-sm font-normal text-gray-500 ml-2">
+              (Available through our ophthalmologists)
+            </span>
+          </h2>
+          <Card className="border-amber-200">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-3 mb-4">
+                <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+                <p className="text-sm text-gray-700">
+                  Based on your symptoms, you may benefit from prescription treatments.
+                  Our board-certified ophthalmologists can evaluate your specific situation
+                  and recommend the most appropriate option.
+                </p>
+              </div>
+              <div className="space-y-4">
+                {PRESCRIPTION_TREATMENTS.map((treatment, index) => (
+                  <div
+                    key={index}
+                    className="p-4 rounded-lg border border-amber-200 bg-amber-50"
+                  >
+                    <div className="flex items-start gap-3">
+                      <Pill className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">
+                          {treatment.name}
+                        </h4>
+                        <p className="text-sm text-gray-700">
+                          {treatment.description}
+                        </p>
+                        <span className="text-xs text-amber-700 mt-2 inline-block">
+                          {treatment.category}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Procedural Treatments - Severe only */}
+      {showProcedural && (
+        <div className="mt-10 space-y-6">
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <Syringe className="h-5 w-5 text-red-600" />
+            In-Office Procedures
+            <span className="text-sm font-normal text-gray-500 ml-2">
+              (For persistent symptoms)
+            </span>
+          </h2>
+          <Card className="border-red-200">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-3 mb-4">
+                <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
+                <p className="text-sm text-gray-700">
+                  For severe or treatment-resistant dry eye, our fellowship-trained ophthalmologists
+                  offer advanced procedural treatments. These can provide significant relief when
+                  other approaches haven't been enough.
+                </p>
+              </div>
+              <div className="space-y-4">
+                {PROCEDURAL_TREATMENTS.map((treatment, index) => (
+                  <div
+                    key={index}
+                    className="p-4 rounded-lg border border-red-200 bg-red-50"
+                  >
+                    <div className="flex items-start gap-3">
+                      <Syringe className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">
+                          {treatment.name}
+                        </h4>
+                        <p className="text-sm text-gray-700 mb-2">
+                          {treatment.description}
+                        </p>
+                        <span className="text-xs text-red-700 bg-red-100 px-2 py-1 rounded">
+                          {treatment.clinicalNote}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* CTA Section */}
+      <Card className="mt-8">
+        <CardContent className="pt-6">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {severity === "severe"
+                ? "Ready to discuss treatment options?"
+                : severity === "moderate"
+                ? "Want personalized guidance?"
+                : "Still struggling? We're here for you."}
+            </h3>
+            <p className="text-gray-600 mb-4">
+              {severity === "severe"
+                ? "Our fellowship-trained ophthalmologists can evaluate your condition and recommend the most effective treatment plan for your specific situation."
+                : severity === "moderate"
+                ? "Our board-certified ophthalmologists can help determine if prescription treatments might be right for you."
+                : "If you've been trying these approaches for a few weeks and still aren't feeling better, that's okay — sometimes you need a little extra help. Our ophthalmologists can explore prescription options with you."}
+            </p>
+            <Link href="/register">
+              <Button
+                size="lg"
+                className={severity === "severe" ? "bg-red-600 hover:bg-red-700" : ""}
+              >
+                {severity === "severe"
+                  ? "Schedule Ophthalmologist Consultation"
+                  : severity === "moderate"
+                  ? "Talk to an Ophthalmologist"
+                  : "Talk to a Specialist"}
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="mt-8 text-center">
+        <p className="text-sm text-gray-500 mb-2">
+          Curious how you're progressing?
+        </p>
+        <Link href="/assessment">
+          <Button variant="ghost" size="sm">
+            Check In Again in a Few Weeks
+          </Button>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function RecommendationsLoading() {
+  return (
+    <div className="max-w-3xl mx-auto text-center py-20">
+      <Loader2 className="h-8 w-8 animate-spin text-primary-600 mx-auto mb-4" />
+      <p className="text-gray-600">Loading your recommendations...</p>
+    </div>
+  );
+}
+
 export default function RecommendationsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
@@ -166,113 +450,9 @@ export default function RecommendationsPage() {
       </header>
 
       <main className="container mx-auto px-4 pb-20">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Here's What Can Help
-            </h1>
-            <p className="text-gray-600">
-              Gentle, proven approaches to help you feel more comfortable — start wherever feels right for you
-            </p>
-          </div>
-
-          <div className="flex justify-center gap-4 mb-8">
-            <Button variant="secondary" size="sm">
-              <Printer className="h-4 w-4 mr-2" />
-              Print List
-            </Button>
-            <Button variant="secondary" size="sm">
-              <Mail className="h-4 w-4 mr-2" />
-              Email to Me
-            </Button>
-          </div>
-
-          <Card className="mb-8 border-primary-200 bg-primary-50">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-primary-600 mt-0.5" />
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">
-                    Be patient with yourself
-                  </h3>
-                  <p className="text-sm text-gray-700">
-                    Healing takes time — most people start noticing improvement after 2-4 weeks of consistent care.
-                    It's okay if progress feels slow. You're doing something good for your eyes.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="space-y-6">
-            {recommendations.map((category) => (
-              <Card key={category.category}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-3 text-lg">
-                    <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                      <category.icon className="h-5 w-5 text-primary-600" />
-                    </div>
-                    <div>
-                      <span className="block">{category.category}</span>
-                      <span className="text-sm font-normal text-gray-500">
-                        {category.description}
-                      </span>
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {category.items.map((item, index) => (
-                      <div
-                        key={index}
-                        className={`p-4 rounded-lg border ${priorityColors[item.priority]}`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                          <div>
-                            <h4 className="font-medium mb-1">{item.name}</h4>
-                            <p className="text-sm opacity-90">{item.details}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <Card className="mt-8">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Still struggling? We're here for you.
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  If you've been trying these approaches for a few weeks and still aren't feeling better,
-                  that's okay — sometimes you need a little extra help. Our specialists can explore prescription options with you.
-                </p>
-                <Link href="/register">
-                  <Button size="lg">
-                    Talk to a Specialist
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-500 mb-2">
-              Curious how you're progressing?
-            </p>
-            <Link href="/assessment">
-              <Button variant="ghost" size="sm">
-                Check In Again in a Few Weeks
-              </Button>
-            </Link>
-          </div>
-        </div>
+        <Suspense fallback={<RecommendationsLoading />}>
+          <RecommendationsContent />
+        </Suspense>
       </main>
     </div>
   );

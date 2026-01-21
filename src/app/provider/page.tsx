@@ -138,8 +138,8 @@ export default function ProviderDashboard() {
                   <User className="h-4 w-4 text-primary-600" />
                 </div>
                 <div className="text-sm">
-                  <div className="font-medium">Dr. Sarah Chen</div>
-                  <div className="text-gray-500 text-xs">CPSO #12345</div>
+                  <div className="font-medium">Dr. Sarah Chen, MD, FRCSC</div>
+                  <div className="text-gray-500 text-xs">Ophthalmologist • CPSO #12345</div>
                 </div>
               </div>
             </div>

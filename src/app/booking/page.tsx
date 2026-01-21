@@ -21,14 +21,18 @@ const providers = [
     name: "Dr. Sarah Chen",
     credentials: "MD, FRCSC",
     specialty: "Ophthalmologist",
+    subspecialty: "Cornea & External Disease",
+    expertise: ["Dry Eye Disease", "Ocular Surface Disorders", "Corneal Conditions"],
     cpsoNumber: "12345",
   },
   {
     id: 2,
-    name: "Dr. Michael Roberts",
-    credentials: "OD",
-    specialty: "Optometrist",
-    cpsoNumber: "67890",
+    name: "Dr. James Wilson",
+    credentials: "MD, FRCSC",
+    specialty: "Ophthalmologist",
+    subspecialty: "Oculoplastics & Tear Film",
+    expertise: ["Meibomian Gland Dysfunction", "Blepharitis", "Punctal Procedures"],
+    cpsoNumber: "67891",
   },
 ];
 
@@ -146,16 +150,29 @@ export default function BookingPage() {
                       <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
                         <User className="h-6 w-6 text-gray-500" />
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <h3 className="font-semibold text-gray-900">
                           {provider.name}
                         </h3>
                         <p className="text-sm text-gray-600">
                           {provider.credentials} • {provider.specialty}
                         </p>
+                        <p className="text-xs text-primary-600 font-medium mt-1">
+                          {provider.subspecialty}
+                        </p>
                         <p className="text-xs text-gray-500 mt-1">
                           CPSO #{provider.cpsoNumber}
                         </p>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {provider.expertise.map((exp, idx) => (
+                            <span
+                              key={idx}
+                              className="text-xs bg-primary-100 text-primary-700 px-2 py-0.5 rounded"
+                            >
+                              {exp}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </button>

@@ -8,8 +8,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "EyeCare - Dry Eye Assessment & Treatment",
-  description: "Get relief from dry, irritated eyes. Take our free assessment and receive personalized treatment recommendations from Ontario healthcare providers.",
+  title: "Klara - Board-Certified Ophthalmologist Care for Dry Eyes",
+  description: "Get relief from dry, irritated eyes. Take our free assessment and receive personalized treatment recommendations from board-certified ophthalmologists in Ontario.",
 };
 
 export default function RootLayout({

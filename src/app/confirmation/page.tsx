@@ -20,6 +20,8 @@ const appointment = {
   id: "APT-2024-001234",
   provider: "Dr. Sarah Chen",
   credentials: "MD, FRCSC",
+  specialty: "Ophthalmologist",
+  subspecialty: "Cornea & External Disease",
   date: "Monday, February 5, 2024",
   time: "10:30 AM",
   timezone: "EST",
@@ -71,7 +73,10 @@ export default function ConfirmationPage() {
                       {appointment.provider}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {appointment.credentials}
+                      {appointment.credentials} • {appointment.specialty}
+                    </div>
+                    <div className="text-sm text-primary-600">
+                      {appointment.subspecialty}
                     </div>
                   </div>
                 </div>

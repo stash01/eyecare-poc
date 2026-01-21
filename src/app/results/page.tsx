@@ -50,42 +50,91 @@ const severityConfigs: Record<Severity, SeverityConfig> = {
     level: "moderate",
     title: "We Understand — These Symptoms Can Be Tough",
     description:
-      "Living with moderate dry eye can really affect your quality of life, and we want you to know that relief is absolutely possible. While self-care helps many people, you may also benefit from personalized guidance from a specialist who can create a treatment plan just for you.",
+      "Living with moderate dry eye can really affect your quality of life, and we want you to know that relief is absolutely possible. While self-care helps many people, you may also benefit from personalized guidance from one of our board-certified ophthalmologists who can create a treatment plan just for you.",
     color: "text-amber-700",
     bgColor: "bg-amber-50",
     borderColor: "border-amber-200",
     icon: AlertTriangle,
     recommendation:
-      "Let's start with some proven over-the-counter options. If you don't see improvement in a couple of weeks, connecting with one of our caring specialists could help you find faster relief.",
+      "Let's start with some proven over-the-counter options. If you don't see improvement in a couple of weeks, connecting with one of our fellowship-trained ophthalmologists could help you find faster relief.",
     showBooking: true,
-    bookingUrgency: "We're here when you're ready",
+    bookingUrgency: "Talk to an Ophthalmologist",
   },
   severe: {
     level: "severe",
     title: "You Deserve Better Than This",
     description:
-      "We know how much you've been struggling — significant dry eye symptoms can be exhausting and really impact your daily life. Please know that you don't have to keep dealing with this alone. With the right treatment plan, many people experience meaningful relief.",
+      "We know how much you've been struggling — significant dry eye symptoms can be exhausting and really impact your daily life. Please know that you don't have to keep dealing with this alone. With the right treatment plan from a board-certified ophthalmologist, many people experience meaningful relief.",
     color: "text-red-700",
     bgColor: "bg-red-50",
     borderColor: "border-red-200",
     icon: AlertCircle,
     recommendation:
-      "Based on what you've shared, we'd love to connect you with one of our compassionate eye care specialists. They can discuss prescription options that may give you the relief you've been looking for.",
+      "Based on what you've shared, we strongly recommend connecting with one of our fellowship-trained ophthalmologists. They can discuss prescription and procedural options that may give you the relief you've been looking for.",
     showBooking: true,
-    bookingUrgency: "Let's get you help",
+    bookingUrgency: "Schedule Ophthalmologist Consultation",
   },
 };
 
-function getSeverity(score: number): Severity {
-  if (score <= 6) return "mild";
-  if (score <= 14) return "moderate";
-  return "severe";
+function getSeverity(
+  totalScore: number,
+  deq5Score: number,
+  deq5Positive: boolean,
+  riskFactorCount: number
+): Severity {
+  // DEWS3-based severity using DEQ-5 clinical thresholds
+  // DEQ-5 score ≥6 is diagnostic cutoff for dry eye (per TFOS DEWS II)
+  // DEQ-5 max score: 18, Total max score: ~40
+
+  let baseSeverity: Severity;
+
+  // Primary classification based on DEQ-5 (clinically validated)
+  if (!deq5Positive || deq5Score < 6) {
+    baseSeverity = "mild";
+  } else if (deq5Score < 12) {
+    baseSeverity = "moderate";
+  } else {
+    baseSeverity = "severe";
+  }
+
+  // Secondary adjustment based on total symptom burden
+  // If high total score despite lower DEQ-5, upgrade
+  if (baseSeverity === "mild" && totalScore >= 15) {
+    baseSeverity = "moderate";
+  }
+  if (baseSeverity === "moderate" && totalScore >= 28) {
+    baseSeverity = "severe";
+  }
+
+  // Risk factor upgrade logic
+  // 2+ risk factors: mild -> moderate
+  // 3+ risk factors: moderate -> severe
+  if (baseSeverity === "mild" && riskFactorCount >= 2) {
+    return "moderate";
+  }
+  if (baseSeverity === "moderate" && riskFactorCount >= 3) {
+    return "severe";
+  }
+
+  return baseSeverity;
 }
 
 function ResultsContent() {
   const searchParams = useSearchParams();
-  const score = parseInt(searchParams.get("score") || "0", 10);
-  const severity = getSeverity(score);
+  const totalScore = parseInt(searchParams.get("score") || "0", 10);
+  const deq5Score = parseInt(searchParams.get("deq5") || "0", 10);
+  const deq5Positive = searchParams.get("deq5Positive") === "true";
+
+  // Parse risk factor flags
+  const hasAutoimmune = searchParams.get("autoimmune") === "true";
+  const hasDiabetes = searchParams.get("diabetes") === "true";
+  const hasTriedTreatments = searchParams.get("triedTreatments") === "true";
+  const hasMGD = searchParams.get("mgd") === "true";
+
+  // Count risk factors
+  const riskFactorCount = [hasAutoimmune, hasDiabetes, hasTriedTreatments, hasMGD].filter(Boolean).length;
+
+  const severity = getSeverity(totalScore, deq5Score, deq5Positive, riskFactorCount);
   const config = severityConfigs[severity];
   const Icon = config.icon;
 
@@ -113,9 +162,22 @@ function ResultsContent() {
                 {config.title}
               </h2>
               <p className="text-gray-700 mb-4">{config.description}</p>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <span className="font-medium">Score:</span>
-                <span className={`font-bold ${config.color}`}>{score}/24</span>
+              <div className="flex flex-col gap-1 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">DEQ-5 Score:</span>
+                  <span className={`font-bold ${config.color}`}>{deq5Score}/18</span>
+                  {deq5Positive && (
+                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded">
+                      Above clinical threshold
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <span>Total symptom score: {totalScore}</span>
+                  {riskFactorCount > 0 && (
+                    <span>• {riskFactorCount} risk factor{riskFactorCount > 1 ? "s" : ""} identified</span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -133,7 +195,7 @@ function ResultsContent() {
       </Card>
 
       <div className="space-y-4">
-        <Link href="/recommendations" className="block">
+        <Link href={`/recommendations?severity=${severity}&score=${totalScore}&deq5=${deq5Score}&mgd=${hasMGD}`} className="block">
           <Button
             size="lg"
             className="w-full justify-between"
@@ -148,12 +210,12 @@ function ResultsContent() {
           <Link href="/register" className="block">
             <Button
               size="lg"
-              className="w-full justify-between"
+              className={`w-full justify-between ${severity === "severe" ? "bg-red-600 hover:bg-red-700" : ""}`}
               variant={severity === "severe" ? "default" : "secondary"}
             >
               <span className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Talk to a Specialist
+                {severity === "severe" ? "Schedule Ophthalmologist Consultation" : "Talk to an Ophthalmologist"}
               </span>
               <span className="text-sm opacity-80">{config.bookingUrgency}</span>
             </Button>
@@ -175,11 +237,11 @@ function ResultsContent() {
             </h3>
             <p className="text-gray-600 text-sm mb-4">
               Even with mild symptoms, sometimes it helps to talk to someone who truly understands what you're experiencing.
-              Our specialists are here whenever you're ready — no pressure, just support.
+              Our board-certified ophthalmologists are here whenever you're ready — no pressure, just support.
             </p>
             <Link href="/register">
               <Button variant="secondary" size="sm">
-                Connect with a Specialist
+                Connect with an Ophthalmologist
               </Button>
             </Link>
           </CardContent>

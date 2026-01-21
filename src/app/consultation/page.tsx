@@ -22,6 +22,9 @@ import {
 const provider = {
   name: "Dr. Sarah Chen",
   credentials: "MD, FRCSC",
+  specialty: "Ophthalmologist",
+  subspecialty: "Cornea & External Disease",
+  boardCertifications: ["Royal College of Physicians and Surgeons of Canada", "American Board of Ophthalmology"],
   cpsoNumber: "12345",
   location: "Toronto, Ontario",
   phone: "(416) 555-0100",
@@ -82,7 +85,21 @@ export default function ConsultationPage() {
                 <div>
                   <div className="text-xs text-gray-500">Credentials</div>
                   <div className="font-medium text-gray-900">
-                    {provider.credentials}
+                    {provider.credentials} • {provider.specialty}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500">Subspecialty</div>
+                  <div className="font-medium text-primary-600">
+                    {provider.subspecialty}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500">Board Certifications</div>
+                  <div className="font-medium text-gray-900">
+                    {provider.boardCertifications.map((cert, idx) => (
+                      <div key={idx} className="text-sm">{cert}</div>
+                    ))}
                   </div>
                 </div>
                 <div>

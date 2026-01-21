@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Eye, CheckCircle, Clock, Shield, ArrowRight, Heart } from "lucide-react";
+import { Eye, CheckCircle, Clock, Shield, ArrowRight, Heart, Award } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
@@ -148,8 +148,18 @@ export default function Home() {
       {/* Trust Indicators */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="grid md:grid-cols-3 gap-8 text-center">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-4 gap-8 text-center">
+              <div className="p-6">
+                <Award className="h-10 w-10 text-primary-600 mx-auto mb-4" />
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Ophthalmologist-Led
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Board-certified ophthalmologists with fellowship training in
+                  cornea and ocular surface disease.
+                </p>
+              </div>
               <div className="p-6">
                 <Shield className="h-10 w-10 text-primary-600 mx-auto mb-4" />
                 <h3 className="font-semibold text-gray-900 mb-2">
@@ -166,8 +176,8 @@ export default function Home() {
                   Clinically Validated
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Our assessment is based on the same questionnaires eye care
-                  professionals use every day in their practice.
+                  Our assessment is based on the same questionnaires board-certified
+                  ophthalmologists use every day in their practice.
                 </p>
               </div>
               <div className="p-6">
@@ -290,6 +300,6 @@ const steps = [
   },
   {
     title: "Take the next step that's right for you",
-    description: "For milder symptoms, we'll share proven self-care strategies. If your symptoms suggest you'd benefit from professional care, we'll connect you with an Ontario eye care specialist through a convenient video consultation.",
+    description: "For milder symptoms, we'll share proven self-care strategies. If your symptoms suggest you'd benefit from professional care, we'll connect you with a fellowship-trained ophthalmologist through a convenient video consultation.",
   },
 ];

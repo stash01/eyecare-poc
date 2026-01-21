@@ -31,6 +31,7 @@ const pastAppointments = [
   {
     id: "APT-2024-001200",
     provider: "Dr. Sarah Chen",
+    credentials: "MD, FRCSC",
     date: "Jan 15, 2024",
     status: "Completed",
     hasNotes: true,
@@ -38,7 +39,8 @@ const pastAppointments = [
   },
   {
     id: "APT-2024-001150",
-    provider: "Dr. Michael Roberts",
+    provider: "Dr. James Wilson",
+    credentials: "MD, FRCSC",
     date: "Dec 20, 2023",
     status: "Completed",
     hasNotes: true,
@@ -214,7 +216,9 @@ export default function DashboardPage() {
                           <div className="font-medium text-gray-900">
                             {apt.provider}
                           </div>
-                          <div className="text-sm text-gray-500">{apt.date}</div>
+                          <div className="text-sm text-gray-500">
+                            {apt.credentials} • {apt.date}
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
