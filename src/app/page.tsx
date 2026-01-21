@@ -15,6 +15,9 @@ export default function Home() {
             </span>
           </div>
           <div className="flex items-center gap-4">
+            <Link href="/shop" className="text-primary-700 hover:text-primary-800">
+              Shop
+            </Link>
             <Link href="/login" className="text-primary-700 hover:text-primary-800">
               Sign In
             </Link>
