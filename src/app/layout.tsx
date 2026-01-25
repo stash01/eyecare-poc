@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Klara - Board-Certified Ophthalmologist Care for Dry Eyes",
+  title: "KlaraMD - Board-Certified Ophthalmologist Care for Dry Eyes",
   description: "Get relief from dry, irritated eyes. Take our free assessment and receive personalized treatment recommendations from board-certified ophthalmologists in Ontario.",
 };
 

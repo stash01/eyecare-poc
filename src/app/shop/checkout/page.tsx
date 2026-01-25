@@ -65,7 +65,7 @@ export default function CheckoutPage() {
             <nav className="flex items-center justify-between">
               <Link href="/" className="flex items-center gap-2">
                 <Eye className="h-8 w-8 text-primary-600" />
-                <span className="text-xl font-semibold text-primary-900">Klara</span>
+                <span className="text-xl font-semibold text-primary-900">KlaraMD</span>
               </Link>
             </nav>
           </div>
@@ -89,7 +89,7 @@ export default function CheckoutPage() {
           <nav className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
               <Eye className="h-8 w-8 text-primary-600" />
-              <span className="text-xl font-semibold text-primary-900">Klara</span>
+              <span className="text-xl font-semibold text-primary-900">KlaraMD</span>
             </Link>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Lock className="h-4 w-4" />

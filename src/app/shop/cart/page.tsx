@@ -38,7 +38,7 @@ export default function CartPage() {
           <nav className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
               <Eye className="h-8 w-8 text-primary-600" />
-              <span className="text-xl font-semibold text-primary-900">Klara</span>
+              <span className="text-xl font-semibold text-primary-900">KlaraMD</span>
             </Link>
             <div className="flex items-center gap-4">
               <Link href="/shop">

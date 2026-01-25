@@ -141,7 +141,7 @@ export default function ConsultationPage() {
       <header className="bg-gray-800 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Eye className="h-6 w-6 text-primary-400" />
-          <span className="text-white font-semibold">Klara</span>
+          <span className="text-white font-semibold">KlaraMD</span>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-sm text-gray-300">

@@ -11,7 +11,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <Eye className="h-8 w-8 text-primary-600" />
             <span className="text-xl font-semibold text-primary-900">
-              Klara
+              KlaraMD
             </span>
           </div>
           <div className="flex items-center gap-4">
@@ -228,7 +228,7 @@ export default function Home() {
             <div className="flex flex-col md:flex-row justify-between items-center gap-6">
               <div className="flex items-center gap-2">
                 <Eye className="h-6 w-6 text-primary-400" />
-                <span className="text-white font-semibold">Klara</span>
+                <span className="text-white font-semibold">KlaraMD</span>
               </div>
               <div className="flex gap-6 text-sm">
                 <Link href="/privacy" className="hover:text-white">
@@ -249,7 +249,7 @@ export default function Home() {
                 severe symptoms, please seek care from a healthcare provider.
               </p>
               <p className="mt-4">
-                &copy; {new Date().getFullYear()} Klara Health. Ontario, Canada.
+                &copy; {new Date().getFullYear()} KlaraMD. Ontario, Canada.
               </p>
             </div>
           </div>
