@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, ArrowRight, ArrowLeft, Shield, AlertTriangle, Phone } from "lucide-react";
+import { Eye, ArrowRight, ArrowLeft, Shield, AlertTriangle, Phone, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
 
 // Phase 1: Safety screening questions (pathology red flags)
 const screeningQuestions = [
@@ -276,12 +277,37 @@ type Phase = "screening" | "assessment" | "referral";
 
 export default function AssessmentPage() {
   const router = useRouter();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const [phase, setPhase] = useState<Phase>("screening");
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [screeningAnswers, setScreeningAnswers] = useState<Record<string, number>>({});
   const [assessmentAnswers, setAssessmentAnswers] = useState<Record<number, number>>({});
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [redFlagsDetected, setRedFlagsDetected] = useState<string[]>([]);
+
+  // Redirect to register if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/register");
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render assessment if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const questions = phase === "screening" ? screeningQuestions : dewsQuestions;
   const totalQuestions = questions.length;

@@ -19,11 +19,11 @@ export default function Home() {
               Shop
             </Link>
             <Link href="/login" className="text-primary-700 hover:text-primary-800">
-              Sign In
+              Login
             </Link>
-            <Link href="/assessment">
+            <Link href="/register">
               <Button size="sm">
-                Start Assessment
+                Create Account
               </Button>
             </Link>
           </div>
@@ -34,28 +34,28 @@ export default function Home() {
       <section className="container mx-auto px-4 pt-12 pb-20">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
-            We understand how
-            <span className="text-primary-600"> frustrating dry eyes </span>
-            can be
+            Specialist eye care for
+            <span className="text-primary-600"> dry eyes </span>
+            — without the wait
           </h1>
           <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-            The constant discomfort. The burning. The blurry vision that makes
-            every day harder than it should be. You&apos;ve been dealing with this
-            long enough — and we&apos;re here to help you find relief.
+            Expert care from board-certified ophthalmologists, delivered virtually.
+            Get a personalized assessment and evidence-based treatment plan
+            tailored to your symptoms.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/assessment">
+            <Link href="/register">
               <Button size="lg" className="text-lg">
-                Take the Free Assessment
+                Get Started
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
             <Button size="lg" variant="secondary">
-              Learn How We Can Help
+              How It Works
             </Button>
           </div>
           <p className="mt-4 text-sm text-gray-500">
-            Takes just 2 minutes. No account needed. Your answers stay private.
+            Create your account to complete your personalized symptom assessment.
           </p>
         </div>
       </section>
@@ -69,11 +69,11 @@ export default function Home() {
               <span className="text-primary-600 font-medium">You&apos;re not alone</span>
             </div>
             <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">
-              Does this sound like your daily struggle?
+              Does this sound familiar?
             </h2>
             <p className="text-center text-gray-600 mb-12">
               Millions of Canadians live with dry eye disease. If any of these
-              feel familiar, know that relief is possible — and we can help you get there.
+              symptoms resonate with you, specialist care can help.
             </p>
 
             <div className="grid md:grid-cols-2 gap-6">
@@ -99,12 +99,12 @@ export default function Home() {
 
             <div className="mt-12 text-center">
               <p className="text-gray-700 mb-4">
-                If even one of these resonates with you, our assessment can help
-                identify what&apos;s happening and guide you toward the right care.
+                Our clinically validated assessment helps identify your specific
+                condition and guides you toward the right specialist care.
               </p>
-              <Link href="/assessment">
+              <Link href="/register">
                 <Button size="lg">
-                  Find Out What&apos;s Causing Your Symptoms
+                  Create Your Account
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -118,11 +118,10 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">
-              Getting help is simple
+              How KlaraMD Works
             </h2>
             <p className="text-center text-gray-600 mb-12">
-              We&apos;ve made it easy to understand your symptoms and connect with care —
-              all from the comfort of your home.
+              Specialist-led care, delivered on your schedule.
             </p>
 
             <div className="space-y-8">
@@ -156,7 +155,7 @@ export default function Home() {
               <div className="p-6">
                 <Award className="h-10 w-10 text-primary-600 mx-auto mb-4" />
                 <h3 className="font-semibold text-gray-900 mb-2">
-                  Ophthalmologist-Led
+                  Specialist-Led
                 </h3>
                 <p className="text-sm text-gray-600">
                   Board-certified ophthalmologists with fellowship training in
@@ -166,21 +165,21 @@ export default function Home() {
               <div className="p-6">
                 <Shield className="h-10 w-10 text-primary-600 mx-auto mb-4" />
                 <h3 className="font-semibold text-gray-900 mb-2">
-                  Your Privacy Matters
+                  Protected &amp; Private
                 </h3>
                 <p className="text-sm text-gray-600">
                   Your health information is protected under Canadian privacy law
-                  and never shared without your explicit consent.
+                  and never shared without your consent.
                 </p>
               </div>
               <div className="p-6">
                 <CheckCircle className="h-10 w-10 text-primary-600 mx-auto mb-4" />
                 <h3 className="font-semibold text-gray-900 mb-2">
-                  Clinically Validated
+                  Evidence-Based
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Our assessment is based on the same questionnaires board-certified
-                  ophthalmologists use every day in their practice.
+                  Our assessment uses clinically validated questionnaires aligned
+                  with TFOS DEWS II guidelines.
                 </p>
               </div>
               <div className="p-6">
@@ -189,8 +188,8 @@ export default function Home() {
                   Care on Your Schedule
                 </h3>
                 <p className="text-sm text-gray-600">
-                  No more waiting rooms or taking time off work. Get answers now
-                  and connect with specialists when it works for you.
+                  No waiting rooms. Connect with specialists through convenient
+                  video consultations when it works for you.
                 </p>
               </div>
             </div>
@@ -202,19 +201,18 @@ export default function Home() {
       <section className="py-20 bg-primary-600">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            You deserve to feel comfortable again
+            Ready to get the care you deserve?
           </h2>
           <p className="text-primary-100 text-lg mb-8 max-w-2xl mx-auto">
-            Let&apos;s start with a simple assessment to understand what you&apos;re
-            experiencing. In just 2 minutes, you&apos;ll have personalized
-            recommendations and a path forward.
+            Create your account to complete a personalized symptom assessment
+            and receive an evidence-based treatment plan from our specialists.
           </p>
-          <Link href="/assessment">
+          <Link href="/register">
             <Button
               size="lg"
               className="bg-white text-primary-700 hover:bg-primary-50 text-lg"
             >
-              Start Your Assessment
+              Create Your Account
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
@@ -244,9 +242,9 @@ export default function Home() {
             </div>
             <div className="mt-8 pt-8 border-t border-gray-800 text-center text-sm">
               <p>
-                This assessment provides guidance based on your symptoms but is not
-                a substitute for professional medical advice. If you&apos;re experiencing
-                severe symptoms, please seek care from a healthcare provider.
+                This platform provides virtual consultations with licensed healthcare
+                providers. For medical emergencies, please call 911 or visit your
+                nearest emergency room.
               </p>
               <p className="mt-4">
                 &copy; {new Date().getFullYear()} KlaraMD. Ontario, Canada.
@@ -262,47 +260,51 @@ export default function Home() {
 const symptoms = [
   {
     icon: Eye,
-    title: "That burning, stinging feeling",
-    description: "It starts small but by evening, your eyes feel like they're on fire — especially after a long day at the screen.",
+    title: "Burning and stinging",
+    description: "Persistent discomfort that worsens throughout the day, especially after screen time.",
   },
   {
     icon: Eye,
-    title: "Gritty, like sand is stuck",
-    description: "No matter how much you blink or rub, it feels like something's there that you just can't get rid of.",
+    title: "Gritty, sandy sensation",
+    description: "A constant feeling that something is in your eye that you can't remove.",
   },
   {
     icon: Eye,
-    title: "Watery eyes that won't stop",
-    description: "It seems backwards, but your eyes water constantly as they try desperately to find relief.",
+    title: "Excessive tearing",
+    description: "Paradoxically, your eyes water constantly as they try to compensate for dryness.",
   },
   {
     icon: Eye,
-    title: "Heavy, exhausted eyes",
-    description: "Reading, driving, working — everything feels harder when your eyes are this tired and strained.",
+    title: "Heavy, fatigued eyes",
+    description: "Reading, driving, and daily tasks become difficult when your eyes are strained.",
   },
   {
     icon: Eye,
-    title: "Vision that blurs and clears",
-    description: "You blink and it's clear for a moment, then blurs again. It's exhausting and distracting.",
+    title: "Fluctuating vision",
+    description: "Vision that blurs and clears with blinking, affecting focus and concentration.",
   },
   {
     icon: Eye,
-    title: "Sensitivity that limits your day",
-    description: "Bright lights, screens, even being outside — the discomfort makes you want to just close your eyes.",
+    title: "Light sensitivity",
+    description: "Discomfort in bright environments that limits your daily activities.",
   },
 ];
 
 const steps = [
   {
-    title: "Tell us what you're experiencing",
-    description: "Answer a few simple questions about your symptoms. There are no right or wrong answers — just be honest about how you're feeling. It takes less than 2 minutes.",
+    title: "Create your account",
+    description: "Sign up in minutes with your basic information. Your data is protected and secure.",
   },
   {
-    title: "Get personalized insights",
-    description: "Based on what you share, we'll help you understand the severity of your symptoms and what might be causing them. You'll receive recommendations tailored specifically to you.",
+    title: "Complete your assessment",
+    description: "Answer clinically validated questions about your symptoms. Our assessment is based on the same tools ophthalmologists use in practice.",
   },
   {
-    title: "Take the next step that's right for you",
-    description: "For milder symptoms, we'll share proven self-care strategies. If your symptoms suggest you'd benefit from professional care, we'll connect you with a fellowship-trained ophthalmologist through a convenient video consultation.",
+    title: "Receive your personalized plan",
+    description: "Get evidence-based recommendations tailored to your specific symptoms and severity level.",
+  },
+  {
+    title: "Connect with a specialist",
+    description: "For moderate to severe symptoms, book a video consultation with a fellowship-trained ophthalmologist who can prescribe treatment.",
   },
 ];

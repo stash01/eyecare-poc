@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, Shield, ArrowRight } from "lucide-react";
+import { Eye, Shield, ArrowRight, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { register, isAuthenticated, isLoading } = useAuth();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -22,6 +24,13 @@ export default function RegisterPage() {
     consentTerms: false,
   });
 
+  // Redirect to assessment if already authenticated
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.push("/assessment");
+    }
+  }, [isLoading, isAuthenticated, router]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -32,7 +41,12 @@ export default function RegisterPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push("/booking");
+    register({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+    });
+    router.push("/assessment");
   };
 
   const isFormValid =
@@ -63,11 +77,33 @@ export default function RegisterPage() {
         <div className="max-w-xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Connect with an Ophthalmologist
+              Create Your Account
             </h1>
             <p className="text-gray-600">
-              Just a few details so we can connect you with one of our board-certified ophthalmologists
+              Get started with your personalized dry eye assessment and evidence-based treatment plan
             </p>
+          </div>
+
+          {/* What happens next */}
+          <div className="mb-6 p-4 bg-primary-50 border border-primary-100 rounded-lg">
+            <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-primary-600" />
+              What happens next
+            </h3>
+            <ol className="space-y-2 text-sm text-gray-700">
+              <li className="flex items-start gap-2">
+                <span className="font-bold text-primary-600">1.</span>
+                Complete your symptom assessment (2-3 minutes)
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="font-bold text-primary-600">2.</span>
+                Receive your personalized results and recommendations
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="font-bold text-primary-600">3.</span>
+                Book a specialist consultation if recommended
+              </li>
+            </ol>
           </div>
 
           <Card>
@@ -240,7 +276,7 @@ export default function RegisterPage() {
                   className="w-full"
                   disabled={!isFormValid}
                 >
-                  Continue to Book Your Appointment
+                  Create Account &amp; Start Assessment
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </form>

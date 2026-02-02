@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -15,8 +17,10 @@ import {
   ChevronRight,
   Bell,
   Pill,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
 
 const upcomingAppointment = {
   id: "APT-2024-001234",
@@ -60,6 +64,40 @@ const prescriptions = [
 ];
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading, user, logout } = useAuth();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  const firstName = user?.firstName || "User";
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b">
@@ -77,7 +115,7 @@ export default function DashboardPage() {
                 <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
                   <User className="h-4 w-4 text-primary-600" />
                 </div>
-                <span className="text-sm font-medium">John D.</span>
+                <span className="text-sm font-medium">{firstName} {user?.lastName?.charAt(0) || ""}.</span>
               </div>
             </div>
           </div>
@@ -126,7 +164,10 @@ export default function DashboardPage() {
                     Settings
                   </Link>
                   <hr className="my-2" />
-                  <button className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 w-full">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 w-full"
+                  >
                     <LogOut className="h-5 w-5" />
                     Sign Out
                   </button>
@@ -139,10 +180,10 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Welcome back, John
+                  Welcome back, {firstName}
                 </h1>
                 <p className="text-gray-600">
-                  We're here to support you on your journey to healthier eyes
+                  We&apos;re here to support you on your journey to healthier eyes
                 </p>
               </div>
               <Link href="/booking">

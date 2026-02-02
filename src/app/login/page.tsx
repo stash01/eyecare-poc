@@ -1,20 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login, isAuthenticated, isLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState<"patient" | "provider">("patient");
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isLoading, isAuthenticated, router]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    login(email, password);
     if (userType === "provider") {
       router.push("/provider");
     } else {

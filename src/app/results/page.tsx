@@ -34,45 +34,45 @@ interface SeverityConfig {
 const severityConfigs: Record<Severity, SeverityConfig> = {
   mild: {
     level: "mild",
-    title: "Good News — Your Symptoms are Mild",
+    title: "Mild Symptoms Detected",
     description:
-      "We hear you — even mild discomfort can be frustrating. The good news is that many people in your situation find real relief with simple self-care steps and over-the-counter treatments. You've taken an important first step by learning more about what's happening.",
+      "Your assessment indicates mild dry eye symptoms. Many patients with similar symptom profiles find relief through consistent self-care routines and over-the-counter treatments. This is an important step in understanding your condition.",
     color: "text-green-700",
     bgColor: "bg-green-50",
     borderColor: "border-green-200",
     icon: CheckCircle,
     recommendation:
-      "We've put together some gentle, effective treatments you can start today. Keep track of how you're feeling — and remember, we're here if things change.",
+      "We recommend starting with evidence-based self-care strategies. Monitor your symptoms and reach out to our specialists if you notice any changes or lack of improvement.",
     showBooking: false,
     bookingUrgency: "",
   },
   moderate: {
     level: "moderate",
-    title: "We Understand — These Symptoms Can Be Tough",
+    title: "Moderate Symptoms Detected",
     description:
-      "Living with moderate dry eye can really affect your quality of life, and we want you to know that relief is absolutely possible. While self-care helps many people, you may also benefit from personalized guidance from one of our board-certified ophthalmologists who can create a treatment plan just for you.",
+      "Your assessment indicates moderate dry eye disease, which can significantly impact quality of life. While self-care measures may provide some relief, patients with moderate symptoms often benefit from personalized treatment plans developed with a specialist.",
     color: "text-amber-700",
     bgColor: "bg-amber-50",
     borderColor: "border-amber-200",
     icon: AlertTriangle,
     recommendation:
-      "Let's start with some proven over-the-counter options. If you don't see improvement in a couple of weeks, connecting with one of our fellowship-trained ophthalmologists could help you find faster relief.",
+      "We recommend beginning with over-the-counter treatments while considering a specialist consultation. If symptoms persist after 2-3 weeks of consistent treatment, connecting with one of our ophthalmologists can help identify more targeted interventions.",
     showBooking: true,
-    bookingUrgency: "Talk to an Ophthalmologist",
+    bookingUrgency: "Consult a Specialist",
   },
   severe: {
     level: "severe",
-    title: "You Deserve Better Than This",
+    title: "Significant Symptoms Detected",
     description:
-      "We know how much you've been struggling — significant dry eye symptoms can be exhausting and really impact your daily life. Please know that you don't have to keep dealing with this alone. With the right treatment plan from a board-certified ophthalmologist, many people experience meaningful relief.",
+      "Your assessment indicates significant dry eye disease that may benefit from specialist intervention. Patients with similar symptom profiles often experience meaningful improvement with appropriate prescription treatments and clinical management.",
     color: "text-red-700",
     bgColor: "bg-red-50",
     borderColor: "border-red-200",
     icon: AlertCircle,
     recommendation:
-      "Based on what you've shared, we strongly recommend connecting with one of our fellowship-trained ophthalmologists. They can discuss prescription and procedural options that may give you the relief you've been looking for.",
+      "Based on your assessment results, we recommend scheduling a consultation with one of our fellowship-trained ophthalmologists. They can evaluate prescription treatments and procedural options tailored to your specific condition.",
     showBooking: true,
-    bookingUrgency: "Schedule Ophthalmologist Consultation",
+    bookingUrgency: "Schedule Specialist Consultation",
   },
 };
 
@@ -142,10 +142,10 @@ function ResultsContent() {
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Thank You for Sharing
+          Your Assessment Results
         </h1>
         <p className="text-gray-600">
-          We've carefully reviewed your responses — here's what we found and how we can help
+          Based on clinically validated measures, here is your personalized assessment and recommended next steps
         </p>
       </div>
 
@@ -188,7 +188,7 @@ function ResultsContent() {
         <CardContent className="pt-6">
           <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary-600" />
-            Your Path Forward
+            Recommended Next Steps
           </h3>
           <p className="text-gray-700">{config.recommendation}</p>
         </CardContent>
@@ -201,7 +201,7 @@ function ResultsContent() {
             className="w-full justify-between"
             variant={severity === "severe" ? "secondary" : "default"}
           >
-            <span>See What Can Help You Feel Better</span>
+            <span>View Treatment Recommendations</span>
             <ArrowRight className="h-5 w-5" />
           </Button>
         </Link>
@@ -233,15 +233,15 @@ function ResultsContent() {
         <Card className="mt-8 border-primary-200 bg-primary-50">
           <CardContent className="pt-6">
             <h3 className="font-semibold text-gray-900 mb-2">
-              We're here if you need us
+              Specialist Support Available
             </h3>
             <p className="text-gray-600 text-sm mb-4">
-              Even with mild symptoms, sometimes it helps to talk to someone who truly understands what you're experiencing.
-              Our board-certified ophthalmologists are here whenever you're ready — no pressure, just support.
+              Even with mild symptoms, some patients benefit from specialist guidance.
+              Our board-certified ophthalmologists are available for consultations if you would like personalized care.
             </p>
-            <Link href="/register">
+            <Link href="/booking">
               <Button variant="secondary" size="sm">
-                Connect with an Ophthalmologist
+                Schedule a Consultation
               </Button>
             </Link>
           </CardContent>
@@ -249,9 +249,9 @@ function ResultsContent() {
       )}
 
       <p className="text-center text-xs text-gray-500 mt-8">
-        This assessment helps us understand your experience but isn't a medical diagnosis.
-        If your symptoms are severe or you're worried, please don't hesitate to reach out
-        to a healthcare provider — your comfort and wellbeing matter.
+        This assessment provides guidance based on validated clinical measures but does not
+        constitute a medical diagnosis. For severe symptoms or medical emergencies, please
+        consult a healthcare provider directly.
       </p>
     </div>
   );
