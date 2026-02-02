@@ -1,8 +1,13 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Eye, CheckCircle, Clock, Shield, ArrowRight, Heart, Award } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
 
 export default function Home() {
+  const { isAuthenticated, user, logout } = useAuth();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
       {/* Header */}
@@ -18,14 +23,30 @@ export default function Home() {
             <Link href="/shop" className="text-primary-700 hover:text-primary-800">
               Shop
             </Link>
-            <Link href="/login" className="text-primary-700 hover:text-primary-800">
-              Login
-            </Link>
-            <Link href="/register">
-              <Button size="sm">
-                Create Account
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link href="/dashboard" className="text-primary-700 hover:text-primary-800">
+                  Dashboard
+                </Link>
+                <button
+                  onClick={logout}
+                  className="text-primary-700 hover:text-primary-800"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="text-primary-700 hover:text-primary-800">
+                  Login
+                </Link>
+                <Link href="/register">
+                  <Button size="sm">
+                    Create Account
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </nav>
       </header>
