@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import { SymptomHistoryWidget } from "@/components/symptom-history-widget";
 
 const upcomingAppointment = {
   id: "APT-2024-001234",
@@ -321,6 +322,8 @@ export default function DashboardPage() {
                 )}
               </CardContent>
             </Card>
+
+            <SymptomHistoryWidget />
 
             <div className="grid md:grid-cols-2 gap-4">
               <Link href="/assessment">

@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, ArrowRight, ArrowLeft, Shield, AlertTriangle, Phone, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import { getSeverity } from "@/lib/assessment-utils";
+import { useSymptomHistory } from "@/lib/symptom-history-context";
 
 // Phase 1: Safety screening questions (pathology red flags)
 const screeningQuestions = [
@@ -278,6 +280,7 @@ type Phase = "screening" | "assessment" | "referral";
 export default function AssessmentPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading, user } = useAuth();
+  const { addResult } = useSymptomHistory();
   const [phase, setPhase] = useState<Phase>("screening");
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [screeningAnswers, setScreeningAnswers] = useState<Record<string, number>>({});
@@ -378,6 +381,20 @@ export default function AssessmentPage() {
 
         // DEQ-5 cutoff: score >= 6 suggests dry eye (per DEWS II)
         const deq5Positive = deq5Score >= 6;
+
+        const riskFactorCount = [hasAutoimmune, hasDiabetes, hasTriedTreatments, hasMGD].filter(Boolean).length;
+        const severity = getSeverity(totalScore, deq5Score, deq5Positive, riskFactorCount);
+
+        addResult({
+          score: totalScore,
+          deq5: deq5Score,
+          deq5Positive,
+          severity,
+          autoimmune: hasAutoimmune,
+          diabetes: hasDiabetes,
+          mgd: hasMGD,
+          triedTreatments: hasTriedTreatments,
+        });
 
         const params = new URLSearchParams({
           score: totalScore.toString(),
