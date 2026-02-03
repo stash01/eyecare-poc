@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KlaraMD - User Flow Diagram</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+    padding: 40px 20px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 8px;
+    color: #0f172a;
+  }
+  .subtitle {
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 40px;
+  }
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #475569;
+  }
+  .legend-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 2px solid;
+  }
+  .section {
+    max-width: 1200px;
+    margin: 0 auto 48px;
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .section-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: white;
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .section-desc {
+    font-size: 13px;
+    color: #64748b;
+  }
+
+  /* Flow container */
+  .flow {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    overflow-x: auto;
+    padding: 16px 0;
+  }
+  .flow-vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* Nodes */
+  .node {
+    min-width: 140px;
+    max-width: 180px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 2px solid;
+    text-align: center;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .node-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  .node-route {
+    font-size: 11px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    opacity: 0.7;
+  }
+  .node-detail {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  /* Node colors */
+  .node-entry {
+    background: #eff6ff;
+    border-color: #3b82f6;
+    color: #1e40af;
+  }
+  .node-auth {
+    background: #faf5ff;
+    border-color: #a855f7;
+    color: #7e22ce;
+  }
+  .node-clinical {
+    background: #ecfdf5;
+    border-color: #10b981;
+    color: #065f46;
+  }
+  .node-result {
+    background: #fefce8;
+    border-color: #eab308;
+    color: #854d0e;
+  }
+  .node-action {
+    background: #fff7ed;
+    border-color: #f97316;
+    color: #9a3412;
+  }
+  .node-provider {
+    background: #fdf2f8;
+    border-color: #ec4899;
+    color: #9d174d;
+  }
+  .node-shop {
+    background: #f0fdf4;
+    border-color: #22c55e;
+    color: #166534;
+  }
+  .node-danger {
+    background: #fef2f2;
+    border-color: #ef4444;
+    color: #991b1b;
+  }
+  .node-end {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #475569;
+    border-style: dashed;
+  }
+
+  /* Decision diamond */
+  .decision-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .decision {
+    width: 120px;
+    height: 120px;
+    transform: rotate(45deg);
+    border: 2px solid #eab308;
+    background: #fefce8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 10px;
+  }
+  .decision-text {
+    transform: rotate(-45deg);
+    font-size: 12px;
+    font-weight: 600;
+    color: #854d0e;
+    text-align: center;
+    line-height: 1.3;
+    width: 100px;
+  }
+
+  /* Arrows */
+  .arrow {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: #94a3b8;
+    padding: 0 4px;
+  }
+  .arrow svg {
+    width: 40px;
+    height: 24px;
+  }
+  .arrow-label {
+    font-size: 10px;
+    color: #64748b;
+    white-space: nowrap;
+    position: relative;
+    top: -14px;
+    text-align: center;
+  }
+  .arrow-down {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #94a3b8;
+    padding: 4px 0;
+  }
+  .arrow-down svg {
+    width: 24px;
+    height: 32px;
+  }
+
+  /* Branch */
+  .branch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .branch-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .branch-label {
+    font-size: 11px;
+    color: #64748b;
+    font-style: italic;
+    padding: 2px 8px;
+    background: #f8fafc;
+    border-radius: 4px;
+  }
+
+  /* Multi-step sub-flow */
+  .substep {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #475569;
+    padding: 6px 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin: 4px 0;
+  }
+  .substep-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* Responsive scrollable container */
+  .scroll-container {
+    overflow-x: auto;
+    padding-bottom: 12px;
+  }
+  .scroll-container::-webkit-scrollbar {
+    height: 6px;
+  }
+  .scroll-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+  .scroll-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+
+  /* Complex flow layouts */
+  .flow-grid {
+    display: grid;
+    grid-template-columns: auto;
+    gap: 24px;
+    justify-items: center;
+  }
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    justify-content: center;
+  }
+  .flow-branch-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .branch-paths {
+    display: flex;
+    gap: 24px;
+    position: relative;
+  }
+  .branch-paths::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 25%;
+    right: 25%;
+    height: 2px;
+    background: #cbd5e1;
+  }
+  .branch-path {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .branch-path-label {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+  .label-green {
+    background: #dcfce7;
+    color: #166534;
+  }
+  .label-amber {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  .label-red {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+  .label-blue {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  .label-purple {
+    background: #f3e8ff;
+    color: #7e22ce;
+  }
+
+  /* Notes */
+  .note {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: #92400e;
+    margin-top: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .note-icon {
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<h1>KlaraMD User Flow Diagram</h1>
+<p class="subtitle">EyeCare Telehealth Platform &mdash; All navigation paths mapped from the codebase</p>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#eff6ff;border-color:#3b82f6;"></div>
+    Entry / Landing
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#faf5ff;border-color:#a855f7;"></div>
+    Authentication
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#ecfdf5;border-color:#10b981;"></div>
+    Clinical / Assessment
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#fefce8;border-color:#eab308;"></div>
+    Results / Decision
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#fff7ed;border-color:#f97316;"></div>
+    Booking / Action
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#fdf2f8;border-color:#ec4899;"></div>
+    Provider
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#f0fdf4;border-color:#22c55e;"></div>
+    Shop / E-Commerce
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- FLOW 1: NEW PATIENT JOURNEY                  -->
+<!-- ============================================ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:linear-gradient(135deg,#3b82f6,#10b981);">&#x1F9D1;</div>
+    <div>
+      <div class="section-title">New Patient Journey</div>
+      <div class="section-desc">First-time user from landing page through assessment to consultation</div>
+    </div>
+  </div>
+
+  <div class="scroll-container">
+    <div class="flow-grid" style="min-width:1000px;">
+
+      <!-- Row 1: Landing → Register → Assessment -->
+      <div class="flow-row">
+        <div class="node node-entry">
+          <div class="node-title">Home Page</div>
+          <div class="node-route">/</div>
+          <div class="node-detail">Hero, symptoms, how it works, CTAs</div>
+        </div>
+
+        <div class="arrow">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="arrow-label">"Get Started"</div>
+            <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+          </div>
+        </div>
+
+        <div class="node node-auth">
+          <div class="node-title">Register</div>
+          <div class="node-route">/register</div>
+          <div class="node-detail">Name, email, DOB, OHIP card, PHIPA consent</div>
+        </div>
+
+        <div class="arrow">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="arrow-label">On submit</div>
+            <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+          </div>
+        </div>
+
+        <div class="node node-clinical" style="min-width:200px;">
+          <div class="node-title">Assessment</div>
+          <div class="node-route">/assessment</div>
+          <div class="node-detail" style="text-align:left;">
+            <strong>Phase 1:</strong> Safety Screening (7 Qs)<br>
+            <strong>Phase 2:</strong> DEWS3 Symptom Assessment (14 Qs)
+          </div>
+        </div>
+
+        <div class="arrow">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="arrow-label">Completed</div>
+            <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+          </div>
+        </div>
+
+        <div class="node node-result">
+          <div class="node-title">Results</div>
+          <div class="node-route">/results</div>
+          <div class="node-detail">DEQ-5 score, severity level, risk factors</div>
+        </div>
+      </div>
+
+      <!-- Branch indicator -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <svg width="24" height="32" viewBox="0 0 24 32"><line x1="12" y1="0" x2="12" y2="24" stroke="#94a3b8" stroke-width="2"/><polygon points="6,24 12,32 18,24" fill="#94a3b8"/></svg>
+        <div style="font-size:12px;color:#64748b;font-weight:600;">Severity determines path</div>
+      </div>
+
+      <!-- Row 2: Branching paths based on severity -->
+      <div class="branch-paths" style="gap:32px;">
+        <!-- Red flag path -->
+        <div class="branch-path">
+          <div class="branch-path-label label-red">Red Flags Detected</div>
+          <div class="node node-danger" style="min-width:160px;">
+            <div class="node-title">In-Person Referral</div>
+            <div class="node-route">/assessment (referral)</div>
+            <div class="node-detail">Emergency warning, find ophthalmologist, retake option</div>
+          </div>
+        </div>
+
+        <!-- Mild path -->
+        <div class="branch-path">
+          <div class="branch-path-label label-green">Mild</div>
+          <div class="node node-clinical">
+            <div class="node-title">Recommendations</div>
+            <div class="node-route">/recommendations</div>
+            <div class="node-detail">OTC treatments, self-care tips only</div>
+          </div>
+        </div>
+
+        <!-- Moderate path -->
+        <div class="branch-path">
+          <div class="branch-path-label label-amber">Moderate</div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+            <div class="node node-clinical">
+              <div class="node-title">Recommendations</div>
+              <div class="node-route">/recommendations</div>
+              <div class="node-detail">OTC + Prescription treatments shown</div>
+            </div>
+            <svg width="24" height="24" viewBox="0 0 24 24"><line x1="12" y1="0" x2="12" y2="16" stroke="#94a3b8" stroke-width="2"/><polygon points="6,16 12,24 18,16" fill="#94a3b8"/></svg>
+            <div class="node node-action">
+              <div class="node-title">Book Consultation</div>
+              <div class="node-route">/booking</div>
+              <div class="node-detail">"Talk to an Ophthalmologist"</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Severe path -->
+        <div class="branch-path">
+          <div class="branch-path-label label-red">Severe</div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+            <div class="node node-clinical">
+              <div class="node-title">Recommendations</div>
+              <div class="node-route">/recommendations</div>
+              <div class="node-detail">OTC + Rx + Procedural treatments</div>
+            </div>
+            <svg width="24" height="24" viewBox="0 0 24 24"><line x1="12" y1="0" x2="12" y2="16" stroke="#94a3b8" stroke-width="2"/><polygon points="6,16 12,24 18,16" fill="#94a3b8"/></svg>
+            <div class="node node-action" style="border-color:#ef4444;">
+              <div class="node-title">Book Consultation</div>
+              <div class="node-route">/booking</div>
+              <div class="node-detail">"Schedule Ophthalmologist Consultation" (urgent CTA)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="note">
+    <span class="note-icon">&#9432;</span>
+    <span>Assessment requires authentication. Unauthenticated users are redirected to <code>/register</code>. The assessment has two phases: a safety screening (7 questions checking for red flags like sudden vision loss or eye pain) and a DEWS3 symptom assessment (14 clinically validated questions).</span>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- FLOW 2: BOOKING → CONSULTATION               -->
+<!-- ============================================ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:linear-gradient(135deg,#f97316,#3b82f6);">&#x1F4C5;</div>
+    <div>
+      <div class="section-title">Booking &amp; Consultation Flow</div>
+      <div class="section-desc">From appointment booking through video consultation</div>
+    </div>
+  </div>
+
+  <div class="scroll-container">
+    <div class="flow-row" style="min-width:900px;justify-content:flex-start;">
+      <div class="node node-action" style="min-width:180px;">
+        <div class="node-title">Booking Page</div>
+        <div class="node-route">/booking</div>
+        <div class="node-detail" style="text-align:left;">
+          Step 1: Select Provider<br>
+          Step 2: Select Date<br>
+          Step 3: Select Time
+        </div>
+      </div>
+
+      <div class="arrow">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="arrow-label">"Confirm Booking"</div>
+          <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+        </div>
+      </div>
+
+      <div class="node node-action">
+        <div class="node-title">Confirmation</div>
+        <div class="node-route">/confirmation</div>
+        <div class="node-detail">Appointment details, prep checklist, add to calendar</div>
+      </div>
+
+      <div class="arrow">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="arrow-label">"Go to Dashboard"</div>
+          <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+        </div>
+      </div>
+
+      <div class="node node-entry">
+        <div class="node-title">Patient Dashboard</div>
+        <div class="node-route">/dashboard</div>
+        <div class="node-detail">Appointments, prescriptions, quick actions</div>
+      </div>
+
+      <div class="arrow">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="arrow-label">"Join Now"</div>
+          <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+        </div>
+      </div>
+
+      <div class="node node-clinical" style="min-width:200px;">
+        <div class="node-title">Video Consultation</div>
+        <div class="node-route">/consultation</div>
+        <div class="node-detail" style="text-align:left;">
+          1. CPSO provider disclosure<br>
+          2. Privacy confirmation<br>
+          3. Video call (mic, cam, chat)<br>
+          4. End call &rarr; Dashboard
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- FLOW 3: RETURNING PATIENT                    -->
+<!-- ============================================ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:linear-gradient(135deg,#a855f7,#3b82f6);">&#x1F504;</div>
+    <div>
+      <div class="section-title">Returning Patient Flow</div>
+      <div class="section-desc">Login and dashboard navigation for existing patients</div>
+    </div>
+  </div>
+
+  <div class="scroll-container">
+    <div class="flow-grid" style="min-width:700px;">
+      <div class="flow-row">
+        <div class="node node-entry">
+          <div class="node-title">Home Page</div>
+          <div class="node-route">/</div>
+        </div>
+
+        <div class="arrow">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="arrow-label">"Login"</div>
+            <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+          </div>
+        </div>
+
+        <div class="node node-auth">
+          <div class="node-title">Login</div>
+          <div class="node-route">/login</div>
+          <div class="node-detail">Patient/Provider toggle, email + password</div>
+        </div>
+
+        <div class="arrow">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="arrow-label">Patient login</div>
+            <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+          </div>
+        </div>
+
+        <div class="node node-entry" style="min-width:200px;">
+          <div class="node-title">Patient Dashboard</div>
+          <div class="node-route">/dashboard</div>
+          <div class="node-detail">Central hub for all patient actions</div>
+        </div>
+      </div>
+
+      <!-- Dashboard actions -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <svg width="24" height="24" viewBox="0 0 24 24"><line x1="12" y1="0" x2="12" y2="16" stroke="#94a3b8" stroke-width="2"/><polygon points="6,16 12,24 18,16" fill="#94a3b8"/></svg>
+        <div style="font-size:12px;color:#64748b;font-weight:600;">Dashboard Actions</div>
+      </div>
+
+      <div class="branch-paths" style="gap:24px;">
+        <div class="branch-path">
+          <div class="branch-path-label label-blue">Quick Action</div>
+          <div class="node node-action">
+            <div class="node-title">Book Appointment</div>
+            <div class="node-route">/booking</div>
+          </div>
+        </div>
+
+        <div class="branch-path">
+          <div class="branch-path-label label-green">Quick Action</div>
+          <div class="node node-clinical">
+            <div class="node-title">Retake Assessment</div>
+            <div class="node-route">/assessment</div>
+            <div class="node-detail">"Check In on Symptoms"</div>
+          </div>
+        </div>
+
+        <div class="branch-path">
+          <div class="branch-path-label label-green">Quick Action</div>
+          <div class="node node-clinical">
+            <div class="node-title">Self-Care Tips</div>
+            <div class="node-route">/recommendations</div>
+          </div>
+        </div>
+
+        <div class="branch-path">
+          <div class="branch-path-label label-blue">Appointment</div>
+          <div class="node node-clinical">
+            <div class="node-title">Join Consultation</div>
+            <div class="node-route">/consultation</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <span class="note-icon">&#9432;</span>
+    <span>Dashboard requires authentication. Unauthenticated users are redirected to <code>/login</code>. Dashboard shows upcoming and past appointments, active prescriptions, and quick-action cards.</span>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- FLOW 4: PROVIDER JOURNEY                     -->
+<!-- ============================================ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:linear-gradient(135deg,#ec4899,#a855f7);">&#x1FA7A;</div>
+    <div>
+      <div class="section-title">Provider Flow</div>
+      <div class="section-desc">Healthcare provider login, patient queue, and consultation</div>
+    </div>
+  </div>
+
+  <div class="scroll-container">
+    <div class="flow-grid" style="min-width:800px;">
+      <div class="flow-row">
+        <div class="node node-entry">
+          <div class="node-title">Home Page</div>
+          <div class="node-route">/</div>
+        </div>
+
+        <div class="arrow">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="arrow-label">"Login"</div>
+            <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+          </div>
+        </div>
+
+        <div class="node node-auth">
+          <div class="node-title">Login (Provider)</div>
+          <div class="node-route">/login</div>
+          <div class="node-detail">Select "Provider" tab</div>
+        </div>
+
+        <div class="arrow">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="arrow-label">Provider login</div>
+            <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+          </div>
+        </div>
+
+        <div class="node node-provider" style="min-width:200px;">
+          <div class="node-title">Provider Dashboard</div>
+          <div class="node-route">/provider</div>
+          <div class="node-detail" style="text-align:left;">
+            Patient queue (next, waiting)<br>
+            Today's schedule view<br>
+            Stats: patients, OHIP billed, private pay
+          </div>
+        </div>
+
+        <div class="arrow">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="arrow-label">"Start Consultation"</div>
+            <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+          </div>
+        </div>
+
+        <div class="node node-clinical" style="min-width:180px;">
+          <div class="node-title">Video Consultation</div>
+          <div class="node-route">/consultation</div>
+          <div class="node-detail">Shared consultation room with patient</div>
+        </div>
+      </div>
+
+      <!-- Provider sidebar nav -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <svg width="24" height="24" viewBox="0 0 24 24"><line x1="12" y1="0" x2="12" y2="16" stroke="#94a3b8" stroke-width="2"/><polygon points="6,16 12,24 18,16" fill="#94a3b8"/></svg>
+        <div style="font-size:12px;color:#64748b;font-weight:600;">Provider Sidebar Navigation (wireframe only)</div>
+      </div>
+
+      <div class="branch-paths" style="gap:24px;">
+        <div class="branch-path">
+          <div class="branch-path-label label-purple">Nav</div>
+          <div class="node node-end">
+            <div class="node-title">Schedule</div>
+            <div class="node-route">/provider/schedule</div>
+          </div>
+        </div>
+        <div class="branch-path">
+          <div class="branch-path-label label-purple">Nav</div>
+          <div class="node node-end">
+            <div class="node-title">Patient Records</div>
+            <div class="node-route">/provider/patients</div>
+          </div>
+        </div>
+        <div class="branch-path">
+          <div class="branch-path-label label-purple">Nav</div>
+          <div class="node node-end">
+            <div class="node-title">OHIP Billing</div>
+            <div class="node-route">/provider/billing</div>
+          </div>
+        </div>
+        <div class="branch-path">
+          <div class="branch-path-label label-purple">Nav</div>
+          <div class="node node-end">
+            <div class="node-title">Settings</div>
+            <div class="node-route">/provider/settings</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <span class="note-icon">&#9432;</span>
+    <span>Provider sidebar links (<code>/provider/schedule</code>, <code>/provider/patients</code>, <code>/provider/billing</code>, <code>/provider/settings</code>) are referenced in the UI but their pages are not yet implemented (wireframe placeholders).</span>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- FLOW 5: SHOP / E-COMMERCE                    -->
+<!-- ============================================ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:linear-gradient(135deg,#22c55e,#10b981);">&#x1F6D2;</div>
+    <div>
+      <div class="section-title">Shop / E-Commerce Flow</div>
+      <div class="section-desc">Product browsing, cart, checkout (no auth required)</div>
+    </div>
+  </div>
+
+  <div class="scroll-container">
+    <div class="flow-row" style="min-width:900px;justify-content:flex-start;">
+      <div class="node node-entry">
+        <div class="node-title">Home Page</div>
+        <div class="node-route">/</div>
+        <div class="node-detail">Nav link: "Shop"</div>
+      </div>
+
+      <div class="arrow">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="arrow-label">"Shop"</div>
+          <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+        </div>
+      </div>
+
+      <div class="node node-shop">
+        <div class="node-title">Shop</div>
+        <div class="node-route">/shop</div>
+        <div class="node-detail">Product grid, category filter, add to cart</div>
+      </div>
+
+      <div class="arrow">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="arrow-label">View product</div>
+          <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+        </div>
+      </div>
+
+      <div class="node node-shop">
+        <div class="node-title">Product Detail</div>
+        <div class="node-route">/shop/[productId]</div>
+        <div class="node-detail">Images, description, quantity, add to cart</div>
+      </div>
+
+      <div class="arrow">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="arrow-label">Cart icon</div>
+          <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+        </div>
+      </div>
+
+      <div class="node node-shop">
+        <div class="node-title">Cart</div>
+        <div class="node-route">/shop/cart</div>
+        <div class="node-detail">Items, quantities, subtotal, tax, free shipping threshold</div>
+      </div>
+
+      <div class="arrow">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="arrow-label">"Checkout"</div>
+          <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+        </div>
+      </div>
+
+      <div class="node node-shop">
+        <div class="node-title">Checkout</div>
+        <div class="node-route">/shop/checkout</div>
+        <div class="node-detail">Shipping info, payment, order summary</div>
+      </div>
+
+      <div class="arrow">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="arrow-label">"Place Order"</div>
+          <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+        </div>
+      </div>
+
+      <div class="node node-shop">
+        <div class="node-title">Order Confirmation</div>
+        <div class="node-route">/shop/order-confirmation</div>
+        <div class="node-detail">Order #, delivery estimate, continue shopping</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- COMPLETE SITEMAP                              -->
+<!-- ============================================ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:linear-gradient(135deg,#64748b,#475569);">&#x1F5FA;</div>
+    <div>
+      <div class="section-title">Complete Route Map</div>
+      <div class="section-desc">All pages in the codebase with auth requirements and connections</div>
+    </div>
+  </div>
+
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead>
+      <tr style="border-bottom:2px solid #e2e8f0;text-align:left;">
+        <th style="padding:10px 12px;color:#64748b;font-weight:600;">Route</th>
+        <th style="padding:10px 12px;color:#64748b;font-weight:600;">Page</th>
+        <th style="padding:10px 12px;color:#64748b;font-weight:600;">Auth</th>
+        <th style="padding:10px 12px;color:#64748b;font-weight:600;">Navigates To</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:10px 12px;font-family:monospace;color:#3b82f6;">/</td>
+        <td style="padding:10px 12px;">Home / Landing Page</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/register, /login, /dashboard, /shop</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
+        <td style="padding:10px 12px;font-family:monospace;color:#a855f7;">/register</td>
+        <td style="padding:10px 12px;">Patient Registration</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/assessment (on submit or if already auth'd)</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:10px 12px;font-family:monospace;color:#a855f7;">/login</td>
+        <td style="padding:10px 12px;">Login (Patient + Provider)</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/dashboard (patient), /provider (provider), redirects if auth'd</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
+        <td style="padding:10px 12px;font-family:monospace;color:#10b981;">/assessment</td>
+        <td style="padding:10px 12px;">Symptom Assessment (2-phase)</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Required</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/results (scores passed via query params) or referral screen</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:10px 12px;font-family:monospace;color:#eab308;">/results</td>
+        <td style="padding:10px 12px;">Assessment Results</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/recommendations, /booking, /register, /assessment</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
+        <td style="padding:10px 12px;font-family:monospace;color:#10b981;">/recommendations</td>
+        <td style="padding:10px 12px;">Treatment Recommendations</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/register, /assessment, /results</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:10px 12px;font-family:monospace;color:#f97316;">/booking</td>
+        <td style="padding:10px 12px;">Appointment Booking</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/confirmation</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
+        <td style="padding:10px 12px;font-family:monospace;color:#f97316;">/confirmation</td>
+        <td style="padding:10px 12px;">Booking Confirmation</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/dashboard, /</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:10px 12px;font-family:monospace;color:#3b82f6;">/dashboard</td>
+        <td style="padding:10px 12px;">Patient Dashboard</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Required</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/booking, /consultation, /assessment, /recommendations</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
+        <td style="padding:10px 12px;font-family:monospace;color:#10b981;">/consultation</td>
+        <td style="padding:10px 12px;">Video Consultation</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public*</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/dashboard (end call)</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:10px 12px;font-family:monospace;color:#ec4899;">/provider</td>
+        <td style="padding:10px 12px;">Provider Dashboard</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public*</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/consultation</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
+        <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/shop</td>
+        <td style="padding:10px 12px;">Product Listing</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/shop/[productId], /shop/cart</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/shop/[productId]</td>
+        <td style="padding:10px 12px;">Product Detail</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/shop, /shop/cart</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
+        <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/shop/cart</td>
+        <td style="padding:10px 12px;">Shopping Cart</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/shop, /shop/checkout</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/shop/checkout</td>
+        <td style="padding:10px 12px;">Checkout</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/shop/order-confirmation</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/shop/order-confirmation</td>
+        <td style="padding:10px 12px;">Order Confirmation</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/shop, /</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <span class="note-icon">&#9432;</span>
+    <span><strong>Public*</strong> = No auth guard in the current wireframe code, but would require auth in production. The <code>/consultation</code> and <code>/provider</code> pages are currently accessible without login in this POC/wireframe stage.</span>
+  </div>
+</div>
+
+<div style="text-align:center;color:#94a3b8;font-size:12px;padding:20px 0 40px;">
+  Generated from codebase analysis &mdash; eyecare-poc (KlaraMD) &mdash; All routes verified from source code
+</div>
+
+</body>
+</html>
