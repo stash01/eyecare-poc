@@ -18,7 +18,7 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-function TrendChart({ entries }: { entries: AssessmentResult[] }) {
+export function TrendChart({ entries }: { entries: AssessmentResult[] }) {
   const recent = entries.slice(-10);
   const W = 400;
   const H = 120;

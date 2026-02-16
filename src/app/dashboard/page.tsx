@@ -13,15 +13,19 @@ import {
   User,
   Settings,
   LogOut,
-  Plus,
   ChevronRight,
   Bell,
   Pill,
   Loader2,
+  BookOpen,
+  Activity,
+  ClipboardList,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { SymptomHistoryWidget } from "@/components/symptom-history-widget";
+import { useSymptomHistory } from "@/lib/symptom-history-context";
 
 const upcomingAppointment = {
   id: "APT-2024-001234",
@@ -67,6 +71,7 @@ const prescriptions = [
 export default function DashboardPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading, user, logout } = useAuth();
+  const { history } = useSymptomHistory();
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -134,7 +139,21 @@ export default function DashboardPage() {
                     className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary-50 text-primary-700 font-medium"
                   >
                     <Calendar className="h-5 w-5" />
-                    Appointments
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/blog"
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50"
+                  >
+                    <BookOpen className="h-5 w-5" />
+                    Blog &amp; Community
+                  </Link>
+                  <Link
+                    href="/dashboard/symptom-tracker"
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50"
+                  >
+                    <Activity className="h-5 w-5" />
+                    Symptom Tracker
                   </Link>
                   <Link
                     href="/dashboard/records"
@@ -178,23 +197,89 @@ export default function DashboardPage() {
           </aside>
 
           <main className="lg:col-span-3 space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Welcome back, {firstName}
-                </h1>
-                <p className="text-gray-600">
-                  We&apos;re here to support you on your journey to healthier eyes
-                </p>
-              </div>
-              <Link href="/booking">
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Book Appointment
-                </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Welcome back, {firstName}
+              </h1>
+              <p className="text-gray-600">
+                We&apos;re here to support you on your journey to healthier eyes
+              </p>
+            </div>
+
+            {/* 3 Pathway Cards */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <Link href="/blog">
+                <Card className="hover:border-primary-300 cursor-pointer transition-colors h-full">
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center text-center gap-3">
+                      <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center">
+                        <BookOpen className="h-7 w-7 text-blue-600" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-900">Blog &amp; Community</div>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Articles, tips, and community stories
+                        </p>
+                      </div>
+                      <span className="text-xs text-primary-600 flex items-center gap-1">
+                        Explore <ArrowRight className="h-3 w-3" />
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link href="/dashboard/symptom-tracker">
+                <Card className="hover:border-primary-300 cursor-pointer transition-colors h-full">
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center text-center gap-3">
+                      <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
+                        <Activity className="h-7 w-7 text-green-600" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-900">Symptom Tracker</div>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {history.length > 0
+                            ? `${history.length} assessment${history.length > 1 ? "s" : ""} recorded`
+                            : "Track your symptoms over time"}
+                        </p>
+                      </div>
+                      <span className="text-xs text-primary-600 flex items-center gap-1">
+                        View History <ArrowRight className="h-3 w-3" />
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link href="/assessment">
+                <Card className="hover:border-primary-300 cursor-pointer transition-colors h-full border-primary-200 bg-primary-50">
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center text-center gap-3">
+                      <div className="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center">
+                        <ClipboardList className="h-7 w-7 text-primary-600" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-900">
+                          {history.length > 0 ? "Retake Assessment" : "Take Assessment"}
+                        </div>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Clinically validated dry eye assessment
+                        </p>
+                      </div>
+                      <span className="text-xs text-primary-600 flex items-center gap-1">
+                        Start Now <ArrowRight className="h-3 w-3" />
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
               </Link>
             </div>
 
+            {/* Symptom History Widget */}
+            <SymptomHistoryWidget />
+
+            {/* Secondary content: Appointments & Prescriptions */}
             {upcomingAppointment && (
               <Card className="border-primary-200 bg-primary-50">
                 <CardHeader className="pb-2">
@@ -259,7 +344,7 @@ export default function DashboardPage() {
                             {apt.provider}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {apt.credentials} • {apt.date}
+                            {apt.credentials} &bull; {apt.date}
                           </div>
                         </div>
                       </div>
@@ -302,7 +387,7 @@ export default function DashboardPage() {
                               {rx.name}
                             </div>
                             <div className="text-sm text-gray-600 mt-1">
-                              {rx.dosage} • {rx.instructions}
+                              {rx.dosage} &bull; {rx.instructions}
                             </div>
                             <div className="text-xs text-gray-500 mt-2">
                               Prescribed: {rx.prescribedDate}
@@ -322,49 +407,6 @@ export default function DashboardPage() {
                 )}
               </CardContent>
             </Card>
-
-            <SymptomHistoryWidget />
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <Link href="/assessment">
-                <Card className="hover:border-primary-300 cursor-pointer transition-colors">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                        <Eye className="h-5 w-5 text-primary-600" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-900">
-                          Check In on Your Symptoms
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          See how you're progressing
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-              <Link href="/recommendations">
-                <Card className="hover:border-primary-300 cursor-pointer transition-colors">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                        <FileText className="h-5 w-5 text-primary-600" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-900">
-                          Self-Care Tips
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          Gentle treatments to feel better
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            </div>
           </main>
         </div>
       </div>

@@ -20,8 +20,17 @@ import {
   CheckCircle,
   AlertCircle,
   DollarSign,
+  ClipboardList,
+  AlertTriangle,
+  Pill,
+  ShoppingCart,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  PRODUCTS,
+  PRESCRIPTION_TREATMENTS,
+  PROCEDURAL_TREATMENTS,
+} from "@/lib/constants";
 
 const todayAppointments = [
   {
@@ -87,6 +96,62 @@ const patientQueue = [
   },
 ];
 
+// Mock patient assessments for the new tab
+const patientAssessments = [
+  {
+    id: "PA-001",
+    patient: "Jane Smith",
+    date: "Feb 14, 2026",
+    totalScore: 22,
+    deq5Score: 10,
+    severity: "Moderate" as const,
+    autoimmune: false,
+    diabetes: false,
+    mgd: true,
+    triedTreatments: true,
+    riskFactors: ["MGD indicators", "Prior treatments without relief"],
+  },
+  {
+    id: "PA-002",
+    patient: "Robert Wilson",
+    date: "Feb 13, 2026",
+    totalScore: 8,
+    deq5Score: 4,
+    severity: "Mild" as const,
+    autoimmune: false,
+    diabetes: false,
+    mgd: false,
+    triedTreatments: false,
+    riskFactors: [],
+  },
+  {
+    id: "PA-003",
+    patient: "Emily Brown",
+    date: "Feb 12, 2026",
+    totalScore: 32,
+    deq5Score: 14,
+    severity: "Severe" as const,
+    autoimmune: true,
+    diabetes: true,
+    mgd: true,
+    triedTreatments: true,
+    riskFactors: ["Autoimmune condition", "Diabetes", "MGD indicators", "Multiple prior treatments"],
+  },
+  {
+    id: "PA-004",
+    patient: "Michael Lee",
+    date: "Feb 10, 2026",
+    totalScore: 18,
+    deq5Score: 8,
+    severity: "Moderate" as const,
+    autoimmune: false,
+    diabetes: true,
+    mgd: false,
+    triedTreatments: false,
+    riskFactors: ["Diabetes"],
+  },
+];
+
 const stats = {
   todayPatients: 5,
   completedToday: 1,
@@ -110,8 +175,64 @@ const severityColors: Record<Severity, string> = {
   Severe: "text-red-600",
 };
 
+const severityBadgeColors: Record<Severity, string> = {
+  Mild: "bg-green-100 text-green-700",
+  Moderate: "bg-amber-100 text-amber-700",
+  Severe: "bg-red-100 text-red-700",
+};
+
+function generateTreatmentPlan(assessment: typeof patientAssessments[number]) {
+  const plan: {
+    otcRecommendations: (typeof PRODUCTS)[number][];
+    rxSuggestions: (typeof PRESCRIPTION_TREATMENTS)[number][];
+    procedures: (typeof PROCEDURAL_TREATMENTS)[number][];
+    notes: string[];
+  } = {
+    otcRecommendations: [],
+    rxSuggestions: [],
+    procedures: [],
+    notes: [],
+  };
+
+  // OTC based on severity
+  const tears = PRODUCTS.filter((p) => p.category === "artificial-tears");
+  const compresses = PRODUCTS.filter((p) => p.category === "warm-compresses");
+  const lidCare = PRODUCTS.filter((p) => p.category === "lid-care");
+  const supplements = PRODUCTS.filter((p) => p.category === "supplements");
+
+  if (assessment.severity === "Mild") {
+    plan.otcRecommendations = [...tears.slice(0, 2), ...compresses.slice(0, 1)];
+    plan.notes.push("Start with preservative-free artificial tears 4x daily and warm compresses 1-2x daily.");
+  } else if (assessment.severity === "Moderate") {
+    plan.otcRecommendations = [...tears.slice(0, 2), ...compresses.slice(0, 1), ...lidCare.slice(0, 1), ...supplements.slice(0, 1)];
+    plan.rxSuggestions = [...PRESCRIPTION_TREATMENTS.slice(0, 2)];
+    plan.notes.push("Recommend combination therapy: PF tears QID, warm compresses BID, lid hygiene daily.");
+    plan.notes.push("Consider Rx anti-inflammatory if OTC regimen insufficient after 4-6 weeks.");
+  } else {
+    plan.otcRecommendations = [...tears.slice(0, 2), ...compresses, ...lidCare.slice(0, 2), ...supplements.slice(0, 2)];
+    plan.rxSuggestions = [...PRESCRIPTION_TREATMENTS];
+    plan.procedures = [...PROCEDURAL_TREATMENTS];
+    plan.notes.push("Comprehensive treatment approach indicated. Initiate Rx anti-inflammatory therapy promptly.");
+    plan.notes.push("Schedule follow-up in 4 weeks to assess response and consider procedural interventions.");
+  }
+
+  // Condition-specific notes
+  if (assessment.mgd) {
+    plan.notes.push("MGD management: emphasize warm compresses, lid massage, and omega-3 supplementation. Consider LipiFlow if conservative measures fail.");
+  }
+  if (assessment.autoimmune) {
+    plan.notes.push("Autoimmune-associated dry eye: coordinate with rheumatology. Consider punctal plugs to preserve aqueous tears. Monitor for corneal staining.");
+  }
+  if (assessment.diabetes) {
+    plan.notes.push("Diabetes-related neuropathy may reduce corneal sensitivity. Ensure regular corneal evaluation. Optimize glycemic control with PCP.");
+  }
+
+  return plan;
+}
+
 export default function ProviderDashboard() {
-  const [activeTab, setActiveTab] = useState<"queue" | "schedule">("queue");
+  const [activeTab, setActiveTab] = useState<"queue" | "schedule" | "assessments">("queue");
+  const [expandedAssessment, setExpandedAssessment] = useState<string | null>(null);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -139,7 +260,7 @@ export default function ProviderDashboard() {
                 </div>
                 <div className="text-sm">
                   <div className="font-medium">Dr. Sarah Chen, MD, FRCSC</div>
-                  <div className="text-gray-500 text-xs">Ophthalmologist • CPSO #12345</div>
+                  <div className="text-gray-500 text-xs">Ophthalmologist &bull; CPSO #12345</div>
                 </div>
               </div>
             </div>
@@ -243,6 +364,19 @@ export default function ProviderDashboard() {
                 }`}
               >
                 Today&apos;s Schedule
+              </button>
+              <button
+                onClick={() => setActiveTab("assessments")}
+                className={`pb-3 px-1 font-medium ${
+                  activeTab === "assessments"
+                    ? "border-b-2 border-primary-600 text-primary-600"
+                    : "text-gray-500"
+                }`}
+              >
+                <span className="flex items-center gap-1">
+                  <ClipboardList className="h-4 w-4" />
+                  Patient Assessments ({patientAssessments.length})
+                </span>
               </button>
             </div>
 
@@ -402,6 +536,147 @@ export default function ProviderDashboard() {
                   </div>
                 </CardContent>
               </Card>
+            )}
+
+            {activeTab === "assessments" && (
+              <div className="space-y-4">
+                {patientAssessments.map((assessment) => {
+                  const isExpanded = expandedAssessment === assessment.id;
+                  const plan = isExpanded ? generateTreatmentPlan(assessment) : null;
+
+                  return (
+                    <Card key={assessment.id}>
+                      <CardContent className="pt-6">
+                        {/* Summary Row */}
+                        <div
+                          className="flex items-center justify-between cursor-pointer"
+                          onClick={() => setExpandedAssessment(isExpanded ? null : assessment.id)}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                              <User className="h-5 w-5 text-gray-500" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-gray-900">{assessment.patient}</h3>
+                              <div className="flex items-center gap-3 text-sm text-gray-500">
+                                <span>{assessment.date}</span>
+                                <span>Score: {assessment.totalScore}/40</span>
+                                <span>DEQ-5: {assessment.deq5Score}/18</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className={`text-xs font-medium px-2 py-1 rounded ${severityBadgeColors[assessment.severity]}`}>
+                              {assessment.severity}
+                            </span>
+                            {assessment.riskFactors.length > 0 && (
+                              <AlertTriangle className="h-4 w-4 text-amber-500" />
+                            )}
+                            <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+                          </div>
+                        </div>
+
+                        {/* Expanded Treatment Plan */}
+                        {isExpanded && plan && (
+                          <div className="mt-6 pt-6 border-t space-y-5">
+                            {/* Risk Factors */}
+                            {assessment.riskFactors.length > 0 && (
+                              <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                                <h4 className="font-semibold text-amber-800 text-sm mb-2 flex items-center gap-2">
+                                  <AlertTriangle className="h-4 w-4" />
+                                  Risk Factors
+                                </h4>
+                                <ul className="space-y-1">
+                                  {assessment.riskFactors.map((rf, i) => (
+                                    <li key={i} className="text-sm text-amber-700 flex items-center gap-2">
+                                      <span className="w-1 h-1 rounded-full bg-amber-500" />
+                                      {rf}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            {/* Auto-Generated Treatment Plan */}
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                <FileText className="h-4 w-4 text-primary-600" />
+                                Auto-Generated Treatment Plan
+                              </h4>
+
+                              {/* Clinical Notes */}
+                              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 mb-4">
+                                <h5 className="font-medium text-blue-800 text-sm mb-2">Clinical Notes</h5>
+                                <ul className="space-y-2">
+                                  {plan.notes.map((note, i) => (
+                                    <li key={i} className="text-sm text-blue-700">{note}</li>
+                                  ))}
+                                </ul>
+                              </div>
+
+                              {/* OTC Recommendations */}
+                              <div className="mb-4">
+                                <h5 className="font-medium text-gray-900 text-sm mb-2 flex items-center gap-2">
+                                  <ShoppingCart className="h-4 w-4 text-gray-500" />
+                                  OTC Product Recommendations
+                                </h5>
+                                <div className="grid grid-cols-2 gap-2">
+                                  {plan.otcRecommendations.map((product) => (
+                                    <div key={product.id} className="p-2 border rounded text-sm">
+                                      <div className="font-medium text-gray-900">{product.name}</div>
+                                      <div className="text-xs text-gray-500">{product.description}</div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Rx Suggestions */}
+                              {plan.rxSuggestions.length > 0 && (
+                                <div className="mb-4">
+                                  <h5 className="font-medium text-gray-900 text-sm mb-2 flex items-center gap-2">
+                                    <Pill className="h-4 w-4 text-gray-500" />
+                                    Prescription Suggestions
+                                  </h5>
+                                  <div className="space-y-2">
+                                    {plan.rxSuggestions.map((rx, i) => (
+                                      <div key={i} className="p-2 border rounded text-sm">
+                                        <div className="font-medium text-gray-900">{rx.name}</div>
+                                        <div className="text-xs text-gray-500">{rx.description}</div>
+                                        <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded mt-1 inline-block">
+                                          {rx.category}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Procedural Treatments */}
+                              {plan.procedures.length > 0 && (
+                                <div>
+                                  <h5 className="font-medium text-gray-900 text-sm mb-2 flex items-center gap-2">
+                                    <Eye className="h-4 w-4 text-gray-500" />
+                                    Procedural Treatments
+                                  </h5>
+                                  <div className="space-y-2">
+                                    {plan.procedures.map((proc, i) => (
+                                      <div key={i} className="p-2 border rounded text-sm">
+                                        <div className="font-medium text-gray-900">{proc.name}</div>
+                                        <div className="text-xs text-gray-500">{proc.description}</div>
+                                        <div className="text-xs text-primary-600 italic mt-1">{proc.clinicalNote}</div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
             )}
           </main>
         </div>

@@ -405,7 +405,7 @@ export default function AssessmentPage() {
           mgd: hasMGD.toString(),
           triedTreatments: hasTriedTreatments.toString(),
         });
-        router.push(`/results?${params.toString()}`);
+        router.push(`/subscribe?${params.toString()}`);
       }
     }
   };

@@ -24,10 +24,10 @@ export default function RegisterPage() {
     consentTerms: false,
   });
 
-  // Redirect to assessment if already authenticated
+  // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push("/assessment");
+      router.push("/dashboard");
     }
   }, [isLoading, isAuthenticated, router]);
 
@@ -46,7 +46,7 @@ export default function RegisterPage() {
       lastName: formData.lastName,
       email: formData.email,
     });
-    router.push("/assessment");
+    router.push("/dashboard");
   };
 
   const isFormValid =
@@ -93,15 +93,15 @@ export default function RegisterPage() {
             <ol className="space-y-2 text-sm text-gray-700">
               <li className="flex items-start gap-2">
                 <span className="font-bold text-primary-600">1.</span>
-                Complete your symptom assessment (2-3 minutes)
+                Access your personal dashboard with symptom tracking and resources
               </li>
               <li className="flex items-start gap-2">
                 <span className="font-bold text-primary-600">2.</span>
-                Receive your personalized results and recommendations
+                Take a clinically validated dry eye assessment (2-3 minutes)
               </li>
               <li className="flex items-start gap-2">
                 <span className="font-bold text-primary-600">3.</span>
-                Book a specialist consultation if recommended
+                Subscribe to unlock your personalized results and treatment plan
               </li>
             </ol>
           </div>
@@ -276,7 +276,7 @@ export default function RegisterPage() {
                   className="w-full"
                   disabled={!isFormValid}
                 >
-                  Create Account &amp; Start Assessment
+                  Create Account &amp; Go to Dashboard
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </form>

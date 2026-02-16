@@ -314,15 +314,15 @@ const symptoms = [
 const steps = [
   {
     title: "Create your account",
-    description: "Sign up in minutes with your basic information. Your data is protected and secure.",
+    description: "Sign up in minutes and access your personal dashboard with symptom tracking, resources, and community.",
   },
   {
-    title: "Complete your assessment",
+    title: "Take your assessment",
     description: "Answer clinically validated questions about your symptoms. Our assessment is based on the same tools ophthalmologists use in practice.",
   },
   {
-    title: "Receive your personalized plan",
-    description: "Get evidence-based recommendations tailored to your specific symptoms and severity level.",
+    title: "Subscribe to unlock results",
+    description: "Choose a plan to access your personalized severity score, evidence-based product recommendations, and treatment guidance.",
   },
   {
     title: "Connect with a specialist",
