@@ -169,33 +169,10 @@
     color: #475569;
     border-style: dashed;
   }
-
-  /* Decision diamond */
-  .decision-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex-shrink: 0;
-  }
-  .decision {
-    width: 120px;
-    height: 120px;
-    transform: rotate(45deg);
-    border: 2px solid #eab308;
-    background: #fefce8;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 20px 10px;
-  }
-  .decision-text {
-    transform: rotate(-45deg);
-    font-size: 12px;
-    font-weight: 600;
-    color: #854d0e;
-    text-align: center;
-    line-height: 1.3;
-    width: 100px;
+  .node-paywall {
+    background: #fdf4ff;
+    border-color: #d946ef;
+    color: #86198f;
   }
 
   /* Arrows */
@@ -231,88 +208,6 @@
   }
 
   /* Branch */
-  .branch {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-  }
-  .branch-row {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-  }
-  .branch-label {
-    font-size: 11px;
-    color: #64748b;
-    font-style: italic;
-    padding: 2px 8px;
-    background: #f8fafc;
-    border-radius: 4px;
-  }
-
-  /* Multi-step sub-flow */
-  .substep {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: #475569;
-    padding: 6px 12px;
-    background: #f8fafc;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
-    margin: 4px 0;
-  }
-  .substep-num {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-
-  /* Responsive scrollable container */
-  .scroll-container {
-    overflow-x: auto;
-    padding-bottom: 12px;
-  }
-  .scroll-container::-webkit-scrollbar {
-    height: 6px;
-  }
-  .scroll-container::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 3px;
-  }
-  .scroll-container::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
-  }
-
-  /* Complex flow layouts */
-  .flow-grid {
-    display: grid;
-    grid-template-columns: auto;
-    gap: 24px;
-    justify-items: center;
-  }
-  .flow-row {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    justify-content: center;
-  }
-  .flow-branch-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
   .branch-paths {
     display: flex;
     gap: 24px;
@@ -340,25 +235,42 @@
     border-radius: 12px;
     white-space: nowrap;
   }
-  .label-green {
-    background: #dcfce7;
-    color: #166534;
+  .label-green { background: #dcfce7; color: #166534; }
+  .label-amber { background: #fef3c7; color: #92400e; }
+  .label-red { background: #fee2e2; color: #991b1b; }
+  .label-blue { background: #dbeafe; color: #1e40af; }
+  .label-purple { background: #f3e8ff; color: #7e22ce; }
+  .label-pink { background: #fce7f3; color: #9d174d; }
+
+  /* Complex flow layouts */
+  .flow-grid {
+    display: grid;
+    grid-template-columns: auto;
+    gap: 24px;
+    justify-items: center;
   }
-  .label-amber {
-    background: #fef3c7;
-    color: #92400e;
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    justify-content: center;
   }
-  .label-red {
-    background: #fee2e2;
-    color: #991b1b;
+
+  /* Responsive scrollable container */
+  .scroll-container {
+    overflow-x: auto;
+    padding-bottom: 12px;
   }
-  .label-blue {
-    background: #dbeafe;
-    color: #1e40af;
+  .scroll-container::-webkit-scrollbar {
+    height: 6px;
   }
-  .label-purple {
-    background: #f3e8ff;
-    color: #7e22ce;
+  .scroll-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+  .scroll-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
   }
 
   /* Notes */
@@ -383,12 +295,12 @@
 <body>
 
 <h1>KlaraMD User Flow Diagram</h1>
-<p class="subtitle">EyeCare Telehealth Platform &mdash; All navigation paths mapped from the codebase</p>
+<p class="subtitle">EyeCare Telehealth Platform &mdash; Updated flow with Dashboard hub, subscription paywall, and provider assessments</p>
 
 <div class="legend">
   <div class="legend-item">
     <div class="legend-swatch" style="background:#eff6ff;border-color:#3b82f6;"></div>
-    Entry / Landing
+    Entry / Dashboard
   </div>
   <div class="legend-item">
     <div class="legend-swatch" style="background:#faf5ff;border-color:#a855f7;"></div>
@@ -397,6 +309,10 @@
   <div class="legend-item">
     <div class="legend-swatch" style="background:#ecfdf5;border-color:#10b981;"></div>
     Clinical / Assessment
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#fdf4ff;border-color:#d946ef;"></div>
+    Subscription / Paywall
   </div>
   <div class="legend-item">
     <div class="legend-swatch" style="background:#fefce8;border-color:#eab308;"></div>
@@ -424,14 +340,14 @@
     <div class="section-icon" style="background:linear-gradient(135deg,#3b82f6,#10b981);">&#x1F9D1;</div>
     <div>
       <div class="section-title">New Patient Journey</div>
-      <div class="section-desc">First-time user from landing page through assessment to consultation</div>
+      <div class="section-desc">First-time user: Home &rarr; Register &rarr; Dashboard &rarr; Assessment &rarr; Subscribe &rarr; Results</div>
     </div>
   </div>
 
   <div class="scroll-container">
-    <div class="flow-grid" style="min-width:1000px;">
+    <div class="flow-grid" style="min-width:1100px;">
 
-      <!-- Row 1: Landing → Register → Assessment -->
+      <!-- Row 1: Landing → Register → Dashboard -->
       <div class="flow-row">
         <div class="node node-entry">
           <div class="node-title">Home Page</div>
@@ -459,90 +375,119 @@
           </div>
         </div>
 
-        <div class="node node-clinical" style="min-width:200px;">
-          <div class="node-title">Assessment</div>
-          <div class="node-route">/assessment</div>
-          <div class="node-detail" style="text-align:left;">
-            <strong>Phase 1:</strong> Safety Screening (7 Qs)<br>
-            <strong>Phase 2:</strong> DEWS3 Symptom Assessment (14 Qs)
+        <div class="node node-entry" style="min-width:200px;">
+          <div class="node-title">Dashboard (Hub)</div>
+          <div class="node-route">/dashboard</div>
+          <div class="node-detail">3 pathway cards, appointments, prescriptions, symptom widget</div>
+        </div>
+      </div>
+
+      <!-- Dashboard pathways branch -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <svg width="24" height="32" viewBox="0 0 24 32"><line x1="12" y1="0" x2="12" y2="24" stroke="#94a3b8" stroke-width="2"/><polygon points="6,24 12,32 18,24" fill="#94a3b8"/></svg>
+        <div style="font-size:12px;color:#64748b;font-weight:600;">3 Dashboard Pathways</div>
+      </div>
+
+      <div class="branch-paths" style="gap:32px;">
+        <!-- Blog pathway -->
+        <div class="branch-path">
+          <div class="branch-path-label label-blue">Pathway 1</div>
+          <div class="node node-end">
+            <div class="node-title">Blog &amp; Community</div>
+            <div class="node-route">/blog</div>
+            <div class="node-detail">"Coming soon" placeholder with sample articles</div>
           </div>
+        </div>
+
+        <!-- Symptom Tracker pathway -->
+        <div class="branch-path">
+          <div class="branch-path-label label-green">Pathway 2</div>
+          <div class="node node-clinical">
+            <div class="node-title">Symptom Tracker</div>
+            <div class="node-route">/dashboard/symptom-tracker</div>
+            <div class="node-detail">Full history, trend chart, assessment table with severity badges</div>
+          </div>
+        </div>
+
+        <!-- Assessment pathway (main flow continues) -->
+        <div class="branch-path">
+          <div class="branch-path-label label-amber">Pathway 3 (Main)</div>
+          <div class="node node-clinical" style="min-width:200px;">
+            <div class="node-title">Assessment</div>
+            <div class="node-route">/assessment</div>
+            <div class="node-detail" style="text-align:left;">
+              <strong>Phase 1:</strong> Safety Screening (7 Qs)<br>
+              <strong>Phase 2:</strong> DEWS3 Assessment (14 Qs)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assessment completion flow -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <svg width="24" height="32" viewBox="0 0 24 32"><line x1="12" y1="0" x2="12" y2="24" stroke="#94a3b8" stroke-width="2"/><polygon points="6,24 12,32 18,24" fill="#94a3b8"/></svg>
+        <div style="font-size:12px;color:#64748b;font-weight:600;">Assessment completed (no red flags)</div>
+      </div>
+
+      <!-- Row 3: Subscribe → Assessment Results -->
+      <div class="flow-row">
+        <div class="node node-paywall" style="min-width:200px;">
+          <div class="node-title">Subscribe (Paywall)</div>
+          <div class="node-route">/subscribe</div>
+          <div class="node-detail">3 plans: Basic ($19.99), Premium ($39.99), Complete ($79.99). Auto-redirects if already subscribed.</div>
         </div>
 
         <div class="arrow">
           <div style="display:flex;flex-direction:column;align-items:center;">
-            <div class="arrow-label">Completed</div>
+            <div class="arrow-label">On subscribe</div>
             <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
           </div>
         </div>
 
-        <div class="node node-result">
-          <div class="node-title">Results</div>
-          <div class="node-route">/results</div>
-          <div class="node-detail">DEQ-5 score, severity level, risk factors</div>
+        <div class="node node-result" style="min-width:220px;">
+          <div class="node-title">Assessment Results</div>
+          <div class="node-route">/assessment-results</div>
+          <div class="node-detail">Severity score, product recs by severity, Rx suggestions, procedural treatments, booking CTA</div>
         </div>
       </div>
 
-      <!-- Branch indicator -->
+      <!-- Results branching -->
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
         <svg width="24" height="32" viewBox="0 0 24 32"><line x1="12" y1="0" x2="12" y2="24" stroke="#94a3b8" stroke-width="2"/><polygon points="6,24 12,32 18,24" fill="#94a3b8"/></svg>
-        <div style="font-size:12px;color:#64748b;font-weight:600;">Severity determines path</div>
+        <div style="font-size:12px;color:#64748b;font-weight:600;">Results page actions</div>
       </div>
 
-      <!-- Row 2: Branching paths based on severity -->
       <div class="branch-paths" style="gap:32px;">
+        <!-- Product recs -->
+        <div class="branch-path">
+          <div class="branch-path-label label-green">By Severity</div>
+          <div class="node node-shop">
+            <div class="node-title">Product Recommendations</div>
+            <div class="node-detail" style="text-align:left;">
+              Mild: tears + compresses<br>
+              Moderate: + lid care, supplements, Rx<br>
+              Severe: all + procedures
+            </div>
+          </div>
+        </div>
+
+        <!-- Book consultation -->
+        <div class="branch-path">
+          <div class="branch-path-label label-amber">CTA</div>
+          <div class="node node-action">
+            <div class="node-title">Book Consultation</div>
+            <div class="node-route">/booking</div>
+            <div class="node-detail">Provider info, calendar, time selection</div>
+          </div>
+        </div>
+
         <!-- Red flag path -->
         <div class="branch-path">
-          <div class="branch-path-label label-red">Red Flags Detected</div>
+          <div class="branch-path-label label-red">Red Flags (Phase 1)</div>
           <div class="node node-danger" style="min-width:160px;">
             <div class="node-title">In-Person Referral</div>
             <div class="node-route">/assessment (referral)</div>
             <div class="node-detail">Emergency warning, find ophthalmologist, retake option</div>
-          </div>
-        </div>
-
-        <!-- Mild path -->
-        <div class="branch-path">
-          <div class="branch-path-label label-green">Mild</div>
-          <div class="node node-clinical">
-            <div class="node-title">Recommendations</div>
-            <div class="node-route">/recommendations</div>
-            <div class="node-detail">OTC treatments, self-care tips only</div>
-          </div>
-        </div>
-
-        <!-- Moderate path -->
-        <div class="branch-path">
-          <div class="branch-path-label label-amber">Moderate</div>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-            <div class="node node-clinical">
-              <div class="node-title">Recommendations</div>
-              <div class="node-route">/recommendations</div>
-              <div class="node-detail">OTC + Prescription treatments shown</div>
-            </div>
-            <svg width="24" height="24" viewBox="0 0 24 24"><line x1="12" y1="0" x2="12" y2="16" stroke="#94a3b8" stroke-width="2"/><polygon points="6,16 12,24 18,16" fill="#94a3b8"/></svg>
-            <div class="node node-action">
-              <div class="node-title">Book Consultation</div>
-              <div class="node-route">/booking</div>
-              <div class="node-detail">"Talk to an Ophthalmologist"</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Severe path -->
-        <div class="branch-path">
-          <div class="branch-path-label label-red">Severe</div>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-            <div class="node node-clinical">
-              <div class="node-title">Recommendations</div>
-              <div class="node-route">/recommendations</div>
-              <div class="node-detail">OTC + Rx + Procedural treatments</div>
-            </div>
-            <svg width="24" height="24" viewBox="0 0 24 24"><line x1="12" y1="0" x2="12" y2="16" stroke="#94a3b8" stroke-width="2"/><polygon points="6,16 12,24 18,16" fill="#94a3b8"/></svg>
-            <div class="node node-action" style="border-color:#ef4444;">
-              <div class="node-title">Book Consultation</div>
-              <div class="node-route">/booking</div>
-              <div class="node-detail">"Schedule Ophthalmologist Consultation" (urgent CTA)</div>
-            </div>
           </div>
         </div>
       </div>
@@ -552,12 +497,12 @@
 
   <div class="note">
     <span class="note-icon">&#9432;</span>
-    <span>Assessment requires authentication. Unauthenticated users are redirected to <code>/register</code>. The assessment has two phases: a safety screening (7 questions checking for red flags like sudden vision loss or eye pain) and a DEWS3 symptom assessment (14 clinically validated questions).</span>
+    <span>Key change: Register now redirects to <code>/dashboard</code> (not <code>/assessment</code>). Assessment completion redirects to <code>/subscribe</code> (paywall) instead of <code>/results</code>. After subscribing, users see <code>/assessment-results</code> with severity-filtered product recommendations. Old <code>/results</code> and <code>/recommendations</code> pages remain in codebase but are unlinked from navigation.</span>
   </div>
 </div>
 
 <!-- ============================================ -->
-<!-- FLOW 2: BOOKING → CONSULTATION               -->
+<!-- FLOW 2: BOOKING & CONSULTATION               -->
 <!-- ============================================ -->
 <div class="section">
   <div class="section-header">
@@ -603,7 +548,7 @@
       <div class="node node-entry">
         <div class="node-title">Patient Dashboard</div>
         <div class="node-route">/dashboard</div>
-        <div class="node-detail">Appointments, prescriptions, quick actions</div>
+        <div class="node-detail">Upcoming appointment shows "Join Now"</div>
       </div>
 
       <div class="arrow">
@@ -668,9 +613,9 @@
         </div>
 
         <div class="node node-entry" style="min-width:200px;">
-          <div class="node-title">Patient Dashboard</div>
+          <div class="node-title">Dashboard (Hub)</div>
           <div class="node-route">/dashboard</div>
-          <div class="node-detail">Central hub for all patient actions</div>
+          <div class="node-detail">Central hub with 3 pathway cards</div>
         </div>
       </div>
 
@@ -680,29 +625,28 @@
         <div style="font-size:12px;color:#64748b;font-weight:600;">Dashboard Actions</div>
       </div>
 
-      <div class="branch-paths" style="gap:24px;">
+      <div class="branch-paths" style="gap:20px;">
         <div class="branch-path">
-          <div class="branch-path-label label-blue">Quick Action</div>
-          <div class="node node-action">
-            <div class="node-title">Book Appointment</div>
-            <div class="node-route">/booking</div>
+          <div class="branch-path-label label-blue">Pathway</div>
+          <div class="node node-end">
+            <div class="node-title">Blog &amp; Community</div>
+            <div class="node-route">/blog</div>
           </div>
         </div>
 
         <div class="branch-path">
-          <div class="branch-path-label label-green">Quick Action</div>
+          <div class="branch-path-label label-green">Pathway</div>
           <div class="node node-clinical">
-            <div class="node-title">Retake Assessment</div>
+            <div class="node-title">Symptom Tracker</div>
+            <div class="node-route">/dashboard/symptom-tracker</div>
+          </div>
+        </div>
+
+        <div class="branch-path">
+          <div class="branch-path-label label-amber">Pathway</div>
+          <div class="node node-clinical">
+            <div class="node-title">Take/Retake Assessment</div>
             <div class="node-route">/assessment</div>
-            <div class="node-detail">"Check In on Symptoms"</div>
-          </div>
-        </div>
-
-        <div class="branch-path">
-          <div class="branch-path-label label-green">Quick Action</div>
-          <div class="node node-clinical">
-            <div class="node-title">Self-Care Tips</div>
-            <div class="node-route">/recommendations</div>
           </div>
         </div>
 
@@ -719,7 +663,7 @@
 
   <div class="note">
     <span class="note-icon">&#9432;</span>
-    <span>Dashboard requires authentication. Unauthenticated users are redirected to <code>/login</code>. Dashboard shows upcoming and past appointments, active prescriptions, and quick-action cards.</span>
+    <span>Dashboard requires authentication. Unauthenticated users are redirected to <code>/login</code>. The sidebar now includes Blog &amp; Community and Symptom Tracker entries alongside Medical Records, Prescriptions, Profile, and Settings.</span>
   </div>
 </div>
 
@@ -731,7 +675,7 @@
     <div class="section-icon" style="background:linear-gradient(135deg,#ec4899,#a855f7);">&#x1FA7A;</div>
     <div>
       <div class="section-title">Provider Flow</div>
-      <div class="section-desc">Healthcare provider login, patient queue, and consultation</div>
+      <div class="section-desc">Healthcare provider login, patient queue, assessments tab, and consultation</div>
     </div>
   </div>
 
@@ -763,13 +707,14 @@
           </div>
         </div>
 
-        <div class="node node-provider" style="min-width:200px;">
+        <div class="node node-provider" style="min-width:220px;">
           <div class="node-title">Provider Dashboard</div>
           <div class="node-route">/provider</div>
           <div class="node-detail" style="text-align:left;">
-            Patient queue (next, waiting)<br>
-            Today's schedule view<br>
-            Stats: patients, OHIP billed, private pay
+            <strong>3 Tabs:</strong><br>
+            1. Patient Queue (waiting patients)<br>
+            2. Today's Schedule (all appointments)<br>
+            3. <strong>Patient Assessments (NEW)</strong>
           </div>
         </div>
 
@@ -784,6 +729,40 @@
           <div class="node-title">Video Consultation</div>
           <div class="node-route">/consultation</div>
           <div class="node-detail">Shared consultation room with patient</div>
+        </div>
+      </div>
+
+      <!-- Patient Assessments tab detail -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <svg width="24" height="24" viewBox="0 0 24 24"><line x1="12" y1="0" x2="12" y2="16" stroke="#94a3b8" stroke-width="2"/><polygon points="6,16 12,24 18,16" fill="#94a3b8"/></svg>
+        <div style="font-size:12px;color:#64748b;font-weight:600;">Patient Assessments Tab (NEW)</div>
+      </div>
+
+      <div class="branch-paths" style="gap:24px;">
+        <div class="branch-path">
+          <div class="branch-path-label label-pink">Per Patient</div>
+          <div class="node node-provider" style="min-width:180px;">
+            <div class="node-title">Assessment Summary</div>
+            <div class="node-detail" style="text-align:left;">
+              Patient name, date, scores<br>
+              Severity badge (color-coded)<br>
+              Risk factor indicators
+            </div>
+          </div>
+        </div>
+
+        <div class="branch-path">
+          <div class="branch-path-label label-pink">Expanded</div>
+          <div class="node node-provider" style="min-width:220px;">
+            <div class="node-title">Auto-Generated Treatment Plan</div>
+            <div class="node-detail" style="text-align:left;">
+              &bull; Clinical notes (severity-based)<br>
+              &bull; OTC product recommendations<br>
+              &bull; Rx suggestions (moderate+)<br>
+              &bull; Procedural treatments (severe)<br>
+              &bull; MGD/autoimmune/diabetes notes
+            </div>
+          </div>
         </div>
       </div>
 
@@ -828,7 +807,7 @@
 
   <div class="note">
     <span class="note-icon">&#9432;</span>
-    <span>Provider sidebar links (<code>/provider/schedule</code>, <code>/provider/patients</code>, <code>/provider/billing</code>, <code>/provider/settings</code>) are referenced in the UI but their pages are not yet implemented (wireframe placeholders).</span>
+    <span>New "Patient Assessments" tab shows submitted assessments with severity, scores, and risk factors. Expanding a patient reveals an auto-generated treatment plan with OTC recommendations, Rx suggestions, and procedural treatments based on severity. Includes condition-specific notes for MGD, autoimmune, and diabetes patients.</span>
   </div>
 </div>
 
@@ -952,49 +931,61 @@
         <td style="padding:10px 12px;font-family:monospace;color:#a855f7;">/register</td>
         <td style="padding:10px 12px;">Patient Registration</td>
         <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/assessment (on submit or if already auth'd)</td>
+        <td style="padding:10px 12px;font-size:12px;">/dashboard (on submit or if already auth'd)</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;">
         <td style="padding:10px 12px;font-family:monospace;color:#a855f7;">/login</td>
         <td style="padding:10px 12px;">Login (Patient + Provider)</td>
         <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/dashboard (patient), /provider (provider), redirects if auth'd</td>
+        <td style="padding:10px 12px;font-size:12px;">/dashboard (patient), /provider (provider)</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
+        <td style="padding:10px 12px;font-family:monospace;color:#3b82f6;">/dashboard</td>
+        <td style="padding:10px 12px;">Patient Dashboard (Hub)</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Required</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/blog, /dashboard/symptom-tracker, /assessment, /booking, /consultation</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:10px 12px;font-family:monospace;color:#3b82f6;">/blog</td>
+        <td style="padding:10px 12px;">Blog &amp; Community (Placeholder)</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/dashboard</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
+        <td style="padding:10px 12px;font-family:monospace;color:#10b981;">/dashboard/symptom-tracker</td>
+        <td style="padding:10px 12px;">Symptom History &amp; Tracker</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Required</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/assessment, /dashboard</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;">
         <td style="padding:10px 12px;font-family:monospace;color:#10b981;">/assessment</td>
         <td style="padding:10px 12px;">Symptom Assessment (2-phase)</td>
         <td style="padding:10px 12px;"><span style="color:#ef4444;">Required</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/results (scores passed via query params) or referral screen</td>
-      </tr>
-      <tr style="border-bottom:1px solid #f1f5f9;">
-        <td style="padding:10px 12px;font-family:monospace;color:#eab308;">/results</td>
-        <td style="padding:10px 12px;">Assessment Results</td>
-        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/recommendations, /booking, /register, /assessment</td>
+        <td style="padding:10px 12px;font-size:12px;">/subscribe (scores via query params) or referral screen</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
-        <td style="padding:10px 12px;font-family:monospace;color:#10b981;">/recommendations</td>
-        <td style="padding:10px 12px;">Treatment Recommendations</td>
-        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/register, /assessment, /results</td>
+        <td style="padding:10px 12px;font-family:monospace;color:#d946ef;">/subscribe</td>
+        <td style="padding:10px 12px;">Subscription Paywall</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Required</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/assessment-results (on subscribe), /dashboard. Auto-redirects if already subscribed.</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:10px 12px;font-family:monospace;color:#eab308;">/assessment-results</td>
+        <td style="padding:10px 12px;">Assessment Results &amp; Recommendations</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Auth + Sub</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/shop, /booking, /dashboard. Products by severity, Rx suggestions, booking CTA.</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
         <td style="padding:10px 12px;font-family:monospace;color:#f97316;">/booking</td>
         <td style="padding:10px 12px;">Appointment Booking</td>
         <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
         <td style="padding:10px 12px;font-size:12px;">/confirmation</td>
       </tr>
-      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
+      <tr style="border-bottom:1px solid #f1f5f9;">
         <td style="padding:10px 12px;font-family:monospace;color:#f97316;">/confirmation</td>
         <td style="padding:10px 12px;">Booking Confirmation</td>
         <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
         <td style="padding:10px 12px;font-size:12px;">/dashboard, /</td>
-      </tr>
-      <tr style="border-bottom:1px solid #f1f5f9;">
-        <td style="padding:10px 12px;font-family:monospace;color:#3b82f6;">/dashboard</td>
-        <td style="padding:10px 12px;">Patient Dashboard</td>
-        <td style="padding:10px 12px;"><span style="color:#ef4444;">Required</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/booking, /consultation, /assessment, /recommendations</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
         <td style="padding:10px 12px;font-family:monospace;color:#10b981;">/consultation</td>
@@ -1004,9 +995,9 @@
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;">
         <td style="padding:10px 12px;font-family:monospace;color:#ec4899;">/provider</td>
-        <td style="padding:10px 12px;">Provider Dashboard</td>
+        <td style="padding:10px 12px;">Provider Dashboard (3 tabs)</td>
         <td style="padding:10px 12px;"><span style="color:#22c55e;">Public*</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/consultation</td>
+        <td style="padding:10px 12px;font-size:12px;">/consultation. Tabs: Queue, Schedule, Patient Assessments (with treatment plans).</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
         <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/shop</td>
@@ -1032,23 +1023,35 @@
         <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
         <td style="padding:10px 12px;font-size:12px;">/shop/order-confirmation</td>
       </tr>
-      <tr>
+      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
         <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/shop/order-confirmation</td>
         <td style="padding:10px 12px;">Order Confirmation</td>
         <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
         <td style="padding:10px 12px;font-size:12px;">/shop, /</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:10px 12px;font-family:monospace;color:#94a3b8;">/results</td>
+        <td style="padding:10px 12px;">Legacy Results (unlinked)</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
+        <td style="padding:10px 12px;font-size:12px;">Still accessible directly but not linked in navigation</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 12px;font-family:monospace;color:#94a3b8;">/recommendations</td>
+        <td style="padding:10px 12px;">Legacy Recommendations (unlinked)</td>
+        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
+        <td style="padding:10px 12px;font-size:12px;">Still accessible directly but not linked in navigation</td>
       </tr>
     </tbody>
   </table>
 
   <div class="note">
     <span class="note-icon">&#9432;</span>
-    <span><strong>Public*</strong> = No auth guard in the current wireframe code, but would require auth in production. The <code>/consultation</code> and <code>/provider</code> pages are currently accessible without login in this POC/wireframe stage.</span>
+    <span><strong>Public*</strong> = No auth guard in the current wireframe code, but would require auth in production. <strong>Auth + Sub</strong> = Requires both authentication and an active subscription; unsubscribed users are redirected to <code>/subscribe</code>. Legacy pages (<code>/results</code>, <code>/recommendations</code>) remain in codebase but are no longer linked from any navigation.</span>
   </div>
 </div>
 
 <div style="text-align:center;color:#94a3b8;font-size:12px;padding:20px 0 40px;">
-  Generated from codebase analysis &mdash; eyecare-poc (KlaraMD) &mdash; All routes verified from source code
+  Generated from codebase analysis &mdash; eyecare-poc (KlaraMD) &mdash; Updated Feb 2026 with dashboard hub, subscription paywall, and provider assessments tab
 </div>
 
 </body>
