@@ -1,5 +1,6 @@
-"use client";
-
+import { redirect } from "next/navigation";
+import { validateSession } from "@/lib/server/session";
+import { db } from "@/lib/server/db";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -16,20 +17,56 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-const appointment = {
-  id: "APT-2024-001234",
-  provider: "Dr. Sarah Chen",
-  credentials: "MD, FRCSC",
-  specialty: "Ophthalmologist",
-  subspecialty: "Cornea & External Disease",
-  date: "Monday, February 5, 2024",
-  time: "10:30 AM",
-  timezone: "EST",
-  type: "Video Consultation",
-  duration: "30 minutes",
-};
+function formatDateTime(iso: string) {
+  const d = new Date(iso);
+  return {
+    date: d.toLocaleDateString("en-CA", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZone: "America/Toronto",
+    }),
+    time: d.toLocaleTimeString("en-CA", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: "America/Toronto",
+    }),
+  };
+}
 
-export default function ConfirmationPage() {
+export default async function ConfirmationPage({
+  searchParams,
+}: {
+  searchParams: { id?: string };
+}) {
+  const session = await validateSession();
+  if (!session) redirect("/login");
+
+  const appointmentId = searchParams.id;
+  if (!appointmentId) redirect("/dashboard");
+
+  const { data: appointment } = await db
+    .from("appointments")
+    .select("id, scheduled_at, duration_minutes, appointment_type, provider_uuid")
+    .eq("id", appointmentId)
+    .eq("patient_id", session.patientId)
+    .single();
+
+  if (!appointment) redirect("/dashboard");
+
+  const { data: provider } = appointment.provider_uuid
+    ? await db
+        .from("providers")
+        .select("name, credentials, specialty, subspecialty")
+        .eq("id", appointment.provider_uuid)
+        .single()
+    : { data: null };
+
+  const { date, time } = formatDateTime(appointment.scheduled_at);
+  const confirmationNumber = `APT-${appointment.id.split("-")[0].toUpperCase()}`;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
       <header className="container mx-auto px-4 py-6">
@@ -47,12 +84,10 @@ export default function ConfirmationPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              You're All Set!
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">You&apos;re All Set!</h1>
             <p className="text-gray-600">
-              We're looking forward to helping you feel better. Check your email for
-              all the details — and don't hesitate to reach out if you have any questions.
+              We&apos;re looking forward to helping you feel better. Check your email for all the
+              details — and don&apos;t hesitate to reach out if you have any questions.
             </p>
           </div>
 
@@ -60,54 +95,42 @@ export default function ConfirmationPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between mb-4 pb-4 border-b">
                 <span className="text-sm text-gray-500">Confirmation #</span>
-                <span className="font-mono font-medium text-gray-900">
-                  {appointment.id}
-                </span>
+                <span className="font-mono font-medium text-gray-900">{confirmationNumber}</span>
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <User className="h-5 w-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {appointment.provider}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {appointment.credentials} • {appointment.specialty}
-                    </div>
-                    <div className="text-sm text-primary-600">
-                      {appointment.subspecialty}
+                {provider && (
+                  <div className="flex items-start gap-3">
+                    <User className="h-5 w-5 text-gray-400 mt-0.5" />
+                    <div>
+                      <div className="font-medium text-gray-900">{provider.name}</div>
+                      <div className="text-sm text-gray-500">
+                        {provider.credentials} • {provider.specialty}
+                      </div>
+                      {provider.subspecialty && (
+                        <div className="text-sm text-primary-600">{provider.subspecialty}</div>
+                      )}
                     </div>
                   </div>
-                </div>
+                )}
 
                 <div className="flex items-start gap-3">
                   <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {appointment.date}
-                    </div>
-                  </div>
+                  <div className="font-medium text-gray-900">{date}</div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <Clock className="h-5 w-5 text-gray-400 mt-0.5" />
                   <div>
-                    <div className="font-medium text-gray-900">
-                      {appointment.time} ({appointment.timezone})
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {appointment.duration}
-                    </div>
+                    <div className="font-medium text-gray-900">{time} (EST)</div>
+                    <div className="text-sm text-gray-500">{appointment.duration_minutes} minutes</div>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <Video className="h-5 w-5 text-gray-400 mt-0.5" />
                   <div>
-                    <div className="font-medium text-gray-900">
-                      {appointment.type}
-                    </div>
+                    <div className="font-medium text-gray-900">Video Consultation</div>
                     <div className="text-sm text-gray-500">
                       Link will be available 15 minutes before
                     </div>
@@ -137,33 +160,23 @@ export default function ConfirmationPage() {
               <ul className="space-y-3 text-sm text-gray-700">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-primary-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    Find a quiet, well-lit, private location for your video call
-                  </span>
+                  <span>Find a quiet, well-lit, private location for your video call</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-primary-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    Test your camera and microphone before the appointment
-                  </span>
+                  <span>Test your camera and microphone before the appointment</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-primary-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    Have your Ontario Health Card ready if using OHIP coverage
-                  </span>
+                  <span>Have your Ontario Health Card ready if using OHIP coverage</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-primary-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    List any medications you&apos;re currently taking for your eyes
-                  </span>
+                  <span>List any medications you&apos;re currently taking for your eyes</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-primary-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    Write down any questions you want to ask the doctor
-                  </span>
+                  <span>Write down any questions you want to ask the doctor</span>
                 </li>
               </ul>
             </CardContent>

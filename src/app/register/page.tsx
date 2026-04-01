@@ -23,6 +23,8 @@ export default function RegisterPage() {
     consentPHIPA: false,
     consentTerms: false,
   });
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redirect to dashboard if already authenticated
   useEffect(() => {
@@ -39,13 +41,26 @@ export default function RegisterPage() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    register({
+    setSubmitError(null);
+    setIsSubmitting(true);
+    const result = await register({
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
+      phone: formData.phone || undefined,
+      dateOfBirth: formData.dateOfBirth,
+      healthCardNumber: formData.healthCardNumber || undefined,
+      password: formData.password,
+      consentPHIPA: formData.consentPHIPA,
+      consentTerms: formData.consentTerms,
     });
+    setIsSubmitting(false);
+    if (result.error) {
+      setSubmitError(result.error);
+      return;
+    }
     router.push("/dashboard");
   };
 
@@ -223,9 +238,16 @@ export default function RegisterPage() {
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                      formData.confirmPassword && formData.password !== formData.confirmPassword
+                        ? "border-red-400 bg-red-50"
+                        : "border-gray-300"
+                    }`}
                     required
                   />
+                  {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                    <p className="text-xs text-red-600 mt-1">Passwords do not match</p>
+                  )}
                 </div>
 
                 <div className="space-y-4 pt-4 border-t">
@@ -270,14 +292,39 @@ export default function RegisterPage() {
                   </div>
                 </div>
 
+                {/* Inline validation hints — only shown once user has started filling the form */}
+                {(formData.firstName || formData.email || formData.password) && !isFormValid && (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800 space-y-1">
+                    <p className="font-medium mb-1">To enable the button, please:</p>
+                    <ul className="space-y-1">
+                      {!formData.firstName && <li>• Enter your first name</li>}
+                      {!formData.lastName && <li>• Enter your last name</li>}
+                      {!formData.email && <li>• Enter your email address</li>}
+                      {!formData.dateOfBirth && <li>• Enter your date of birth</li>}
+                      {!formData.password && <li>• Enter a password</li>}
+                      {formData.password && formData.password !== formData.confirmPassword && (
+                        <li>• Passwords must match</li>
+                      )}
+                      {!formData.consentPHIPA && <li>• Check the PHIPA privacy consent box</li>}
+                      {!formData.consentTerms && <li>• Check the Terms of Service box</li>}
+                    </ul>
+                  </div>
+                )}
+
+                {submitError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                    {submitError}
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   size="lg"
                   className="w-full"
-                  disabled={!isFormValid}
+                  disabled={!isFormValid || isSubmitting}
                 >
-                  Create Account &amp; Go to Dashboard
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  {isSubmitting ? "Creating Account..." : "Create Account & Go to Dashboard"}
+                  {!isSubmitting && <ArrowRight className="ml-2 h-5 w-5" />}
                 </Button>
               </form>
             </CardContent>

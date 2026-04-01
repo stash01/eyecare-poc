@@ -340,10 +340,10 @@ function AssessmentResultsContent() {
                     {provider.location} &bull; {provider.phone}
                   </p>
                   <div className="flex items-center gap-3">
-                    <Link href="/booking">
+                    <Link href="/request-consultation">
                       <Button>
                         <Calendar className="h-4 w-4 mr-2" />
-                        Book Consultation
+                        Request Consultation
                       </Button>
                     </Link>
                     <Link href="/dashboard">

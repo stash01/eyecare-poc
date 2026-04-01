@@ -317,16 +317,13 @@ export default function AssessmentPage() {
   const question = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / totalQuestions) * 100;
 
-  const handleNext = () => {
-    if (selectedOption === null) return;
-
+  const handleNext = (optionIndex: number) => {
     if (phase === "screening") {
       const screeningQ = question as typeof screeningQuestions[number];
-      const newAnswers = { ...screeningAnswers, [screeningQ.id]: selectedOption };
+      const newAnswers = { ...screeningAnswers, [screeningQ.id]: optionIndex };
       setScreeningAnswers(newAnswers);
 
-      // Check for red flags
-      const selectedOpt = screeningQ.options[selectedOption];
+      const selectedOpt = screeningQ.options[optionIndex];
       if (selectedOpt?.isRedFlag) {
         setRedFlagsDetected(prev => [...prev, screeningQ.question]);
       }
@@ -336,24 +333,20 @@ export default function AssessmentPage() {
       if (currentQuestion < screeningQuestions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
       } else {
-        // Finished screening - check if any red flags
         const allRedFlags = [...redFlagsDetected];
-        const currentOpt = screeningQ.options[selectedOption];
-        if (currentOpt?.isRedFlag) {
+        if (selectedOpt?.isRedFlag) {
           allRedFlags.push(screeningQ.question);
         }
-
         if (allRedFlags.length > 0) {
           setPhase("referral");
         } else {
-          // Move to DEWS assessment
           setPhase("assessment");
           setCurrentQuestion(0);
         }
       }
     } else if (phase === "assessment") {
       const dewsQ = question as typeof dewsQuestions[number];
-      const newAnswers = { ...assessmentAnswers, [dewsQ.id]: selectedOption };
+      const newAnswers = { ...assessmentAnswers, [dewsQ.id]: optionIndex };
       setAssessmentAnswers(newAnswers);
       setSelectedOption(null);
 
@@ -364,7 +357,6 @@ export default function AssessmentPage() {
           setSelectedOption(nextAnswer);
         }
       } else {
-        // Calculate scores and navigate to results
         const deq5Score = (newAnswers[1] || 0) + (newAnswers[2] || 0) + (newAnswers[3] || 0) +
                          (newAnswers[4] || 0) + (newAnswers[5] || 0);
         const osdiVisualScore = (newAnswers[6] || 0) + (newAnswers[7] || 0);
@@ -373,13 +365,11 @@ export default function AssessmentPage() {
 
         const totalScore = deq5Score + osdiVisualScore + osdiEnvScore + symptomScore;
 
-        // Calculate flags
         const hasAutoimmune = (newAnswers[10] || 0) >= 1;
         const hasDiabetes = (newAnswers[11] || 0) >= 1;
         const hasMGD = (newAnswers[12] || 0) >= 2;
         const hasTriedTreatments = (newAnswers[14] || 0) >= 2;
 
-        // DEQ-5 cutoff: score >= 6 suggests dry eye (per DEWS II)
         const deq5Positive = deq5Score >= 6;
 
         const riskFactorCount = [hasAutoimmune, hasDiabetes, hasTriedTreatments, hasMGD].filter(Boolean).length;
@@ -394,7 +384,7 @@ export default function AssessmentPage() {
           diabetes: hasDiabetes,
           mgd: hasMGD,
           triedTreatments: hasTriedTreatments,
-        });
+        }).catch((err) => console.error("[assessment] addResult failed:", err));
 
         const params = new URLSearchParams({
           score: totalScore.toString(),
@@ -605,7 +595,10 @@ export default function AssessmentPage() {
                 {question.options.map((option, index) => (
                   <button
                     key={index}
-                    onClick={() => setSelectedOption(index)}
+                    onClick={() => {
+                      setSelectedOption(index);
+                      setTimeout(() => handleNext(index), 300);
+                    }}
                     className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
                       selectedOption === index
                         ? "border-primary-600 bg-primary-50 text-primary-900"
@@ -617,7 +610,7 @@ export default function AssessmentPage() {
                 ))}
               </div>
 
-              <div className="flex justify-between mt-8 pt-6 border-t">
+              <div className="flex justify-start mt-8 pt-6 border-t">
                 <Button
                   variant="ghost"
                   onClick={handleBack}
@@ -625,12 +618,6 @@ export default function AssessmentPage() {
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back
-                </Button>
-                <Button onClick={handleNext} disabled={selectedOption === null}>
-                  {phase === "assessment" && currentQuestion === dewsQuestions.length - 1
-                    ? "See My Results"
-                    : "Continue"}
-                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
             </CardContent>

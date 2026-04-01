@@ -5,22 +5,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Eye,
-  Calendar,
-  Clock,
-  Video,
-  FileText,
-  User,
-  Settings,
-  LogOut,
-  ChevronRight,
-  Bell,
-  Pill,
-  Loader2,
-  BookOpen,
-  Activity,
-  ClipboardList,
-  ArrowRight,
+  Eye, Calendar, Clock, Video, FileText, User, Settings,
+  LogOut, ChevronRight, Bell, Pill, Loader2, BookOpen,
+  Activity, ClipboardList, ArrowRight, Stethoscope, UserPlus,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
@@ -31,6 +18,7 @@ const upcomingAppointment = {
   id: "APT-2024-001234",
   provider: "Dr. Sarah Chen",
   credentials: "MD, FRCSC",
+  specialty: "Cornea & Ocular Surface",
   date: "Monday, Feb 5, 2024",
   time: "10:30 AM",
   isJoinable: true,
@@ -68,300 +56,287 @@ const prescriptions = [
   },
 ];
 
+const navItems = [
+  { href: "/dashboard",                   icon: Calendar,      label: "Dashboard" },
+  { href: "/blog",                        icon: BookOpen,      label: "Blog & Community" },
+  { href: "/dashboard/symptom-tracker",   icon: Activity,      label: "Symptom Tracker" },
+  { href: "/dashboard/records",           icon: FileText,      label: "Medical Records" },
+  { href: "/dashboard/prescriptions",     icon: Pill,          label: "Prescriptions" },
+  { href: "/dashboard/profile",           icon: User,          label: "Profile" },
+  { href: "/dashboard/settings",          icon: Settings,      label: "Settings" },
+];
+
 export default function DashboardPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading, user, logout } = useAuth();
   const { history } = useSymptomHistory();
 
-  // Redirect to login if not authenticated
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/login");
-    }
+    if (!isLoading && !isAuthenticated) router.push("/login");
   }, [isLoading, isAuthenticated, router]);
 
-  const handleLogout = () => {
-    logout();
-    router.push("/");
-  };
+  const handleLogout = () => { logout(); router.push("/"); };
 
-  // Show loading state while checking auth
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--bg-base)" }}>
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-primary-600 mx-auto mb-3" />
+          <p className="text-stone-500 text-sm">Loading your dashboard…</p>
         </div>
       </div>
     );
   }
 
-  // Don't render if not authenticated
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
 
-  const firstName = user?.firstName || "User";
+  const firstName = user?.firstName || "there";
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4">
+    <div className="min-h-screen" style={{ background: "var(--bg-base)" }}>
+
+      {/* ── Header ─────────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-stone-200/80 shadow-sm">
+        <div className="container mx-auto px-6 py-3.5">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <Eye className="h-8 w-8 text-primary-600" />
-              <span className="text-xl font-semibold text-primary-900">KlaraMD</span>
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center">
+                <Eye className="h-4 w-4 text-white" />
+              </div>
+              <span className="text-lg font-semibold text-primary-900 tracking-tight">
+                Klara<span className="text-primary-500">MD</span>
+              </span>
             </Link>
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon">
-                <Bell className="h-5 w-5" />
+
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" className="rounded-xl relative">
+                <Bell className="h-5 w-5 text-stone-500" />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-accent-500 rounded-full" />
               </Button>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-                  <User className="h-4 w-4 text-primary-600" />
+              <div className="flex items-center gap-2.5 pl-3 border-l border-stone-200">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">
+                    {firstName.charAt(0)}{user?.lastName?.charAt(0) || ""}
+                  </span>
                 </div>
-                <span className="text-sm font-medium">{firstName} {user?.lastName?.charAt(0) || ""}.</span>
+                <span className="text-sm font-medium text-stone-700">
+                  {firstName} {user?.lastName?.charAt(0) || ""}.
+                </span>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-6 py-8">
         <div className="grid lg:grid-cols-4 gap-6">
+
+          {/* ── Sidebar ──────────────────────────────────────────── */}
           <aside className="lg:col-span-1">
-            <Card>
-              <CardContent className="p-4">
-                <nav className="space-y-1">
-                  <Link
-                    href="/dashboard"
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary-50 text-primary-700 font-medium"
-                  >
-                    <Calendar className="h-5 w-5" />
-                    Dashboard
-                  </Link>
-                  <Link
-                    href="/blog"
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50"
-                  >
-                    <BookOpen className="h-5 w-5" />
-                    Blog &amp; Community
-                  </Link>
-                  <Link
-                    href="/dashboard/symptom-tracker"
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50"
-                  >
-                    <Activity className="h-5 w-5" />
-                    Symptom Tracker
-                  </Link>
-                  <Link
-                    href="/dashboard/records"
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50"
-                  >
-                    <FileText className="h-5 w-5" />
-                    Medical Records
-                  </Link>
-                  <Link
-                    href="/dashboard/prescriptions"
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50"
-                  >
-                    <Pill className="h-5 w-5" />
-                    Prescriptions
-                  </Link>
-                  <Link
-                    href="/dashboard/profile"
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50"
-                  >
-                    <User className="h-5 w-5" />
-                    Profile
-                  </Link>
-                  <Link
-                    href="/dashboard/settings"
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50"
-                  >
-                    <Settings className="h-5 w-5" />
-                    Settings
-                  </Link>
-                  <hr className="my-2" />
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 w-full"
-                  >
-                    <LogOut className="h-5 w-5" />
-                    Sign Out
-                  </button>
+            <Card className="overflow-hidden">
+              {/* Sidebar header */}
+              <div className="bg-gradient-to-br from-primary-800 to-primary-700 p-5">
+                <div className="w-12 h-12 rounded-full bg-white/20 border border-white/30 flex items-center justify-center mb-3">
+                  <span className="text-lg font-bold text-white">
+                    {firstName.charAt(0)}{user?.lastName?.charAt(0) || ""}
+                  </span>
+                </div>
+                <div className="text-white font-semibold">{firstName} {user?.lastName || ""}</div>
+                <div className="text-primary-200/70 text-xs mt-0.5">{user?.email || ""}</div>
+              </div>
+
+              <CardContent className="p-3">
+                <nav className="space-y-0.5">
+                  {navItems.map(({ href, icon: Icon, label }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
+                        href === "/dashboard"
+                          ? "bg-primary-50 text-primary-700 font-medium"
+                          : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 flex-shrink-0" />
+                      {label}
+                    </Link>
+                  ))}
+                  <div className="pt-1 mt-1 border-t border-stone-100">
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-stone-500 hover:bg-red-50 hover:text-red-600 w-full transition-all"
+                    >
+                      <LogOut className="h-4 w-4 flex-shrink-0" />
+                      Sign Out
+                    </button>
+                  </div>
                 </nav>
               </CardContent>
             </Card>
           </aside>
 
+          {/* ── Main ─────────────────────────────────────────────── */}
           <main className="lg:col-span-3 space-y-6">
+
+            {/* Greeting */}
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Welcome back, {firstName}
+              <h1 className="font-display text-3xl text-stone-900">
+                Good to see you, {firstName}
               </h1>
-              <p className="text-gray-600">
-                We&apos;re here to support you on your journey to healthier eyes
-              </p>
+              <p className="text-stone-500 mt-1">Here&apos;s your eye health at a glance.</p>
             </div>
 
             {/* 3 Pathway Cards */}
             <div className="grid md:grid-cols-3 gap-4">
+
               <Link href="/blog">
-                <Card className="hover:border-primary-300 cursor-pointer transition-colors h-full">
-                  <CardContent className="pt-6">
-                    <div className="flex flex-col items-center text-center gap-3">
-                      <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center">
-                        <BookOpen className="h-7 w-7 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-gray-900">Blog &amp; Community</div>
-                        <p className="text-sm text-gray-500 mt-1">
-                          Articles, tips, and community stories
-                        </p>
-                      </div>
-                      <span className="text-xs text-primary-600 flex items-center gap-1">
-                        Explore <ArrowRight className="h-3 w-3" />
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="group relative p-5 rounded-2xl border border-stone-200 bg-white shadow-card hover:shadow-card-lg hover:-translate-y-0.5 transition-all h-full cursor-pointer">
+                  <div className="w-11 h-11 rounded-xl bg-sky-50 flex items-center justify-center mb-4 group-hover:bg-sky-100 transition-colors">
+                    <BookOpen className="h-5 w-5 text-sky-600" />
+                  </div>
+                  <div className="font-semibold text-stone-900 mb-1">Blog & Community</div>
+                  <p className="text-xs text-stone-500 mb-4">Articles, tips, and community stories</p>
+                  <span className="text-xs text-primary-600 font-medium flex items-center gap-1">
+                    Explore <ArrowRight className="h-3 w-3" />
+                  </span>
+                </div>
               </Link>
 
               <Link href="/dashboard/symptom-tracker">
-                <Card className="hover:border-primary-300 cursor-pointer transition-colors h-full">
-                  <CardContent className="pt-6">
-                    <div className="flex flex-col items-center text-center gap-3">
-                      <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
-                        <Activity className="h-7 w-7 text-green-600" />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-gray-900">Symptom Tracker</div>
-                        <p className="text-sm text-gray-500 mt-1">
-                          {history.length > 0
-                            ? `${history.length} assessment${history.length > 1 ? "s" : ""} recorded`
-                            : "Track your symptoms over time"}
-                        </p>
-                      </div>
-                      <span className="text-xs text-primary-600 flex items-center gap-1">
-                        View History <ArrowRight className="h-3 w-3" />
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="group relative p-5 rounded-2xl border border-stone-200 bg-white shadow-card hover:shadow-card-lg hover:-translate-y-0.5 transition-all h-full cursor-pointer">
+                  <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition-colors">
+                    <Activity className="h-5 w-5 text-emerald-600" />
+                  </div>
+                  <div className="font-semibold text-stone-900 mb-1">Symptom Tracker</div>
+                  <p className="text-xs text-stone-500 mb-4">
+                    {history.length > 0
+                      ? `${history.length} assessment${history.length > 1 ? "s" : ""} recorded`
+                      : "Track your symptoms over time"}
+                  </p>
+                  <span className="text-xs text-primary-600 font-medium flex items-center gap-1">
+                    View History <ArrowRight className="h-3 w-3" />
+                  </span>
+                </div>
               </Link>
 
               <Link href="/assessment">
-                <Card className="hover:border-primary-300 cursor-pointer transition-colors h-full border-primary-200 bg-primary-50">
-                  <CardContent className="pt-6">
-                    <div className="flex flex-col items-center text-center gap-3">
-                      <div className="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center">
-                        <ClipboardList className="h-7 w-7 text-primary-600" />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-gray-900">
-                          {history.length > 0 ? "Retake Assessment" : "Take Assessment"}
-                        </div>
-                        <p className="text-sm text-gray-500 mt-1">
-                          Clinically validated dry eye assessment
-                        </p>
-                      </div>
-                      <span className="text-xs text-primary-600 flex items-center gap-1">
-                        Start Now <ArrowRight className="h-3 w-3" />
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="group relative p-5 rounded-2xl border border-primary-200 bg-gradient-to-br from-primary-600 to-primary-700 shadow-card hover:shadow-glow hover:-translate-y-0.5 transition-all h-full cursor-pointer">
+                  <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center mb-4">
+                    <ClipboardList className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="font-semibold text-white mb-1">
+                    {history.length > 0 ? "Retake Assessment" : "Take Assessment"}
+                  </div>
+                  <p className="text-xs text-primary-200/80 mb-4">Clinically validated dry eye assessment</p>
+                  <span className="text-xs text-white font-medium flex items-center gap-1">
+                    Start Now <ArrowRight className="h-3 w-3" />
+                  </span>
+                </div>
               </Link>
             </div>
+
+            {/* Request Consultation CTA */}
+            <Link href="/request-consultation">
+              <div className="group flex items-center justify-between p-5 rounded-2xl border border-accent-200 bg-gradient-to-r from-accent-50 to-white shadow-card hover:shadow-card-lg hover:-translate-y-0.5 transition-all cursor-pointer">
+                <div className="flex items-center gap-4">
+                  <div className="w-11 h-11 rounded-xl bg-accent-100 flex items-center justify-center group-hover:bg-accent-200 transition-colors flex-shrink-0">
+                    <UserPlus className="h-5 w-5 text-accent-700" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-stone-900">Request a Specialist Consultation</div>
+                    <p className="text-xs text-stone-500 mt-0.5">Tell us when you&apos;re available — a specialist will confirm your appointment</p>
+                  </div>
+                </div>
+                <ArrowRight className="h-5 w-5 text-accent-600 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
 
             {/* Symptom History Widget */}
             <SymptomHistoryWidget />
 
-            {/* Secondary content: Appointments & Prescriptions */}
+            {/* Upcoming Appointment */}
             {upcomingAppointment && (
-              <Card className="border-primary-200 bg-primary-50">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-primary-600" />
+              <Card className="border-primary-100 overflow-hidden">
+                <div className="h-1 bg-gradient-to-r from-primary-500 to-primary-400" />
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-primary-500" />
                     Upcoming Appointment
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
-                        <User className="h-6 w-6 text-gray-500" />
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center flex-shrink-0">
+                        <Stethoscope className="h-6 w-6 text-primary-600" />
                       </div>
                       <div>
-                        <div className="font-semibold text-gray-900">
-                          {upcomingAppointment.provider}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {upcomingAppointment.date} at {upcomingAppointment.time}
+                        <div className="font-semibold text-stone-900">{upcomingAppointment.provider}</div>
+                        <div className="text-sm text-stone-500">{upcomingAppointment.specialty}</div>
+                        <div className="text-sm text-primary-600 font-medium mt-0.5">
+                          {upcomingAppointment.date} · {upcomingAppointment.time}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       {upcomingAppointment.isJoinable ? (
                         <Link href="/consultation">
-                          <Button>
-                            <Video className="h-4 w-4 mr-2" />
+                          <Button size="sm" className="gap-2">
+                            <Video className="h-4 w-4" />
                             Join Now
                           </Button>
                         </Link>
                       ) : (
-                        <Button disabled>
-                          <Video className="h-4 w-4 mr-2" />
+                        <Button size="sm" disabled className="gap-2">
+                          <Video className="h-4 w-4" />
                           Join (Available 15 min before)
                         </Button>
                       )}
-                      <Button variant="secondary">Reschedule</Button>
+                      <Button variant="secondary" size="sm">Reschedule</Button>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             )}
 
+            {/* Past Appointments */}
             <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Past Appointments</CardTitle>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Past Appointments</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {pastAppointments.map((apt) => (
                     <div
                       key={apt.id}
-                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-gray-50"
+                      className="flex items-center justify-between p-4 rounded-xl border border-stone-100 hover:bg-stone-50 transition-colors"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                          <User className="h-5 w-5 text-gray-500" />
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-stone-100 flex items-center justify-center">
+                          <User className="h-4 w-4 text-stone-500" />
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">
-                            {apt.provider}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {apt.credentials} &bull; {apt.date}
-                          </div>
+                          <div className="font-medium text-stone-900 text-sm">{apt.provider}</div>
+                          <div className="text-xs text-stone-400">{apt.credentials} · {apt.date}</div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded-full">
+                          {apt.status}
+                        </span>
                         {apt.hasNotes && (
-                          <Button variant="ghost" size="sm">
-                            <FileText className="h-4 w-4 mr-1" />
+                          <Button variant="ghost" size="sm" className="h-8 px-3 text-xs gap-1">
+                            <FileText className="h-3.5 w-3.5" />
                             Notes
                           </Button>
                         )}
                         {apt.hasPrescription && (
-                          <Button variant="ghost" size="sm">
-                            <Pill className="h-4 w-4 mr-1" />
+                          <Button variant="ghost" size="sm" className="h-8 px-3 text-xs gap-1">
+                            <Pill className="h-3.5 w-3.5" />
                             Rx
                           </Button>
                         )}
-                        <ChevronRight className="h-5 w-5 text-gray-400" />
+                        <ChevronRight className="h-4 w-4 text-stone-300" />
                       </div>
                     </div>
                   ))}
@@ -369,44 +344,41 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
+            {/* Active Prescriptions */}
             <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Active Prescriptions</CardTitle>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Pill className="h-4 w-4 text-primary-500" />
+                  Active Prescriptions
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 {prescriptions.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {prescriptions.map((rx) => (
-                      <div
-                        key={rx.id}
-                        className="p-4 rounded-lg border bg-green-50 border-green-200"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <div className="font-medium text-gray-900">
-                              {rx.name}
-                            </div>
-                            <div className="text-sm text-gray-600 mt-1">
-                              {rx.dosage} &bull; {rx.instructions}
-                            </div>
-                            <div className="text-xs text-gray-500 mt-2">
-                              Prescribed: {rx.prescribedDate}
-                            </div>
+                      <div key={rx.id} className="flex items-start justify-between p-4 rounded-xl border border-stone-100 bg-stone-50">
+                        <div className="flex gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-primary-100 flex items-center justify-center flex-shrink-0">
+                            <Pill className="h-4 w-4 text-primary-600" />
                           </div>
-                          <span className="text-xs font-medium text-green-700 bg-green-100 px-2 py-1 rounded">
-                            {rx.status}
-                          </span>
+                          <div>
+                            <div className="font-medium text-stone-900 text-sm">{rx.name}</div>
+                            <div className="text-xs text-stone-500 mt-0.5">{rx.dosage} · {rx.instructions}</div>
+                            <div className="text-xs text-stone-400 mt-1">Prescribed {rx.prescribedDate}</div>
+                          </div>
                         </div>
+                        <span className="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded-full flex-shrink-0">
+                          {rx.status}
+                        </span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-4">
-                    No active prescriptions
-                  </p>
+                  <p className="text-stone-400 text-sm text-center py-6">No active prescriptions</p>
                 )}
               </CardContent>
             </Card>
+
           </main>
         </div>
       </div>

@@ -2,72 +2,127 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-interface User {
+export interface User {
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
+  subscriptionPlan: string | null;
+}
+
+interface RegisterPayload {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  dateOfBirth: string;
+  healthCardNumber?: string;
+  password: string;
+  consentPHIPA: boolean;
+  consentTerms: boolean;
 }
 
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   user: User | null;
-  login: (email: string, password: string) => void;
-  register: (user: User) => void;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<{ error?: string }>;
+  register: (payload: RegisterPayload) => Promise<{ error?: string }>;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_STORAGE_KEY = "klaramd_auth";
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Load current session from server on mount
   useEffect(() => {
-    // Check localStorage for existing auth state
-    const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (stored) {
-      try {
-        const data = JSON.parse(stored);
-        setUser(data.user);
-        setIsAuthenticated(true);
-      } catch {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-      }
-    }
-    setIsLoading(false);
+    refreshUser().finally(() => setIsLoading(false));
   }, []);
 
-  const login = (email: string, _password: string) => {
-    // For wireframe demo, accept any credentials
-    const demoUser: User = {
-      firstName: "John",
-      lastName: "Doe",
-      email: email || "john@example.com",
-    };
-    setUser(demoUser);
-    setIsAuthenticated(true);
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ user: demoUser }));
-  };
+  async function refreshUser() {
+    try {
+      const res = await fetch("/api/auth/me", { credentials: "same-origin" });
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data.user ?? null);
+      } else {
+        setUser(null);
+      }
+    } catch {
+      setUser(null);
+    }
+  }
 
-  const register = (newUser: User) => {
-    setUser(newUser);
-    setIsAuthenticated(true);
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ user: newUser }));
-  };
+  async function login(email: string, password: string): Promise<{ error?: string }> {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ email, password }),
+      });
 
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-  };
+      const data = await res.json();
+
+      if (!res.ok) {
+        return { error: data.error ?? "Login failed" };
+      }
+
+      setUser(data.user);
+      return {};
+    } catch {
+      return { error: "Network error. Please try again." };
+    }
+  }
+
+  async function register(payload: RegisterPayload): Promise<{ error?: string }> {
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return { error: data.error ?? "Registration failed" };
+      }
+
+      setUser(data.user);
+      return {};
+    } catch {
+      return { error: "Network error. Please try again." };
+    }
+  }
+
+  async function logout() {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "same-origin",
+      });
+    } finally {
+      setUser(null);
+    }
+  }
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, isLoading, user, login, register, logout }}
+      value={{
+        isAuthenticated: user !== null,
+        isLoading,
+        user,
+        login,
+        register,
+        logout,
+        refreshUser,
+      }}
     >
       {children}
     </AuthContext.Provider>

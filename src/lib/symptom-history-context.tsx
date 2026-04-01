@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Severity } from "./assessment-utils";
+import { useAuth } from "./auth-context";
 
 export interface AssessmentResult {
   id: string;
@@ -19,53 +20,70 @@ export interface AssessmentResult {
 interface SymptomHistoryContextType {
   history: AssessmentResult[];
   latestResult: AssessmentResult | null;
-  addResult: (result: Omit<AssessmentResult, "id" | "timestamp">) => void;
+  addResult: (result: Omit<AssessmentResult, "id" | "timestamp">) => Promise<void>;
   clearHistory: () => void;
   isLoading: boolean;
 }
 
 const SymptomHistoryContext = createContext<SymptomHistoryContextType | undefined>(undefined);
 
-const STORAGE_KEY = "klaramd_symptom_history";
-
 export function SymptomHistoryProvider({ children }: { children: ReactNode }) {
+  const { isAuthenticated } = useAuth();
   const [history, setHistory] = useState<AssessmentResult[]>([]);
-  const [isHydrated, setIsHydrated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load from localStorage on mount
+  // Load assessment history from the server when authenticated
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setHistory(JSON.parse(stored));
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
-      }
+    if (!isAuthenticated) {
+      setHistory([]);
+      setIsLoading(false);
+      return;
     }
-    setIsHydrated(true);
-    setIsLoading(false);
-  }, []);
 
-  // Save to localStorage when history changes (after hydration)
-  useEffect(() => {
-    if (isHydrated) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+    setIsLoading(true);
+    fetch("/api/assessments", { credentials: "same-origin" })
+      .then((res) => (res.ok ? res.json() : { history: [] }))
+      .then((data) => setHistory(data.history ?? []))
+      .catch(() => setHistory([]))
+      .finally(() => setIsLoading(false));
+  }, [isAuthenticated]);
+
+  async function addResult(result: Omit<AssessmentResult, "id" | "timestamp">) {
+    const res = await fetch("/api/assessments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({
+        score: result.score,
+        deq5: result.deq5,
+        deq5Positive: result.deq5Positive,
+        severity: result.severity,
+        autoimmune: result.autoimmune,
+        diabetes: result.diabetes,
+        mgd: result.mgd,
+        triedTreatments: result.triedTreatments,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to save assessment result");
     }
-  }, [history, isHydrated]);
 
-  const addResult = (result: Omit<AssessmentResult, "id" | "timestamp">) => {
+    const data = await res.json();
+
+    // Optimistically add to local state
     const newResult: AssessmentResult = {
       ...result,
-      id: crypto.randomUUID(),
-      timestamp: new Date().toISOString(),
+      id: data.assessment.id,
+      timestamp: data.assessment.timestamp,
     };
     setHistory((prev) => [...prev, newResult]);
-  };
+  }
 
-  const clearHistory = () => {
+  function clearHistory() {
+    // Local clear only — use the patient deletion endpoint for full PHIPA-compliant erasure
     setHistory([]);
-  };
+  }
 
   const latestResult = history.length > 0 ? history[history.length - 1] : null;
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, ReactNode } from "react";
+import { useAuth } from "./auth-context";
 
 export type SubscriptionPlan = "basic" | "premium" | "complete";
 
@@ -39,41 +40,49 @@ export const PLAN_DETAILS: Record<SubscriptionPlan, { name: string; price: numbe
 interface SubscriptionContextType {
   isSubscribed: boolean;
   plan: SubscriptionPlan | null;
-  subscribe: (plan: SubscriptionPlan) => void;
-  cancelSubscription: () => void;
+  subscribe: (plan: SubscriptionPlan) => Promise<{ error?: string }>;
+  cancelSubscription: () => Promise<void>;
   isLoading: boolean;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
 
-const STORAGE_KEY = "klaramd_subscription";
-
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
-  const [plan, setPlan] = useState<SubscriptionPlan | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Subscription state is derived from the authenticated user object (set by /api/auth/me)
+  const { user, isLoading, refreshUser } = useAuth();
 
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const data = JSON.parse(stored);
-        setPlan(data.plan);
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
+  const plan = (user?.subscriptionPlan as SubscriptionPlan | null) ?? null;
+
+  async function subscribe(newPlan: SubscriptionPlan): Promise<{ error?: string }> {
+    try {
+      const res = await fetch("/api/subscriptions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ plan: newPlan }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return { error: data.error ?? "Subscription failed" };
       }
+
+      // Refresh user to pick up the new subscription_plan from the server
+      await refreshUser();
+      return {};
+    } catch {
+      return { error: "Network error. Please try again." };
     }
-    setIsLoading(false);
-  }, []);
+  }
 
-  const subscribe = (newPlan: SubscriptionPlan) => {
-    setPlan(newPlan);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ plan: newPlan }));
-  };
-
-  const cancelSubscription = () => {
-    setPlan(null);
-    localStorage.removeItem(STORAGE_KEY);
-  };
+  async function cancelSubscription() {
+    await fetch("/api/subscriptions", {
+      method: "DELETE",
+      credentials: "same-origin",
+    });
+    await refreshUser();
+  }
 
   return (
     <SubscriptionContext.Provider

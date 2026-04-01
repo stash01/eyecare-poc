@@ -14,6 +14,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState<"patient" | "provider">("patient");
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -22,9 +24,16 @@ export default function LoginPage() {
     }
   }, [isLoading, isAuthenticated, router]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login(email, password);
+    setLoginError(null);
+    setIsSubmitting(true);
+    const result = await login(email, password);
+    setIsSubmitting(false);
+    if (result.error) {
+      setLoginError(result.error);
+      return;
+    }
     if (userType === "provider") {
       router.push("/provider");
     } else {
@@ -117,9 +126,15 @@ export default function LoginPage() {
                   </Link>
                 </div>
 
-                <Button type="submit" size="lg" className="w-full">
-                  Sign In
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                {loginError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                    {loginError}
+                  </div>
+                )}
+
+                <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? "Signing In..." : "Sign In"}
+                  {!isSubmitting && <ArrowRight className="ml-2 h-5 w-5" />}
                 </Button>
               </form>
 
@@ -135,10 +150,6 @@ export default function LoginPage() {
             </CardContent>
           </Card>
 
-          <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
-            <strong>Wireframe Demo:</strong> Click &quot;Sign In&quot; with any credentials.
-            Select &quot;Patient&quot; or &quot;Provider&quot; to see different dashboards.
-          </div>
         </div>
       </main>
     </div>
