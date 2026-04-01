@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/server/db";
+
+export const dynamic = "force-dynamic";
 import { encryptHealthCard } from "@/lib/server/crypto";
 import { createSession, setSessionCookie } from "@/lib/server/session";
 import { logAuditEvent } from "@/lib/server/audit";

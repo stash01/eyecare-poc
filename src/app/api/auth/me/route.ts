@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { validateSession } from "@/lib/server/session";
 import { db } from "@/lib/server/db";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const session = await validateSession();

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateSession } from "@/lib/server/session";
 import { db } from "@/lib/server/db";
+
+export const dynamic = "force-dynamic";
 import { logAuditEvent } from "@/lib/server/audit";
 import { createJaneChartNote } from "@/lib/server/jane-client";
 

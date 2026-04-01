@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
 
+export const dynamic = "force-dynamic";
+
 // GET /api/provider/requests — all pending consultation requests with patient info and availability
 // NOTE: Provider auth not yet implemented — protected by network/deployment config in POC.
 export async function GET() {

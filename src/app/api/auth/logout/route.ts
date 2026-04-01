@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { deleteSession, clearSessionCookie } from "@/lib/server/session";
 
+export const dynamic = "force-dynamic";
+
 export async function POST() {
   try {
     await deleteSession();

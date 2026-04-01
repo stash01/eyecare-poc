@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
 
+export const dynamic = "force-dynamic";
+
 // GET /api/providers — list active providers (public, no auth required)
 export async function GET() {
   const { data: providers, error } = await db
