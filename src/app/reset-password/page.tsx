@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, CheckCircle, XCircle, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -66,9 +66,9 @@ export default function ResetPasswordPage() {
                   <p className="text-gray-500 text-sm mb-6">
                     Your password has been changed. You can now sign in with your new password.
                   </p>
-                  <Button asChild className="w-full">
-                    <Link href="/login">Sign in</Link>
-                  </Button>
+                  <Link href="/login" className={buttonVariants({ className: "w-full" })}>
+                    Sign in
+                  </Link>
                 </div>
               )}
 
@@ -77,9 +77,9 @@ export default function ResetPasswordPage() {
                   <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
                   <p className="text-gray-700 font-medium mb-2">Link expired or already used</p>
                   <p className="text-gray-500 text-sm mb-6">{errorMessage}</p>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/forgot-password">Request a new reset link</Link>
-                  </Button>
+                  <Link href="/forgot-password" className={buttonVariants({ variant: "outline", className: "w-full" })}>
+                    Request a new reset link
+                  </Link>
                 </div>
               )}
 

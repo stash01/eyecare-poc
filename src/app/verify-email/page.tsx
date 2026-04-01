@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, CheckCircle, XCircle, Mail, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 type Status = "pending" | "verifying" | "success" | "error";
@@ -129,9 +129,9 @@ export default function VerifyEmailPage() {
                   <p className="text-gray-600 mb-8">
                     Your account is now active. You can sign in and get started.
                   </p>
-                  <Button asChild className="w-full">
-                    <Link href="/login">Sign in to your account</Link>
-                  </Button>
+                  <Link href="/login" className={buttonVariants({ className: "w-full" })}>
+                    Sign in to your account
+                  </Link>
                 </>
               )}
 
@@ -141,9 +141,9 @@ export default function VerifyEmailPage() {
                   <XCircle className="h-14 w-14 text-red-500 mx-auto mb-4" />
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">Verification failed</h1>
                   <p className="text-gray-600 mb-8">{errorMessage}</p>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/verify-email">Request a new link</Link>
-                  </Button>
+                  <Link href="/verify-email" className={buttonVariants({ variant: "outline", className: "w-full" })}>
+                    Request a new link
+                  </Link>
                 </>
               )}
 
