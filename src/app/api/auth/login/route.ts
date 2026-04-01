@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     // ── Look up patient ─────────────────────────────────────────────────────
     const { data: patient } = await db
       .from("patients")
-      .select("id, email, first_name, last_name, password_hash")
+      .select("id, email, first_name, last_name, password_hash, email_verified")
       .eq("email", emailLower)
       .single();
 
@@ -82,6 +82,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Invalid email or password" },
         { status: 401 }
+      );
+    }
+
+    // ── Block unverified accounts ───────────────────────────────────────────
+    if (!patient.email_verified) {
+      return NextResponse.json(
+        {
+          error: "Please verify your email address before signing in.",
+          emailNotVerified: true,
+        },
+        { status: 403 }
       );
     }
 

@@ -26,7 +26,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   user: User | null;
-  login: (email: string, password: string) => Promise<{ error?: string }>;
+  login: (email: string, password: string) => Promise<{ error?: string; emailNotVerified?: boolean }>;
   register: (payload: RegisterPayload) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  async function login(email: string, password: string): Promise<{ error?: string }> {
+  async function login(email: string, password: string): Promise<{ error?: string; emailNotVerified?: boolean }> {
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
@@ -69,7 +69,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
 
       if (!res.ok) {
-        return { error: data.error ?? "Login failed" };
+        return {
+          error: data.error ?? "Login failed",
+          emailNotVerified: data.emailNotVerified ?? false,
+        };
       }
 
       setUser(data.user);
@@ -94,7 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: data.error ?? "Registration failed" };
       }
 
-      setUser(data.user);
+      // Registration no longer creates a session — email must be verified first.
       return {};
     } catch {
       return { error: "Network error. Please try again." };

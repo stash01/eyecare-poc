@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createHash, randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/server/db";
 
 export const dynamic = "force-dynamic";
 import { encryptHealthCard } from "@/lib/server/crypto";
-import { createSession, setSessionCookie } from "@/lib/server/session";
 import { logAuditEvent } from "@/lib/server/audit";
 import { createJanePatient } from "@/lib/server/jane-client";
+import { sendVerificationEmail } from "@/lib/server/email";
+
+const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 function getClientIp(req: NextRequest): string {
   return (
@@ -95,6 +98,7 @@ export async function POST(req: NextRequest) {
         consent_phipa_timestamp: now,
         consent_terms: true,
         consent_terms_timestamp: now,
+        email_verified: false,
       })
       .select("id, first_name, last_name, email")
       .single();
@@ -125,24 +129,33 @@ export async function POST(req: NextRequest) {
           .eq("id", patient.id);
       }
     } catch (janeError) {
-      // Jane sync failure is non-fatal — patient record already created locally.
-      // Log and continue; Jane sync can be retried via a background job.
       console.error("[register] Jane patient sync failed:", janeError);
     }
 
-    // ── Create session ──────────────────────────────────────────────────────
-    const ipAddress = getClientIp(req);
-    const token = await createSession(
-      {
-        patientId: patient.id,
-        email: patient.email,
-        firstName: patient.first_name,
-        lastName: patient.last_name,
-      },
-      ipAddress
-    );
+    // ── Create email verification token ────────────────────────────────────
+    const rawToken = randomBytes(32).toString("hex");
+    const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+    const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_MS).toISOString();
 
-    setSessionCookie(token);
+    const { error: tokenError } = await db
+      .from("email_verification_tokens")
+      .insert({
+        patient_id: patient.id,
+        token_hash: tokenHash,
+        expires_at: expiresAt,
+      });
+
+    if (tokenError) {
+      console.error("[register] Failed to create verification token:", tokenError);
+    }
+
+    // ── Send verification email (non-fatal) ─────────────────────────────────
+    try {
+      await sendVerificationEmail(patient.email, patient.first_name, rawToken);
+    } catch (emailError) {
+      console.error("[register] Verification email send failed:", emailError);
+      // Non-fatal — patient can request a resend from /verify-email
+    }
 
     // ── Audit log ───────────────────────────────────────────────────────────
     await logAuditEvent(
@@ -151,17 +164,10 @@ export async function POST(req: NextRequest) {
       "register",
       "patient",
       patient.id,
-      ipAddress
+      getClientIp(req)
     );
 
-    return NextResponse.json({
-      user: {
-        id: patient.id,
-        firstName: patient.first_name,
-        lastName: patient.last_name,
-        email: patient.email,
-      },
-    });
+    return NextResponse.json({ emailVerificationSent: true });
   } catch (err) {
     console.error("[register] Unexpected error:", err);
     return NextResponse.json(

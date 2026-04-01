@@ -15,7 +15,10 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState<"patient" | "provider">("patient");
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [emailNotVerified, setEmailNotVerified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResendingVerification, setIsResendingVerification] = useState(false);
+  const [verificationResent, setVerificationResent] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -27,11 +30,14 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
+    setEmailNotVerified(false);
+    setVerificationResent(false);
     setIsSubmitting(true);
     const result = await login(email, password);
     setIsSubmitting(false);
     if (result.error) {
       setLoginError(result.error);
+      setEmailNotVerified(result.emailNotVerified ?? false);
       return;
     }
     if (userType === "provider") {
@@ -39,6 +45,17 @@ export default function LoginPage() {
     } else {
       router.push("/dashboard");
     }
+  };
+
+  const handleResendVerification = async () => {
+    setIsResendingVerification(true);
+    await fetch("/api/auth/resend-verification", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    setIsResendingVerification(false);
+    setVerificationResent(true);
   };
 
   return (
@@ -126,9 +143,29 @@ export default function LoginPage() {
                   </Link>
                 </div>
 
-                {loginError && (
+                {loginError && !emailNotVerified && (
                   <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
                     {loginError}
+                  </div>
+                )}
+
+                {emailNotVerified && (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                    {verificationResent ? (
+                      <p>Verification email sent — check your inbox.</p>
+                    ) : (
+                      <>
+                        <p className="mb-2">Please verify your email address before signing in.</p>
+                        <button
+                          type="button"
+                          onClick={handleResendVerification}
+                          disabled={isResendingVerification}
+                          className="underline font-medium disabled:opacity-50"
+                        >
+                          {isResendingVerification ? "Sending…" : "Resend verification email"}
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
 

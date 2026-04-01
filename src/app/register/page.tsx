@@ -61,7 +61,7 @@ export default function RegisterPage() {
       setSubmitError(result.error);
       return;
     }
-    router.push("/dashboard");
+    router.push("/verify-email");
   };
 
   const isFormValid =
