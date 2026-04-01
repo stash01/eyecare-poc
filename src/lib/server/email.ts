@@ -19,7 +19,7 @@ export async function sendVerificationEmail(
   const resend = getResend();
 
   const { error } = await resend.emails.send({
-    from: "KlaraMD <noreply@klaramd.ca>",
+    from: "KlaraMD <noreply@klaramd.com>",
     to,
     subject: "Verify your KlaraMD email address",
     html: `
@@ -61,7 +61,7 @@ export async function sendPasswordResetEmail(
   const resend = getResend();
 
   const { error } = await resend.emails.send({
-    from: "KlaraMD <noreply@klaramd.ca>",
+    from: "KlaraMD <noreply@klaramd.com>",
     to,
     subject: "Reset your KlaraMD password",
     html: `
