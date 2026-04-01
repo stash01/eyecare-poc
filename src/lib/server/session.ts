@@ -24,12 +24,16 @@ export async function createSession(
   const tokenHash = hashToken(token);
   const expiresAt = new Date(Date.now() + SESSION_DURATION_MS).toISOString();
 
-  await db.from("auth_sessions").insert({
+  const { error } = await db.from("auth_sessions").insert({
     patient_id: payload.patientId,
     token_hash: tokenHash,
     expires_at: expiresAt,
     ip_address: ipAddress,
   });
+
+  if (error) {
+    throw new Error(`Failed to create session: ${error.message}`);
+  }
 
   return token;
 }
