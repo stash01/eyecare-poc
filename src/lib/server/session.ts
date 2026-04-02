@@ -10,6 +10,7 @@ export interface SessionPayload {
   email: string;
   firstName: string;
   lastName: string;
+  isAdmin: boolean;
 }
 
 function hashToken(token: string): string {
@@ -79,7 +80,7 @@ export async function validateSession(): Promise<SessionPayload | null> {
 
   const { data: patient, error: patientError } = await db
     .from("patients")
-    .select("id, email, first_name, last_name")
+    .select("id, email, first_name, last_name, is_admin")
     .eq("id", session.patient_id)
     .single();
 
@@ -90,6 +91,7 @@ export async function validateSession(): Promise<SessionPayload | null> {
     email: patient.email,
     firstName: patient.first_name,
     lastName: patient.last_name,
+    isAdmin: patient.is_admin ?? false,
   };
 }
 

@@ -11,6 +11,7 @@ const PATIENT_PATHS = [
   "/booking",
   "/subscribe",
   "/shop",
+  "/admin",
 ];
 
 // Lightweight format check — full DB validation happens in each API route.

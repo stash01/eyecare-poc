@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     // ── Look up patient ─────────────────────────────────────────────────────
     const { data: patient } = await db
       .from("patients")
-      .select("id, email, first_name, last_name, password_hash, email_verified")
+      .select("id, email, first_name, last_name, password_hash, email_verified, is_admin")
       .eq("email", emailLower)
       .single();
 
@@ -103,6 +103,7 @@ export async function POST(req: NextRequest) {
         email: patient.email,
         firstName: patient.first_name,
         lastName: patient.last_name,
+        isAdmin: patient.is_admin ?? false,
       },
       ipAddress
     );

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Eye, Calendar, Clock, Video, FileText, User, Settings,
   LogOut, ChevronRight, Bell, Pill, Loader2, BookOpen,
-  Activity, ClipboardList, ArrowRight, Stethoscope, UserPlus,
+  Activity, ClipboardList, ArrowRight, Stethoscope, UserPlus, Shield,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
@@ -180,6 +180,15 @@ export default function DashboardPage() {
                     </Link>
                   ))}
                   <div className="pt-1 mt-1 border-t border-stone-100">
+                    {user?.isAdmin && (
+                      <Link
+                        href="/admin"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-amber-700 bg-amber-50 hover:bg-amber-100 font-medium transition-all mb-0.5"
+                      >
+                        <Shield className="h-4 w-4 flex-shrink-0" />
+                        Admin Panel
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-stone-500 hover:bg-red-50 hover:text-red-600 w-full transition-all"

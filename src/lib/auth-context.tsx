@@ -8,6 +8,7 @@ export interface User {
   lastName: string;
   email: string;
   subscriptionPlan: string | null;
+  isAdmin: boolean;
 }
 
 interface RegisterPayload {
