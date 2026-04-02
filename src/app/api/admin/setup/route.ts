@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     const { data, error } = await db
       .from("patients")
-      .update({ password_hash: hash })
+      .update({ password_hash: hash, email_verified: true })
       .eq("email", "admin@klaramd.com")
       .eq("is_admin", true)
       .select("id, email, first_name")
