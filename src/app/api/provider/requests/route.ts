@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
+import { validateProviderSession } from "@/lib/server/provider-session";
 import { db } from "@/lib/server/db";
 
 export const dynamic = "force-dynamic";
 
 // GET /api/provider/requests — all pending consultation requests with patient info and availability
-// NOTE: Provider auth not yet implemented — protected by network/deployment config in POC.
 export async function GET() {
+  const session = await validateProviderSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { data: requests, error } = await db
     .from("consultation_requests")
     .select("id, status, patient_notes, assessment_result_id, patient_id, created_at")
@@ -30,7 +35,7 @@ export async function GET() {
     assessmentIds.length > 0
       ? db
           .from("assessment_results")
-          .select("id, severity, total_score, deq5_score, deq5_positive, has_autoimmune, has_diabetes, has_mgd")
+          .select("id, severity, frequency_score, intensity_score, risk_factor_count, risk_tier")
           .in("id", assessmentIds)
       : Promise.resolve({ data: [] }),
     db

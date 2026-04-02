@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateSession } from "@/lib/server/session";
 import { db } from "@/lib/server/db";
+import { logAuditEvent } from "@/lib/server/audit";
+import { createDailyRoom } from "@/lib/server/daily-co";
 
 export const dynamic = "force-dynamic";
-import { logAuditEvent } from "@/lib/server/audit";
 
 function getClientIp(req: NextRequest): string {
   return (
@@ -13,7 +14,7 @@ function getClientIp(req: NextRequest): string {
   );
 }
 
-// GET /api/appointments — list current patient's appointments
+// GET /api/appointments — list current patient's appointments with provider names
 export async function GET() {
   const session = await validateSession();
   if (!session) {
@@ -22,7 +23,9 @@ export async function GET() {
 
   const { data: appointments, error } = await db
     .from("appointments")
-    .select("id, provider_uuid, scheduled_at, duration_minutes, appointment_type, status, video_room_url")
+    .select(
+      "id, provider_uuid, scheduled_at, duration_minutes, appointment_type, status, video_room_url"
+    )
     .eq("patient_id", session.patientId)
     .order("scheduled_at", { ascending: false });
 
@@ -30,10 +33,34 @@ export async function GET() {
     return NextResponse.json({ error: "Failed to fetch appointments" }, { status: 500 });
   }
 
-  return NextResponse.json({ appointments: appointments ?? [] });
+  // Enrich with provider names
+  const providerIds = Array.from(
+    new Set((appointments ?? []).map((a) => a.provider_uuid).filter(Boolean))
+  );
+  let providerMap: Record<string, { name: string; credentials: string; specialty: string }> = {};
+
+  if (providerIds.length > 0) {
+    const { data: providers } = await db
+      .from("providers")
+      .select("id, name, credentials, specialty")
+      .in("id", providerIds);
+    providerMap = Object.fromEntries((providers ?? []).map((p) => [p.id, p]));
+  }
+
+  const enriched = (appointments ?? []).map((apt) => ({
+    id: apt.id,
+    scheduledAt: apt.scheduled_at,
+    durationMinutes: apt.duration_minutes,
+    appointmentType: apt.appointment_type,
+    status: apt.status,
+    videoRoomUrl: apt.video_room_url,
+    provider: providerMap[apt.provider_uuid] ?? null,
+  }));
+
+  return NextResponse.json({ appointments: enriched });
 }
 
-// POST /api/appointments — book an appointment
+// POST /api/appointments — patient books an appointment
 export async function POST(req: NextRequest) {
   const session = await validateSession();
   if (!session) {
@@ -48,7 +75,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "provider_id and scheduled_at are required" }, { status: 400 });
     }
 
-    // Verify provider exists and is active
     const { data: provider, error: providerError } = await db
       .from("providers")
       .select("id")
@@ -60,7 +86,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Provider not found" }, { status: 404 });
     }
 
-    // Check the slot is still available (basic conflict check)
     const slotEnd = new Date(new Date(scheduled_at).getTime() + duration_minutes * 60_000).toISOString();
     const { data: conflict } = await db
       .from("appointments")
@@ -93,6 +118,19 @@ export async function POST(req: NextRequest) {
     if (insertError || !appointment) {
       console.error("[appointments] Insert error:", insertError);
       return NextResponse.json({ error: "Failed to create appointment" }, { status: 500 });
+    }
+
+    // Create Daily.co video room (no-op if DAILY_API_KEY not set)
+    try {
+      const videoUrl = await createDailyRoom(appointment.id, scheduled_at);
+      if (videoUrl) {
+        await db
+          .from("appointments")
+          .update({ video_room_url: videoUrl })
+          .eq("id", appointment.id);
+      }
+    } catch (videoErr) {
+      console.error("[appointments] Daily.co room creation failed:", videoErr);
     }
 
     await logAuditEvent(

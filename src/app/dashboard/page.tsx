@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,36 +14,36 @@ import { useAuth } from "@/lib/auth-context";
 import { SymptomHistoryWidget } from "@/components/symptom-history-widget";
 import { useSymptomHistory } from "@/lib/symptom-history-context";
 
-const upcomingAppointment = {
-  id: "APT-2024-001234",
-  provider: "Dr. Sarah Chen",
-  credentials: "MD, FRCSC",
-  specialty: "Cornea & Ocular Surface",
-  date: "Monday, Feb 5, 2024",
-  time: "10:30 AM",
-  isJoinable: true,
-};
+interface Appointment {
+  id: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  appointmentType: string;
+  status: string;
+  videoRoomUrl: string | null;
+  provider: { name: string; credentials: string; specialty: string } | null;
+}
 
-const pastAppointments = [
-  {
-    id: "APT-2024-001200",
-    provider: "Dr. Sarah Chen",
-    credentials: "MD, FRCSC",
-    date: "Jan 15, 2024",
-    status: "Completed",
-    hasNotes: true,
-    hasPrescription: true,
-  },
-  {
-    id: "APT-2024-001150",
-    provider: "Dr. James Wilson",
-    credentials: "MD, FRCSC",
-    date: "Dec 20, 2023",
-    status: "Completed",
-    hasNotes: true,
-    hasPrescription: false,
-  },
-];
+function isJoinable(apt: Appointment): boolean {
+  if (apt.status === "in_progress") return true;
+  if (apt.status !== "scheduled") return false;
+  const msUntil = new Date(apt.scheduledAt).getTime() - Date.now();
+  return msUntil <= 30 * 60_000;
+}
+
+function fmtDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-CA", {
+    weekday: "long", month: "short", day: "numeric",
+    timeZone: "America/Toronto",
+  });
+}
+
+function fmtTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString("en-CA", {
+    hour: "numeric", minute: "2-digit", hour12: true,
+    timeZone: "America/Toronto",
+  });
+}
 
 const prescriptions = [
   {
@@ -70,10 +70,28 @@ export default function DashboardPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading, user, logout } = useAuth();
   const { history } = useSymptomHistory();
+  const [upcomingApts, setUpcomingApts] = useState<Appointment[]>([]);
+  const [pastApts, setPastApts] = useState<Appointment[]>([]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.push("/login");
   }, [isLoading, isAuthenticated, router]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    fetch("/api/appointments")
+      .then((r) => r.json())
+      .then((data) => {
+        const all: Appointment[] = data.appointments ?? [];
+        setUpcomingApts(
+          all.filter((a) => a.status === "scheduled" || a.status === "in_progress")
+        );
+        setPastApts(
+          all.filter((a) => ["completed", "cancelled", "no_show"].includes(a.status))
+        );
+      })
+      .catch(() => {});
+  }, [isAuthenticated]);
 
   const handleLogout = () => { logout(); router.push("/"); };
 
@@ -254,47 +272,52 @@ export default function DashboardPage() {
             {/* Symptom History Widget */}
             <SymptomHistoryWidget />
 
-            {/* Upcoming Appointment */}
-            {upcomingAppointment && (
+            {/* Upcoming Appointments */}
+            {upcomingApts.length > 0 && (
               <Card className="border-primary-100 overflow-hidden">
                 <div className="h-1 bg-gradient-to-r from-primary-500 to-primary-400" />
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Clock className="h-4 w-4 text-primary-500" />
-                    Upcoming Appointment
+                    Upcoming Appointments
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between gap-4 flex-wrap">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center flex-shrink-0">
-                        <Stethoscope className="h-6 w-6 text-primary-600" />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-stone-900">{upcomingAppointment.provider}</div>
-                        <div className="text-sm text-stone-500">{upcomingAppointment.specialty}</div>
-                        <div className="text-sm text-primary-600 font-medium mt-0.5">
-                          {upcomingAppointment.date} · {upcomingAppointment.time}
+                <CardContent className="space-y-3">
+                  {upcomingApts.map((apt) => (
+                    <div key={apt.id} className="flex items-center justify-between gap-4 flex-wrap">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center flex-shrink-0">
+                          <Stethoscope className="h-6 w-6 text-primary-600" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-stone-900">
+                            {apt.provider?.name ?? "Specialist"}
+                          </div>
+                          <div className="text-sm text-stone-500">
+                            {apt.provider?.specialty ?? apt.appointmentType}
+                          </div>
+                          <div className="text-sm text-primary-600 font-medium mt-0.5">
+                            {fmtDate(apt.scheduledAt)} · {fmtTime(apt.scheduledAt)}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {upcomingAppointment.isJoinable ? (
-                        <Link href="/consultation">
-                          <Button size="sm" className="gap-2">
+                      <div className="flex items-center gap-2">
+                        {isJoinable(apt) ? (
+                          <Link href={`/consultation?appointment_id=${apt.id}`}>
+                            <Button size="sm" className="gap-2">
+                              <Video className="h-4 w-4" />
+                              Join Now
+                            </Button>
+                          </Link>
+                        ) : (
+                          <Button size="sm" disabled className="gap-2">
                             <Video className="h-4 w-4" />
-                            Join Now
+                            Join (30 min before)
                           </Button>
-                        </Link>
-                      ) : (
-                        <Button size="sm" disabled className="gap-2">
-                          <Video className="h-4 w-4" />
-                          Join (Available 15 min before)
-                        </Button>
-                      )}
-                      <Button variant="secondary" size="sm">Reschedule</Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </CardContent>
               </Card>
             )}
@@ -305,42 +328,44 @@ export default function DashboardPage() {
                 <CardTitle className="text-base">Past Appointments</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  {pastAppointments.map((apt) => (
-                    <div
-                      key={apt.id}
-                      className="flex items-center justify-between p-4 rounded-xl border border-stone-100 hover:bg-stone-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-stone-100 flex items-center justify-center">
-                          <User className="h-4 w-4 text-stone-500" />
+                {pastApts.length === 0 ? (
+                  <p className="text-stone-400 text-sm text-center py-6">No past appointments</p>
+                ) : (
+                  <div className="space-y-2">
+                    {pastApts.map((apt) => (
+                      <div
+                        key={apt.id}
+                        className="flex items-center justify-between p-4 rounded-xl border border-stone-100 hover:bg-stone-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-stone-100 flex items-center justify-center">
+                            <User className="h-4 w-4 text-stone-500" />
+                          </div>
+                          <div>
+                            <div className="font-medium text-stone-900 text-sm">
+                              {apt.provider?.name ?? "Specialist"}
+                            </div>
+                            <div className="text-xs text-stone-400">
+                              {apt.provider?.credentials} · {fmtDate(apt.scheduledAt)}
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="font-medium text-stone-900 text-sm">{apt.provider}</div>
-                          <div className="text-xs text-stone-400">{apt.credentials} · {apt.date}</div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${
+                            apt.status === "completed"
+                              ? "text-emerald-700 bg-emerald-50 border-emerald-100"
+                              : apt.status === "cancelled"
+                              ? "text-stone-500 bg-stone-50 border-stone-100"
+                              : "text-amber-700 bg-amber-50 border-amber-100"
+                          }`}>
+                            {apt.status.replace("_", " ")}
+                          </span>
+                          <ChevronRight className="h-4 w-4 text-stone-300" />
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded-full">
-                          {apt.status}
-                        </span>
-                        {apt.hasNotes && (
-                          <Button variant="ghost" size="sm" className="h-8 px-3 text-xs gap-1">
-                            <FileText className="h-3.5 w-3.5" />
-                            Notes
-                          </Button>
-                        )}
-                        {apt.hasPrescription && (
-                          <Button variant="ghost" size="sm" className="h-8 px-3 text-xs gap-1">
-                            <Pill className="h-3.5 w-3.5" />
-                            Rx
-                          </Button>
-                        )}
-                        <ChevronRight className="h-4 w-4 text-stone-300" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
 

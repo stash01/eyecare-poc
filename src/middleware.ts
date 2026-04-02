@@ -1,50 +1,75 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createHash } from "crypto";
 
-const PROTECTED_PATHS = [
+const PATIENT_SESSION_COOKIE = "klaramd_session";
+const PROVIDER_SESSION_COOKIE = "klaramd_provider_session";
+
+// Paths requiring a patient session
+const PATIENT_PATHS = [
   "/dashboard",
   "/assessment",
   "/assessment-results",
   "/booking",
-  "/consultation",
-  "/provider",
   "/subscribe",
   "/shop",
 ];
 
-const SESSION_COOKIE = "klaramd_session";
-
-function isProtected(pathname: string): boolean {
-  return PROTECTED_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));
+// Lightweight format check — full DB validation happens in each API route.
+// A valid token is a 64-char hex string (32 random bytes).
+function hasValidToken(req: NextRequest, cookieName: string): boolean {
+  const token = req.cookies.get(cookieName)?.value;
+  return !!token && /^[0-9a-f]{64}$/.test(token);
 }
 
-// Lightweight session check in middleware — just verifies the cookie exists and is plausible.
-// Full DB validation happens in each API route via validateSession().
-function hasSessionCookie(req: NextRequest): boolean {
-  const token = req.cookies.get(SESSION_COOKIE)?.value;
-  // A valid session token is a 64-char hex string (32 bytes from randomBytes)
-  return !!token && /^[0-9a-f]{64}$/.test(token);
+function matchesPath(pathname: string, paths: string[]): boolean {
+  return paths.some((p) => pathname === p || pathname.startsWith(p + "/"));
 }
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ── Auth guard on protected routes ────────────────────────────────────────
-  if (isProtected(pathname) && !hasSessionCookie(req)) {
+  const hasPatientSession = hasValidToken(req, PATIENT_SESSION_COOKIE);
+  const hasProviderSession = hasValidToken(req, PROVIDER_SESSION_COOKIE);
+
+  // ── Provider routes (/provider/login is public; everything else requires provider session) ──
+  const isProviderLogin = pathname === "/provider/login";
+  const isProviderRoute =
+    !isProviderLogin && (pathname === "/provider" || pathname.startsWith("/provider/"));
+
+  if (isProviderRoute && !hasProviderSession) {
+    const loginUrl = new URL("/provider/login", req.url);
+    loginUrl.searchParams.set("from", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // ── Patient routes ─────────────────────────────────────────────────────────
+  if (matchesPath(pathname, PATIENT_PATHS) && !hasPatientSession) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // ── Security headers on all responses ─────────────────────────────────────
+  // ── Consultation (either patient or provider session) ──────────────────────
+  const isConsultation =
+    pathname === "/consultation" || pathname.startsWith("/consultation/");
+  if (isConsultation && !hasPatientSession && !hasProviderSession) {
+    const loginUrl = new URL("/login", req.url);
+    loginUrl.searchParams.set("from", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // ── Security headers ───────────────────────────────────────────────────────
   const response = NextResponse.next();
 
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+
+  // Camera + microphone only allowed on /consultation
   response.headers.set(
     "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=()"
+    isConsultation
+      ? "camera=(self), microphone=(self), geolocation=()"
+      : "camera=(), microphone=(), geolocation=()"
   );
 
   if (process.env.NODE_ENV === "production") {
@@ -54,19 +79,17 @@ export function middleware(req: NextRequest) {
     );
   }
 
-  // Content-Security-Policy
-  // Note: 'unsafe-inline' is required by Next.js for style injection.
-  // Tighten script-src once you have a nonce-based CSP setup.
+  // CSP — allow Daily.co frames only on /consultation; block frames elsewhere
   response.headers.set(
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // tighten after nonce setup
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self'",
       "connect-src 'self'",
-      "frame-src 'none'",
+      isConsultation ? "frame-src https://*.daily.co" : "frame-src 'none'",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
