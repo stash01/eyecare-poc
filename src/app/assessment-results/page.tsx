@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,28 +8,22 @@ import {
   Eye,
   ShoppingCart,
   Calendar,
-  AlertTriangle,
-  CheckCircle,
   Loader2,
   Shield,
   ArrowRight,
   User,
+  CheckCircle2,
+  AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useSubscription } from "@/lib/subscription-context";
 import { useCart } from "@/lib/cart-context";
-import { getSeverity, Severity } from "@/lib/assessment-utils";
-import {
-  PRODUCTS,
-  PROVIDERS,
-  PRESCRIPTION_TREATMENTS,
-  PROCEDURAL_TREATMENTS,
-  MGD_INFO,
-  Product,
-} from "@/lib/constants";
+import { getPathway, Severity, RiskTier } from "@/lib/assessment-utils";
+import { PRODUCTS, PROVIDERS, Product } from "@/lib/constants";
 
-const severityConfig: Record<
+const SEVERITY_CONFIG: Record<
   Severity,
   { label: string; color: string; bgColor: string; borderColor: string; description: string }
 > = {
@@ -47,7 +41,7 @@ const severityConfig: Record<
     bgColor: "bg-amber-50",
     borderColor: "border-amber-200",
     description:
-      "Your symptoms suggest moderate dry eye. A combination of OTC products, lid care, and potentially prescription treatments may be beneficial.",
+      "Your symptoms suggest moderate dry eye. A combination of OTC products and prescription treatments may be recommended.",
   },
   severe: {
     label: "Severe",
@@ -55,8 +49,17 @@ const severityConfig: Record<
     bgColor: "bg-red-50",
     borderColor: "border-red-200",
     description:
-      "Your symptoms suggest severe dry eye requiring comprehensive treatment. We strongly recommend a specialist consultation alongside these recommendations.",
+      "Your symptoms suggest severe dry eye requiring comprehensive treatment. A specialist consultation is strongly recommended.",
   },
+};
+
+const RISK_TIER_CONFIG: Record<
+  RiskTier,
+  { label: string; color: string; bgColor: string }
+> = {
+  low: { label: "Low", color: "text-green-700", bgColor: "bg-green-100" },
+  moderate: { label: "Moderate", color: "text-amber-700", bgColor: "bg-amber-100" },
+  high: { label: "High / Poor Response", color: "text-red-700", bgColor: "bg-red-100" },
 };
 
 function getRecommendedProducts(severity: Severity): Product[] {
@@ -76,7 +79,6 @@ function getRecommendedProducts(severity: Severity): Product[] {
       ...supplements.slice(0, 1),
     ];
   }
-  // severe
   return [
     ...artificialTears.slice(0, 3),
     ...warmCompresses,
@@ -87,11 +89,13 @@ function getRecommendedProducts(severity: Severity): Product[] {
 
 export default function AssessmentResultsPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+        </div>
+      }
+    >
       <AssessmentResultsContent />
     </Suspense>
   );
@@ -104,28 +108,25 @@ function AssessmentResultsContent() {
   const { isSubscribed, isLoading: subLoading } = useSubscription();
   const { addItem } = useCart();
 
-  const totalScore = parseInt(searchParams.get("score") || "0");
-  const deq5Score = parseInt(searchParams.get("deq5") || "0");
-  const deq5Positive = searchParams.get("deq5Positive") === "true";
-  const hasAutoimmune = searchParams.get("autoimmune") === "true";
-  const hasDiabetes = searchParams.get("diabetes") === "true";
-  const hasMGD = searchParams.get("mgd") === "true";
-  const hasTriedTreatments = searchParams.get("triedTreatments") === "true";
+  const frequencyScore = parseInt(searchParams.get("frequencyScore") || "0");
+  const intensityScore = parseInt(searchParams.get("intensityScore") || "0");
+  const frequencySeverity = (searchParams.get("frequencySeverity") || "mild") as Severity;
+  const intensitySeverity = (searchParams.get("intensitySeverity") || "mild") as Severity;
+  const riskFactorCount = parseInt(searchParams.get("riskFactorCount") || "0");
+  const riskTier = (searchParams.get("riskTier") || "low") as RiskTier;
+  const severity = (searchParams.get("severity") || "mild") as Severity;
+  const priorTreatment = searchParams.get("priorTreatment") === "true";
 
-  const riskFactorCount = [hasAutoimmune, hasDiabetes, hasTriedTreatments, hasMGD].filter(Boolean).length;
-  const severity = getSeverity(totalScore, deq5Score, deq5Positive, riskFactorCount);
-  const config = severityConfig[severity];
-  const recommendedProducts = useMemo(() => getRecommendedProducts(severity), [severity]);
+  const config = SEVERITY_CONFIG[severity];
+  const riskConfig = RISK_TIER_CONFIG[riskTier];
+  const pathway = getPathway(severity, priorTreatment);
+  const recommendedProducts = getRecommendedProducts(severity);
   const provider = PROVIDERS[0];
 
-  // Auth guard
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push("/register");
-    }
+    if (!authLoading && !isAuthenticated) router.push("/register");
   }, [authLoading, isAuthenticated, router]);
 
-  // Subscription guard
   useEffect(() => {
     if (!authLoading && !subLoading && isAuthenticated && !isSubscribed) {
       router.push(`/subscribe?${searchParams.toString()}`);
@@ -158,67 +159,113 @@ function AssessmentResultsContent() {
 
       <main className="container mx-auto px-4 pb-20">
         <div className="max-w-3xl mx-auto space-y-8">
-          {/* Severity Result */}
+
+          {/* ── Severity & Score Summary ─────────────────────────────── */}
           <Card className={`border-2 ${config.borderColor} ${config.bgColor}`}>
             <CardHeader>
               <CardTitle className="text-2xl text-center">Your Assessment Results</CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
-              <div className={`text-5xl font-bold ${config.color}`}>
-                {config.label}
-              </div>
+              <div className={`text-5xl font-bold ${config.color}`}>{config.label}</div>
               <p className="text-gray-700 max-w-lg mx-auto">{config.description}</p>
 
-              <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto pt-4">
-                <div className="bg-white rounded-lg p-3 border">
-                  <div className="text-2xl font-bold text-gray-900">{totalScore}/40</div>
-                  <div className="text-xs text-gray-500">Total Score</div>
+              {/* Score breakdown */}
+              <div className="grid grid-cols-3 gap-3 max-w-md mx-auto pt-4">
+                <div className="bg-white rounded-lg p-3 border text-center">
+                  <div className="text-xl font-bold text-gray-900">{frequencyScore}<span className="text-sm font-normal text-gray-400">/24</span></div>
+                  <div className="text-xs text-gray-500 mt-0.5">Frequency</div>
+                  <div className={`text-xs font-medium mt-0.5 capitalize ${SEVERITY_CONFIG[frequencySeverity].color}`}>
+                    {frequencySeverity}
+                  </div>
                 </div>
-                <div className="bg-white rounded-lg p-3 border">
-                  <div className="text-2xl font-bold text-gray-900">{deq5Score}/18</div>
-                  <div className="text-xs text-gray-500">DEQ-5 Score</div>
+                <div className="bg-white rounded-lg p-3 border text-center">
+                  <div className="text-xl font-bold text-gray-900">{intensityScore}<span className="text-sm font-normal text-gray-400">/60</span></div>
+                  <div className="text-xs text-gray-500 mt-0.5">Intensity</div>
+                  <div className={`text-xs font-medium mt-0.5 capitalize ${SEVERITY_CONFIG[intensitySeverity].color}`}>
+                    {intensitySeverity}
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg p-3 border text-center">
+                  <div className={`text-xs font-semibold px-2 py-1 rounded-full inline-block mt-1 ${riskConfig.bgColor} ${riskConfig.color}`}>
+                    {riskConfig.label}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">Risk Tier</div>
+                  <div className="text-xs text-gray-400">{riskFactorCount} factor{riskFactorCount !== 1 ? "s" : ""}</div>
                 </div>
               </div>
-
-              {/* Risk Factors */}
-              {riskFactorCount > 0 && (
-                <div className="bg-white rounded-lg p-4 border text-left max-w-md mx-auto">
-                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-amber-500" />
-                    Risk Factors Identified
-                  </h3>
-                  <ul className="space-y-1 text-sm text-gray-700">
-                    {hasAutoimmune && <li>Autoimmune condition</li>}
-                    {hasDiabetes && <li>Diabetes</li>}
-                    {hasMGD && <li>Meibomian gland dysfunction (MGD) indicators</li>}
-                    {hasTriedTreatments && <li>Prior treatments tried without full relief</li>}
-                  </ul>
-                </div>
-              )}
             </CardContent>
           </Card>
 
-          {/* MGD Info */}
-          {hasMGD && (
-            <Card className="border-amber-200 bg-amber-50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg text-amber-800">{MGD_INFO.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-700 mb-3">{MGD_INFO.description}</p>
-                <ul className="grid grid-cols-2 gap-2">
-                  {MGD_INFO.symptoms.map((s, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
-                      <CheckCircle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                      {s}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
+          {/* ── Treatment Pathway ────────────────────────────────────── */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-primary-600" />
+                Your Recommended Pathway
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              {/* Step 1: Review exacerbating causes */}
+              <div className="flex gap-3">
+                <div className="w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                  1
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 text-sm">Review of exacerbating causes and possible modifications</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Your clinician will discuss environmental, lifestyle, and systemic factors that may be contributing to your symptoms.
+                  </p>
+                </div>
+              </div>
 
-          {/* Product Recommendations */}
+              {/* Step 2: First-line treatments */}
+              <div className="flex gap-3">
+                <div className="w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                  2
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900 text-sm mb-2">
+                    {priorTreatment ? "Prescription treatment recommendations" : "First-line treatment recommendations"}
+                  </p>
+                  <ul className="space-y-1.5">
+                    {pathway.firstLine.map((item, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm text-gray-700">
+                        <CheckCircle2 className="h-4 w-4 text-teal-600 flex-shrink-0" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Step 3: Poor response escalation */}
+              <div className="flex gap-3">
+                <div className="w-7 h-7 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                  <RefreshCw className="h-3.5 w-3.5" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900 text-sm mb-2">
+                    If poor response — consider
+                  </p>
+                  <ul className="space-y-1.5">
+                    {pathway.poorResponse.map((item, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
+                        <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <p className="text-xs text-gray-400 pt-2 border-t">
+                Treatment recommendations are generated by KlaraMD clinical decision support and must
+                be reviewed and confirmed by your treating ophthalmologist.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* ── Product Recommendations ──────────────────────────────── */}
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Recommended Products for {config.label} Dry Eye
@@ -247,11 +294,7 @@ function AssessmentResultsContent() {
                           )}
                         </div>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => addItem(product)}
-                      >
+                      <Button size="sm" variant="secondary" onClick={() => addItem(product)}>
                         <ShoppingCart className="h-3 w-3 mr-1" />
                         Add
                       </Button>
@@ -269,57 +312,7 @@ function AssessmentResultsContent() {
             </div>
           </div>
 
-          {/* Prescription Suggestions (moderate+) */}
-          {(severity === "moderate" || severity === "severe") && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Prescription Treatments to Discuss</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-500 mb-4">
-                  These prescription treatments may be beneficial for your condition. Discuss with your ophthalmologist.
-                </p>
-                <div className="space-y-3">
-                  {PRESCRIPTION_TREATMENTS.map((rx, idx) => (
-                    <div key={idx} className="p-3 border rounded-lg">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-semibold text-gray-900 text-sm">{rx.name}</h4>
-                        <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
-                          {rx.category}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-600">{rx.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Procedural Treatments (severe only) */}
-          {severity === "severe" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Procedural Treatments</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-500 mb-4">
-                  For severe dry eye, these in-office procedures can provide significant relief.
-                </p>
-                <div className="space-y-3">
-                  {PROCEDURAL_TREATMENTS.map((proc, idx) => (
-                    <div key={idx} className="p-3 border rounded-lg">
-                      <h4 className="font-semibold text-gray-900 text-sm mb-1">{proc.name}</h4>
-                      <p className="text-xs text-gray-600 mb-1">{proc.description}</p>
-                      <p className="text-xs text-primary-600 italic">{proc.clinicalNote}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Book Consultation CTA */}
+          {/* ── Book Consultation CTA ─────────────────────────────────── */}
           <Card className="border-primary-300 bg-primary-50">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
@@ -347,9 +340,7 @@ function AssessmentResultsContent() {
                       </Button>
                     </Link>
                     <Link href="/dashboard">
-                      <Button variant="secondary">
-                        Return to Dashboard
-                      </Button>
+                      <Button variant="secondary">Return to Dashboard</Button>
                     </Link>
                   </div>
                 </div>
@@ -359,7 +350,7 @@ function AssessmentResultsContent() {
 
           <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
             <Shield className="h-4 w-4" />
-            <span>Recommendations based on TFOS DEWS II clinical guidelines</span>
+            <span>Recommendations based on real clinical pathways</span>
           </div>
         </div>
       </main>

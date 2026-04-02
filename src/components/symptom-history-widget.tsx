@@ -27,24 +27,24 @@ export function TrendChart({ entries }: { entries: AssessmentResult[] }) {
   const PAD_BOTTOM = 20;
   const chartW = W - PAD_X * 2;
   const chartH = H - PAD_TOP - PAD_BOTTOM;
-  const maxY = 40;
+  const maxY = 24; // frequency score max
 
   const toX = (i: number) =>
     PAD_X + (recent.length === 1 ? chartW / 2 : (i / (recent.length - 1)) * chartW);
   const toY = (score: number) =>
     PAD_TOP + chartH - (score / maxY) * chartH;
 
-  const points = recent.map((e, i) => `${toX(i)},${toY(e.score)}`).join(" ");
+  const points = recent.map((e, i) => `${toX(i)},${toY(e.frequencyScore ?? 0)}`).join(" ");
 
   // Area fill path
   const areaPath =
-    `M ${toX(0)},${toY(recent[0].score)} ` +
-    recent.map((e, i) => `L ${toX(i)},${toY(e.score)}`).join(" ") +
+    `M ${toX(0)},${toY(recent[0].frequencyScore ?? 0)} ` +
+    recent.map((e, i) => `L ${toX(i)},${toY(e.frequencyScore ?? 0)}`).join(" ") +
     ` L ${toX(recent.length - 1)},${PAD_TOP + chartH} L ${toX(0)},${PAD_TOP + chartH} Z`;
 
-  // Threshold lines
-  const mildY = toY(15);
-  const modY = toY(28);
+  // Threshold lines (mild ≤4, moderate 5–12, severe 13+)
+  const mildY = toY(4);
+  const modY = toY(12);
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full" aria-label="Symptom score trend chart">
@@ -58,8 +58,8 @@ export function TrendChart({ entries }: { entries: AssessmentResult[] }) {
       <line x1={PAD_X} y1={modY} x2={W - PAD_X} y2={modY} stroke="#d1d5db" strokeDasharray="4 2" strokeWidth="1" />
 
       {/* Threshold labels */}
-      <text x={PAD_X - 4} y={mildY + 3} textAnchor="end" fontSize="8" fill="#9ca3af">15</text>
-      <text x={PAD_X - 4} y={modY + 3} textAnchor="end" fontSize="8" fill="#9ca3af">28</text>
+      <text x={PAD_X - 4} y={mildY + 3} textAnchor="end" fontSize="8" fill="#9ca3af">4</text>
+      <text x={PAD_X - 4} y={modY + 3} textAnchor="end" fontSize="8" fill="#9ca3af">12</text>
 
       {/* Area fill */}
       <path d={areaPath} fill="#3b82f6" opacity="0.1" />
@@ -69,7 +69,7 @@ export function TrendChart({ entries }: { entries: AssessmentResult[] }) {
 
       {/* Data points */}
       {recent.map((e, i) => (
-        <circle key={e.id} cx={toX(i)} cy={toY(e.score)} r="3" fill="#3b82f6" stroke="white" strokeWidth="1.5" />
+        <circle key={e.id} cx={toX(i)} cy={toY(e.frequencyScore ?? 0)} r="3" fill="#3b82f6" stroke="white" strokeWidth="1.5" />
       ))}
 
       {/* X-axis date labels */}
@@ -88,8 +88,8 @@ export function TrendChart({ entries }: { entries: AssessmentResult[] }) {
 
 function TrendIndicator({ entries }: { entries: AssessmentResult[] }) {
   if (entries.length < 2) return null;
-  const prev = entries[entries.length - 2].score;
-  const curr = entries[entries.length - 1].score;
+  const prev = entries[entries.length - 2].frequencyScore ?? 0;
+  const curr = entries[entries.length - 1].frequencyScore ?? 0;
   const diff = curr - prev;
 
   if (diff < 0) {
@@ -162,8 +162,8 @@ export function SymptomHistoryWidget() {
           {/* Latest result summary */}
           <div className="flex items-center justify-between text-sm">
             <div className="text-gray-600">
-              Latest score: <span className="font-semibold text-gray-900">{latestResult.score}/40</span>
-              <span className="text-gray-400 ml-2">(DEQ-5: {latestResult.deq5}/18)</span>
+              Frequency: <span className="font-semibold text-gray-900">{latestResult.frequencyScore ?? 0}/24</span>
+              <span className="text-gray-400 ml-2">(Intensity: {latestResult.intensityScore ?? 0}/60)</span>
             </div>
             <div className="text-gray-400 text-xs">{formatDate(latestResult.timestamp)}</div>
           </div>

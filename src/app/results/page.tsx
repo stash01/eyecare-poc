@@ -15,7 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
-import { Severity, getSeverity } from "@/lib/assessment-utils";
+import { Severity } from "@/lib/assessment-utils";
 
 interface SeverityConfig {
   level: Severity;
@@ -77,20 +77,7 @@ const severityConfigs: Record<Severity, SeverityConfig> = {
 
 function ResultsContent() {
   const searchParams = useSearchParams();
-  const totalScore = parseInt(searchParams.get("score") || "0", 10);
-  const deq5Score = parseInt(searchParams.get("deq5") || "0", 10);
-  const deq5Positive = searchParams.get("deq5Positive") === "true";
-
-  // Parse risk factor flags
-  const hasAutoimmune = searchParams.get("autoimmune") === "true";
-  const hasDiabetes = searchParams.get("diabetes") === "true";
-  const hasTriedTreatments = searchParams.get("triedTreatments") === "true";
-  const hasMGD = searchParams.get("mgd") === "true";
-
-  // Count risk factors
-  const riskFactorCount = [hasAutoimmune, hasDiabetes, hasTriedTreatments, hasMGD].filter(Boolean).length;
-
-  const severity = getSeverity(totalScore, deq5Score, deq5Positive, riskFactorCount);
+  const severity = (searchParams.get("severity") || "mild") as Severity;
   const config = severityConfigs[severity];
   const Icon = config.icon;
 
@@ -120,19 +107,8 @@ function ResultsContent() {
               <p className="text-gray-700 mb-4">{config.description}</p>
               <div className="flex flex-col gap-1 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium">DEQ-5 Score:</span>
-                  <span className={`font-bold ${config.color}`}>{deq5Score}/18</span>
-                  {deq5Positive && (
-                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded">
-                      Above clinical threshold
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <span>Total symptom score: {totalScore}</span>
-                  {riskFactorCount > 0 && (
-                    <span>• {riskFactorCount} risk factor{riskFactorCount > 1 ? "s" : ""} identified</span>
-                  )}
+                  <span className="font-medium">Severity:</span>
+                  <span className={`font-bold capitalize ${config.color}`}>{severity}</span>
                 </div>
               </div>
             </div>
@@ -151,7 +127,7 @@ function ResultsContent() {
       </Card>
 
       <div className="space-y-4">
-        <Link href={`/recommendations?severity=${severity}&score=${totalScore}&deq5=${deq5Score}&mgd=${hasMGD}`} className="block">
+        <Link href={`/recommendations?severity=${severity}`} className="block">
           <Button
             size="lg"
             className="w-full justify-between"

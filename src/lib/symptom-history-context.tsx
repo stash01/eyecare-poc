@@ -1,20 +1,31 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { Severity } from "./assessment-utils";
+import { Severity, RiskTier } from "./assessment-utils";
 import { useAuth } from "./auth-context";
 
 export interface AssessmentResult {
   id: string;
   timestamp: string;
-  score: number;
-  deq5: number;
-  deq5Positive: boolean;
+  // Scores
+  frequencyScore: number;
+  intensityScore: number;
+  frequencySeverity: Severity;
+  intensitySeverity: Severity;
+  riskFactorCount: number;
+  riskTier: RiskTier;
   severity: Severity;
-  autoimmune: boolean;
-  diabetes: boolean;
-  mgd: boolean;
-  triedTreatments: boolean;
+  priorTreatment: boolean;
+  // Per-symptom detail
+  symptomFrequencies: Record<string, number>;
+  symptomIntensities: Record<string, number>;
+  // History
+  ocularConditions: string[];
+  medicalConditions: string[];
+  pastFailedTreatments: string[];
+  currentTreatments: string[];
+  // Raw
+  rawAnswers: Record<string, unknown>;
 }
 
 interface SymptomHistoryContextType {
@@ -32,7 +43,6 @@ export function SymptomHistoryProvider({ children }: { children: ReactNode }) {
   const [history, setHistory] = useState<AssessmentResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load assessment history from the server when authenticated
   useEffect(() => {
     if (!isAuthenticated) {
       setHistory([]);
@@ -53,16 +63,7 @@ export function SymptomHistoryProvider({ children }: { children: ReactNode }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "same-origin",
-      body: JSON.stringify({
-        score: result.score,
-        deq5: result.deq5,
-        deq5Positive: result.deq5Positive,
-        severity: result.severity,
-        autoimmune: result.autoimmune,
-        diabetes: result.diabetes,
-        mgd: result.mgd,
-        triedTreatments: result.triedTreatments,
-      }),
+      body: JSON.stringify(result),
     });
 
     if (!res.ok) {
@@ -71,7 +72,6 @@ export function SymptomHistoryProvider({ children }: { children: ReactNode }) {
 
     const data = await res.json();
 
-    // Optimistically add to local state
     const newResult: AssessmentResult = {
       ...result,
       id: data.assessment.id,

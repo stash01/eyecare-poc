@@ -142,38 +142,33 @@ export default function SymptomTrackerPage() {
                       <thead>
                         <tr className="border-b text-left">
                           <th className="pb-3 font-medium text-gray-500">Date</th>
-                          <th className="pb-3 font-medium text-gray-500">Score</th>
-                          <th className="pb-3 font-medium text-gray-500">DEQ-5</th>
+                          <th className="pb-3 font-medium text-gray-500">Frequency</th>
+                          <th className="pb-3 font-medium text-gray-500">Intensity</th>
                           <th className="pb-3 font-medium text-gray-500">Severity</th>
-                          <th className="pb-3 font-medium text-gray-500">Risk Factors</th>
+                          <th className="pb-3 font-medium text-gray-500">Risk Tier</th>
                         </tr>
                       </thead>
                       <tbody>
                         {sortedHistory.map((result) => {
                           const badge = severityBadge[result.severity];
-                          const risks = [
-                            result.autoimmune && "Autoimmune",
-                            result.diabetes && "Diabetes",
-                            result.mgd && "MGD",
-                          ].filter(Boolean);
                           return (
                             <tr key={result.id} className="border-b last:border-0">
                               <td className="py-3 text-gray-900">
                                 {formatDateTime(result.timestamp)}
                               </td>
                               <td className="py-3 font-medium text-gray-900">
-                                {result.score}/40
+                                {result.frequencyScore ?? "—"}<span className="text-gray-400 text-xs">/24</span>
                               </td>
                               <td className="py-3 text-gray-600">
-                                {result.deq5}/18
+                                {result.intensityScore ?? "—"}<span className="text-gray-400 text-xs">/60</span>
                               </td>
                               <td className="py-3">
                                 <span className={`text-xs font-medium px-2 py-0.5 rounded ${badge.className}`}>
                                   {badge.label}
                                 </span>
                               </td>
-                              <td className="py-3 text-gray-600">
-                                {risks.length > 0 ? risks.join(", ") : "None"}
+                              <td className="py-3 text-gray-600 capitalize">
+                                {result.riskTier ?? "—"}
                               </td>
                             </tr>
                           );
