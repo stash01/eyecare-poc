@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateSession } from "@/lib/server/session";
 import { db } from "@/lib/server/db";
 import { logAuditEvent } from "@/lib/server/audit";
+import { sendAppointmentConfirmation } from "@/lib/server/email";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,7 @@ export async function PATCH(
   // Verify provider exists and is active
   const { data: provider } = await db
     .from("providers")
-    .select("id, name")
+    .select("id, name, email, credentials")
     .eq("id", provider_id)
     .eq("active", true)
     .single();
@@ -57,6 +58,37 @@ export async function PATCH(
     getClientIp(req),
     { new_provider_id: provider_id, new_provider_name: provider.name }
   );
+
+  // Send update emails to patient and new provider
+  try {
+    const { data: appt } = await db
+      .from("appointments")
+      .select("patient_id, scheduled_at, duration_minutes, video_room_url")
+      .eq("id", params.id)
+      .single();
+
+    if (appt) {
+      const { data: patientRow } = await db
+        .from("patients")
+        .select("email, first_name, last_name")
+        .eq("id", appt.patient_id)
+        .single();
+
+      if (patientRow) {
+        await sendAppointmentConfirmation({
+          appointmentId: params.id,
+          scheduledAt: appt.scheduled_at,
+          durationMinutes: appt.duration_minutes,
+          videoRoomUrl: appt.video_room_url ?? null,
+          patient: { email: patientRow.email, firstName: patientRow.first_name, lastName: patientRow.last_name },
+          provider: { email: provider.email ?? "", name: provider.name, credentials: provider.credentials ?? "" },
+          isUpdate: true,
+        });
+      }
+    }
+  } catch (emailErr) {
+    console.error("[admin/appointments/provider] Update email failed:", emailErr);
+  }
 
   return NextResponse.json({ ok: true, providerName: provider.name });
 }

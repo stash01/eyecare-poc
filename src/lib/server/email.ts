@@ -73,12 +73,15 @@ export async function sendAppointmentConfirmation(params: {
   videoRoomUrl: string | null;
   patient: { email: string; firstName: string; lastName: string };
   provider: { email: string; name: string; credentials: string };
+  isUpdate?: boolean;
 }): Promise<void> {
   const resend = getResend();
-  const { appointmentId, scheduledAt, durationMinutes, videoRoomUrl, patient, provider } = params;
+  const { appointmentId, scheduledAt, durationMinutes, videoRoomUrl, patient, provider, isUpdate } = params;
 
   const formattedDate = formatDateTime(scheduledAt);
-  const subject = `Your KlaraMD appointment – ${formattedDate}`;
+  const subject = isUpdate
+    ? `Your KlaraMD appointment has been updated – ${formattedDate}`
+    : `Your KlaraMD appointment – ${formattedDate}`;
   const meetingSection = videoRoomUrl
     ? `<div style="margin:24px 0;text-align:center">
         <a href="${videoRoomUrl}" style="background:#0f6fd8;color:#fff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:600;display:inline-block">
@@ -121,7 +124,7 @@ export async function sendAppointmentConfirmation(params: {
   const patientHtml = `
     <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;color:#111">
       <h1 style="font-size:22px;margin-bottom:8px">Hi ${patient.firstName},</h1>
-      <p style="color:#444;line-height:1.6">Your KlaraMD appointment has been confirmed.</p>
+      <p style="color:#444;line-height:1.6">${isUpdate ? "Your KlaraMD appointment has been updated. Here are the latest details." : "Your KlaraMD appointment has been confirmed."}</p>
       <table style="width:100%;border-collapse:collapse;margin:20px 0">
         <tr><td style="padding:8px 0;color:#666;font-size:13px;width:120px">Provider</td><td style="padding:8px 0;font-weight:600">${provider.name}${provider.credentials ? ", " + provider.credentials : ""}</td></tr>
         <tr><td style="padding:8px 0;color:#666;font-size:13px">Date &amp; Time</td><td style="padding:8px 0;font-weight:600">${formattedDate}</td></tr>
@@ -136,8 +139,8 @@ export async function sendAppointmentConfirmation(params: {
 
   const providerHtml = `
     <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;color:#111">
-      <h1 style="font-size:22px;margin-bottom:8px">Appointment confirmed</h1>
-      <p style="color:#444;line-height:1.6">A new appointment has been scheduled.</p>
+      <h1 style="font-size:22px;margin-bottom:8px">${isUpdate ? "Appointment updated" : "Appointment confirmed"}</h1>
+      <p style="color:#444;line-height:1.6">${isUpdate ? "An appointment has been reassigned to you." : "A new appointment has been scheduled."}</p>
       <table style="width:100%;border-collapse:collapse;margin:20px 0">
         <tr><td style="padding:8px 0;color:#666;font-size:13px;width:120px">Patient</td><td style="padding:8px 0;font-weight:600">${patient.firstName} ${patient.lastName}</td></tr>
         <tr><td style="padding:8px 0;color:#666;font-size:13px">Date &amp; Time</td><td style="padding:8px 0;font-weight:600">${formattedDate}</td></tr>
