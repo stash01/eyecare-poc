@@ -4,7 +4,7 @@ import { db } from "@/lib/server/db";
 export const dynamic = "force-dynamic";
 
 // GET /api/availability?provider_id=UUID&date=YYYY-MM-DD
-// Returns available 30-min slot ISO strings for the given provider and date.
+// Returns available slot ISO strings for the given provider and date.
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const providerId = searchParams.get("provider_id");

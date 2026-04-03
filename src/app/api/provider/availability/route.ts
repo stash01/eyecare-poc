@@ -25,7 +25,7 @@ export async function GET() {
 }
 
 // PUT /api/provider/availability — replaces all availability rows for the provider
-// Body: { availability: [{ dayOfWeek: 0-6, startTime: "HH:MM", endTime: "HH:MM", slotMinutes: 30 }] }
+// Body: { availability: [{ dayOfWeek: 0-6, startTime: "HH:MM", endTime: "HH:MM", slotMinutes: 15 }] }
 export async function PUT(req: NextRequest) {
   const session = await validateProviderSession();
   if (!session) {
@@ -56,7 +56,7 @@ export async function PUT(req: NextRequest) {
     day_of_week: a.dayOfWeek,
     start_time: a.startTime,
     end_time: a.endTime,
-    slot_minutes: a.slotMinutes ?? 30,
+    slot_minutes: a.slotMinutes ?? 15,
   }));
 
   const { error: insertError } = await db.from("provider_availability").insert(rows);

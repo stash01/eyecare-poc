@@ -113,7 +113,7 @@ function fmtDateTime(iso: string) {
   });
 }
 
-function generateSlots(from: string, until: string, durMin = 30): string[] {
+function generateSlots(from: string, until: string, durMin = 15): string[] {
   const slots: string[] = [];
   let cur = new Date(from).getTime();
   const end = new Date(until).getTime();
@@ -170,7 +170,7 @@ function AdminRequestCard({
           consultation_request_id: request.id,
           provider_id: selectedProvider,
           scheduled_at: selectedSlot,
-          duration_minutes: 30,
+          duration_minutes: 15,
         }),
       });
       const data = await res.json();
@@ -252,7 +252,7 @@ function AdminRequestCard({
         {/* Slot picker */}
         {selectedBlock && (
           <div className="mb-4">
-            <p className="text-xs font-medium text-stone-600 uppercase tracking-wide mb-2">Select Slot (30 min)</p>
+            <p className="text-xs font-medium text-stone-600 uppercase tracking-wide mb-2">Select Slot (15 min)</p>
             {slots.length === 0 ? (
               <p className="text-sm text-stone-400">No slots in this window.</p>
             ) : (

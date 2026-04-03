@@ -104,7 +104,7 @@ function formatBlock(from: string, until: string) {
   return `${dateStr} · ${fromStr} – ${untilStr}`;
 }
 
-function generateSlotsWithinBlock(from: string, until: string, durationMin = 30): string[] {
+function generateSlotsWithinBlock(from: string, until: string, durationMin = 15): string[] {
   const slots: string[] = [];
   let cur = new Date(from).getTime();
   const end = new Date(until).getTime();
@@ -171,7 +171,7 @@ function RequestCard({ request, providerId, onBooked }: {
           consultation_request_id: request.id,
           provider_id: providerId,
           scheduled_at: selectedSlot,
-          duration_minutes: 30,
+          duration_minutes: 15,
         }),
       });
       const data = await res.json();
@@ -270,7 +270,7 @@ function RequestCard({ request, providerId, onBooked }: {
         {/* Slot picker */}
         {selectedBlock && (
           <div className="mb-4">
-            <p className="text-sm font-medium text-gray-700 mb-2">Select a 30-min slot:</p>
+            <p className="text-sm font-medium text-gray-700 mb-2">Select a 15-min slot:</p>
             {slots.length === 0 ? (
               <p className="text-sm text-gray-400">No slots available in this block.</p>
             ) : (
@@ -366,7 +366,7 @@ export default function ProviderDashboard() {
       const data = await res.json();
       const initial: Record<number, DayEdit> = {};
       DAYS.forEach((d) => {
-        initial[d.value] = { enabled: false, startTime: "09:00", endTime: "17:00", slotMinutes: 30 };
+        initial[d.value] = { enabled: false, startTime: "09:00", endTime: "17:00", slotMinutes: 15 };
       });
       (data.availability ?? []).forEach((row: { day_of_week: number; start_time: string; end_time: string; slot_minutes: number }) => {
         initial[row.day_of_week] = {
@@ -381,7 +381,7 @@ export default function ProviderDashboard() {
       // init defaults on error
       const initial: Record<number, DayEdit> = {};
       DAYS.forEach((d) => {
-        initial[d.value] = { enabled: false, startTime: "09:00", endTime: "17:00", slotMinutes: 30 };
+        initial[d.value] = { enabled: false, startTime: "09:00", endTime: "17:00", slotMinutes: 15 };
       });
       setAvailEdit(initial);
     } finally {

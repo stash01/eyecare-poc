@@ -3,6 +3,7 @@ import { validateProviderSession } from "@/lib/server/provider-session";
 import { db } from "@/lib/server/db";
 import { logAuditEvent } from "@/lib/server/audit";
 import { createDailyRoom } from "@/lib/server/daily-co";
+import { sendAppointmentConfirmation } from "@/lib/server/email";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { consultation_request_id, provider_id, scheduled_at, duration_minutes = 30 } = body;
+    const { consultation_request_id, provider_id, scheduled_at, duration_minutes = 15 } = body;
 
     if (!consultation_request_id || !provider_id || !scheduled_at) {
       return NextResponse.json(
@@ -93,8 +94,9 @@ export async function POST(req: NextRequest) {
       .eq("id", consultation_request_id);
 
     // Create Daily.co video room (no-op if DAILY_API_KEY not set)
+    let videoUrl: string | null = null;
     try {
-      const videoUrl = await createDailyRoom(appointment.id, scheduled_at);
+      videoUrl = await createDailyRoom(appointment.id, scheduled_at);
       if (videoUrl) {
         await db
           .from("appointments")
@@ -113,6 +115,26 @@ export async function POST(req: NextRequest) {
       appointment.id,
       getClientIp(req)
     );
+
+    // Send confirmation emails (fire-and-forget — never block the booking response)
+    try {
+      const [{ data: patientRow }, { data: providerRow }] = await Promise.all([
+        db.from("patients").select("email, first_name, last_name").eq("id", request.patient_id).single(),
+        db.from("providers").select("email, name, credentials").eq("id", provider_id).single(),
+      ]);
+      if (patientRow && providerRow && providerRow.email) {
+        await sendAppointmentConfirmation({
+          appointmentId: appointment.id,
+          scheduledAt: scheduled_at,
+          durationMinutes: duration_minutes,
+          videoRoomUrl: videoUrl,
+          patient: { email: patientRow.email, firstName: patientRow.first_name, lastName: patientRow.last_name },
+          provider: { email: providerRow.email, name: providerRow.name, credentials: providerRow.credentials ?? "" },
+        });
+      }
+    } catch (emailErr) {
+      console.error("[provider/appointments] Confirmation email failed:", emailErr);
+    }
 
     return NextResponse.json({ appointment: { id: appointment.id } }, { status: 201 });
   } catch (err) {
