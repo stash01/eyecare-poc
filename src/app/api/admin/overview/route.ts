@@ -32,7 +32,8 @@ export async function GET() {
       .limit(200),
     db
       .from("providers")
-      .select("id, name"),
+      .select("id, name, credentials, specialty")
+      .eq("active", true),
   ]);
 
   const patientMap = Object.fromEntries(
@@ -73,12 +74,20 @@ export async function GET() {
     })),
     appointments: (appointments ?? []).map((a) => ({
       id: a.id,
+      patientId: a.patient_id,
+      providerId: a.provider_uuid,
       patientName: patientMap[a.patient_id] ?? "Unknown",
       providerName: providerMap[a.provider_uuid] ?? "Unknown",
       scheduledAt: a.scheduled_at,
       appointmentType: a.appointment_type,
       status: a.status,
       videoRoomUrl: a.video_room_url,
+    })),
+    providers: (providers ?? []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      credentials: p.credentials,
+      specialty: p.specialty,
     })),
   });
 }
