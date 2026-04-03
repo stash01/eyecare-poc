@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
         db.from("patients").select("email, first_name, last_name").eq("id", request.patient_id).single(),
         db.from("providers").select("email, name, credentials").eq("id", provider_id).single(),
       ]);
-      if (patientRow && providerRow && providerRow.email) {
+      if (patientRow && providerRow) {
         await sendAppointmentConfirmation({
           appointmentId: appointment.id,
           scheduledAt: scheduled_at,

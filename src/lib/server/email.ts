@@ -150,7 +150,7 @@ export async function sendAppointmentConfirmation(params: {
     </div>
   `;
 
-  await Promise.all([
+  const sends = [
     resend.emails.send({
       from: "KlaraMD <noreply@klaramd.com>",
       to: patient.email,
@@ -158,14 +158,21 @@ export async function sendAppointmentConfirmation(params: {
       html: patientHtml,
       attachments: [icsAttachment(patientIcs)],
     }),
-    resend.emails.send({
-      from: "KlaraMD <noreply@klaramd.com>",
-      to: provider.email,
-      subject,
-      html: providerHtml,
-      attachments: [icsAttachment(providerIcs)],
-    }),
-  ]);
+  ];
+
+  if (provider.email) {
+    sends.push(
+      resend.emails.send({
+        from: "KlaraMD <noreply@klaramd.com>",
+        to: provider.email,
+        subject,
+        html: providerHtml,
+        attachments: [icsAttachment(providerIcs)],
+      })
+    );
+  }
+
+  await Promise.all(sends);
 }
 
 export async function sendAppointmentReminder(params: {

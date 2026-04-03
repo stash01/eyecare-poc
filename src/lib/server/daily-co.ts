@@ -15,7 +15,9 @@ export async function createDailyRoom(
     return null;
   }
 
-  const expireAt = Math.floor(new Date(scheduledAt).getTime() / 1000) + 2 * 60 * 60; // +2 hours
+  const appointmentUnix = Math.floor(new Date(scheduledAt).getTime() / 1000);
+  const nowUnix = Math.floor(Date.now() / 1000);
+  const expireAt = Math.max(appointmentUnix, nowUnix) + 2 * 60 * 60; // +2 hours from appointment or now, whichever is later
 
   try {
     const res = await fetch(`${DAILY_API_BASE}/rooms`, {
