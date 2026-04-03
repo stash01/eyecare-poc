@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import {
   Eye, Users, ClipboardList, Calendar, Video, Shield,
   ArrowLeft, Loader2, ExternalLink, AlertCircle, CheckCircle,
-  UserCheck,
+  UserCheck, Pencil, X,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -42,6 +42,7 @@ interface AdminAppointment {
   patientName: string;
   providerName: string;
   scheduledAt: string;
+  durationMinutes: number;
   appointmentType: string;
   status: string;
   videoRoomUrl: string | null;
@@ -137,6 +138,184 @@ function fmtBlock(from: string, until: string) {
   const fromT = f.toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/Toronto" });
   const untilT = u.toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/Toronto" });
   return `${date} · ${fromT}–${untilT}`;
+}
+
+// ─── Edit Appointment Modal ───────────────────────────────────────────────────
+
+function EditAppointmentModal({
+  appointment,
+  providers,
+  onClose,
+  onSaved,
+}: {
+  appointment: AdminAppointment;
+  providers: Provider[];
+  onClose: () => void;
+  onSaved: (updated: Partial<AdminAppointment>) => void;
+}) {
+  // Parse existing scheduled_at into local date + time inputs
+  const existingDate = new Date(appointment.scheduledAt);
+  const toLocalDate = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const toLocalTime = (d: Date) =>
+    `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+
+  const [date, setDate] = useState(toLocalDate(existingDate));
+  const [time, setTime] = useState(toLocalTime(existingDate));
+  const [providerId, setProviderId] = useState(appointment.providerId);
+  const [duration, setDuration] = useState(String(appointment.durationMinutes));
+  const [apptType, setApptType] = useState(appointment.appointmentType);
+  const [status, setStatus] = useState(appointment.status);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      // Build ISO UTC from local date + time (treat input as America/Toronto)
+      const localIso = `${date}T${time}:00`;
+      const scheduledAt = new Date(localIso).toISOString();
+
+      const res = await fetch(`/api/admin/appointments/${appointment.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scheduled_at: scheduledAt,
+          provider_id: providerId,
+          duration_minutes: Number(duration),
+          appointment_type: apptType,
+          status,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? "Failed to save"); return; }
+
+      const newProvider = providers.find((p) => p.id === providerId);
+      onSaved({
+        scheduledAt,
+        durationMinutes: Number(duration),
+        providerId,
+        providerName: newProvider?.name ?? appointment.providerName,
+        appointmentType: apptType,
+        status,
+      });
+      onClose();
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-semibold text-stone-900 text-base">Edit Appointment</h2>
+          <button onClick={onClose} className="text-stone-400 hover:text-stone-600">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="text-sm text-stone-500 mb-5">
+          Patient: <span className="font-medium text-stone-900">{appointment.patientName}</span>
+        </div>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-stone-600 mb-1">Date</label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-stone-600 mb-1">Time (ET)</label>
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-stone-600 mb-1">Provider</label>
+            <select
+              value={providerId}
+              onChange={(e) => setProviderId(e.target.value)}
+              className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              {providers.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}{p.credentials ? `, ${p.credentials}` : ""}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-stone-600 mb-1">Duration</label>
+              <select
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="15">15 min</option>
+                <option value="30">30 min</option>
+                <option value="45">45 min</option>
+                <option value="60">60 min</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-stone-600 mb-1">Type</label>
+              <select
+                value={apptType}
+                onChange={(e) => setApptType(e.target.value)}
+                className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="new_patient">New Patient</option>
+                <option value="follow_up">Follow Up</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-stone-600 mb-1">Status</label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="scheduled">Scheduled</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="no_show">No Show</option>
+            </select>
+          </div>
+        </div>
+
+        {error && (
+          <div className="mt-4 flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            {error}
+          </div>
+        )}
+
+        <div className="flex gap-3 mt-6">
+          <Button variant="secondary" onClick={onClose} className="flex-1" disabled={saving}>Cancel</Button>
+          <Button onClick={handleSave} className="flex-1" disabled={saving}>
+            {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving…</> : "Save Changes"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ─── Request Card (admin version with provider picker) ────────────────────────
@@ -332,6 +511,9 @@ export default function AdminPage() {
   const [savingReassign, setSavingReassign] = useState<string | null>(null);
   const [reassignSuccess, setReassignSuccess] = useState<string | null>(null);
 
+  // Edit modal state
+  const [editingAppointment, setEditingAppointment] = useState<AdminAppointment | null>(null);
+
   // Meeting state
   const [meetingLoading, setMeetingLoading] = useState(false);
   const [meetingError, setMeetingError] = useState<string | null>(null);
@@ -411,6 +593,12 @@ export default function AdminPage() {
     }
   };
 
+  const handleEditSaved = (appointmentId: string, updated: Partial<AdminAppointment>) => {
+    setAppointments((prev) =>
+      prev.map((a) => (a.id === appointmentId ? { ...a, ...updated } : a))
+    );
+  };
+
   const handleStartMeeting = async () => {
     setMeetingLoading(true);
     setMeetingError(null);
@@ -488,6 +676,15 @@ export default function AdminPage() {
           )}
         </div>
       </header>
+
+      {editingAppointment && (
+        <EditAppointmentModal
+          appointment={editingAppointment}
+          providers={providers}
+          onClose={() => setEditingAppointment(null)}
+          onSaved={(updated) => { handleEditSaved(editingAppointment.id, updated); }}
+        />
+      )}
 
       <div className="container mx-auto px-6 py-8">
 
@@ -638,6 +835,7 @@ export default function AdminPage() {
                             <th className="px-6 py-3 font-medium">Type</th>
                             <th className="px-6 py-3 font-medium">Status</th>
                             <th className="px-6 py-3 font-medium">Video</th>
+                            <th className="px-6 py-3 font-medium"></th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-stone-50">
@@ -659,6 +857,14 @@ export default function AdminPage() {
                                     <Video className="h-3.5 w-3.5" /> Join <ExternalLink className="h-3 w-3" />
                                   </a>
                                 ) : <span className="text-stone-300 text-xs">—</span>}
+                              </td>
+                              <td className="px-6 py-3.5">
+                                <button
+                                  onClick={() => setEditingAppointment(a)}
+                                  className="inline-flex items-center gap-1 text-stone-400 hover:text-primary-600 text-xs transition-colors"
+                                >
+                                  <Pencil className="h-3.5 w-3.5" /> Edit
+                                </button>
                               </td>
                             </tr>
                           ))}
@@ -754,6 +960,7 @@ export default function AdminPage() {
                                 <th className="px-5 py-3 font-medium">Status</th>
                                 <th className="px-5 py-3 font-medium">Reassign</th>
                                 <th className="px-5 py-3 font-medium">Video</th>
+                                <th className="px-5 py-3 font-medium"></th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-stone-50">
@@ -814,6 +1021,14 @@ export default function AdminPage() {
                                           <Video className="h-3.5 w-3.5" /> Join <ExternalLink className="h-3 w-3" />
                                         </a>
                                       ) : <span className="text-stone-300 text-xs">—</span>}
+                                    </td>
+                                    <td className="px-5 py-3.5">
+                                      <button
+                                        onClick={() => setEditingAppointment(apt)}
+                                        className="inline-flex items-center gap-1 text-stone-400 hover:text-primary-600 text-xs transition-colors"
+                                      >
+                                        <Pencil className="h-3.5 w-3.5" /> Edit
+                                      </button>
                                     </td>
                                   </tr>
                                 );

@@ -27,7 +27,7 @@ export async function GET() {
       .order("created_at", { ascending: false }),
     db
       .from("appointments")
-      .select("id, patient_id, provider_uuid, scheduled_at, appointment_type, status, video_room_url")
+      .select("id, patient_id, provider_uuid, scheduled_at, duration_minutes, appointment_type, status, video_room_url")
       .order("scheduled_at", { ascending: false })
       .limit(200),
     db
@@ -79,6 +79,7 @@ export async function GET() {
       patientName: patientMap[a.patient_id] ?? "Unknown",
       providerName: providerMap[a.provider_uuid] ?? "Unknown",
       scheduledAt: a.scheduled_at,
+      durationMinutes: a.duration_minutes,
       appointmentType: a.appointment_type,
       status: a.status,
       videoRoomUrl: a.video_room_url,
