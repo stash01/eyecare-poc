@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateSession } from "@/lib/server/session";
 import { db } from "@/lib/server/db";
-import { createDailyRoom } from "@/lib/server/daily-co";
+import { createAndAttachVideoRoom } from "@/lib/server/daily-co";
 import { logAuditEvent } from "@/lib/server/audit";
-import { sendAppointmentConfirmation } from "@/lib/server/email";
+import { sendConfirmationForIds } from "@/lib/server/email";
+import { getClientIp } from "@/lib/server/request";
 
 export const dynamic = "force-dynamic";
-
-function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
-}
 
 // POST /api/admin/appointments — admin books a pending request and assigns to any provider
 export async function POST(req: NextRequest) {
@@ -45,7 +38,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Request is no longer pending" }, { status: 409 });
     }
 
-    // Verify provider exists and is active
     const { data: provider } = await db
       .from("providers")
       .select("id")
@@ -55,6 +47,21 @@ export async function POST(req: NextRequest) {
 
     if (!provider) {
       return NextResponse.json({ error: "Provider not found" }, { status: 404 });
+    }
+
+    // Conflict check — prevent double-booking the provider
+    const slotEnd = new Date(new Date(scheduled_at).getTime() + duration_minutes * 60_000).toISOString();
+    const { data: conflict } = await db
+      .from("appointments")
+      .select("id")
+      .eq("provider_uuid", provider_id)
+      .gte("scheduled_at", scheduled_at)
+      .lt("scheduled_at", slotEnd)
+      .not("status", "eq", "cancelled")
+      .limit(1);
+
+    if (conflict && conflict.length > 0) {
+      return NextResponse.json({ error: "That time slot is no longer available" }, { status: 409 });
     }
 
     const { data: appointment, error: apptError } = await db
@@ -83,19 +90,10 @@ export async function POST(req: NextRequest) {
       .update({ status: "scheduled", updated_at: new Date().toISOString() })
       .eq("id", consultation_request_id);
 
-    // Create Daily.co room
-    let videoUrl: string | null = null;
-    try {
-      videoUrl = await createDailyRoom(appointment.id, scheduled_at);
-      if (videoUrl) {
-        await db.from("appointments").update({ video_room_url: videoUrl }).eq("id", appointment.id);
-      }
-    } catch (videoErr) {
-      console.error("[admin/appointments] Daily.co error:", videoErr);
-    }
+    const videoUrl = await createAndAttachVideoRoom(appointment.id, scheduled_at);
 
     await logAuditEvent(
-      "patient",
+      "system",
       session.patientId,
       "admin_book_appointment",
       "appointments",
@@ -103,22 +101,15 @@ export async function POST(req: NextRequest) {
       getClientIp(req)
     );
 
-    // Send confirmation emails (fire-and-forget — never block the booking response)
     try {
-      const [{ data: patientRow }, { data: providerRow }] = await Promise.all([
-        db.from("patients").select("email, first_name, last_name").eq("id", request.patient_id).single(),
-        db.from("providers").select("email, name, credentials").eq("id", provider_id).single(),
-      ]);
-      if (patientRow && providerRow) {
-        await sendAppointmentConfirmation({
-          appointmentId: appointment.id,
-          scheduledAt: scheduled_at,
-          durationMinutes: duration_minutes,
-          videoRoomUrl: videoUrl,
-          patient: { email: patientRow.email, firstName: patientRow.first_name, lastName: patientRow.last_name },
-          provider: { email: providerRow.email, name: providerRow.name, credentials: providerRow.credentials ?? "" },
-        });
-      }
+      await sendConfirmationForIds({
+        appointmentId: appointment.id,
+        patientId: request.patient_id,
+        providerId: provider_id,
+        scheduledAt: scheduled_at,
+        durationMinutes: duration_minutes,
+        videoRoomUrl: videoUrl,
+      });
     } catch (emailErr) {
       console.error("[admin/appointments] Confirmation email failed:", emailErr);
     }

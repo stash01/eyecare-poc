@@ -434,7 +434,7 @@
         <div class="node node-paywall" style="min-width:200px;">
           <div class="node-title">Subscribe (Paywall)</div>
           <div class="node-route">/subscribe</div>
-          <div class="node-detail">3 plans: Basic ($19.99), Premium ($39.99), Complete ($79.99). Auto-redirects if already subscribed.</div>
+          <div class="node-detail">Klara Membership: $99/first 3 months, then $59/month. All features included. Auto-redirects if already subscribed.</div>
         </div>
 
         <div class="arrow">
@@ -598,7 +598,7 @@
       </div>
 
       <div class="node node-provider" style="min-width:200px;">
-        <div class="node-title">Pick 30-min Slot</div>
+        <div class="node-title">Pick 15-min Slot</div>
         <div class="node-detail" style="text-align:left;">
           Slots generated within<br>
           selected availability block<br>
@@ -645,7 +645,7 @@
 
   <div class="note">
     <span class="note-icon">&#9432;</span>
-    <span><strong>Reversed scheduling model:</strong> Patients no longer pick from provider availability. Instead, patients declare when they are free; providers review pending requests and book the specific appointment from within the patient's windows. The old <code>/booking</code> page remains in the codebase (with live provider availability from DB) but is no longer the primary consultation scheduling path.</span>
+    <span><strong>Reversed scheduling model:</strong> Patients declare when they are free; providers review pending requests and book the specific 15-min appointment from within the patient's windows. On booking, confirmation emails with .ics calendar attachments are sent to both patient and provider. Reminder emails fire 1 hour before via cron-job.org. The old <code>/booking</code> page remains in the codebase but is no longer the primary consultation scheduling path.</span>
   </div>
 </div>
 
@@ -844,9 +844,9 @@
           <div class="node node-provider" style="min-width:180px;">
             <div class="node-title">Today's Schedule</div>
             <div class="node-detail" style="text-align:left;">
-              Mock appointments list<br>
-              Status badges, OHIP flag<br>
-              "Start/Join" video links
+              Live appointments from DB<br>
+              Status badges, Join video links<br>
+              15-min default slots
             </div>
           </div>
         </div>
@@ -907,18 +907,136 @@
 
   <div class="note">
     <span class="note-icon">&#9432;</span>
-    <span><strong>Pending Requests tab is now the primary provider view.</strong> Requests load live from <code>consultation_requests</code> + <code>patient_availability</code> tables. Provider selects an availability block, picks a 30-min slot, assigns a provider, and clicks "Confirm Appointment" — this writes to <code>appointments</code> and marks the request as scheduled. The slot is validated server-side to be within the patient's declared availability window.</span>
+    <span><strong>Pending Requests tab is now the primary provider view.</strong> Requests load live from <code>consultation_requests</code> + <code>patient_availability</code> tables. Provider selects an availability block, picks a 15-min slot, and clicks "Confirm Appointment" — this writes to <code>appointments</code>, marks the request as scheduled, creates a Daily.co video room, and sends confirmation emails with .ics attachments to patient and provider.</span>
   </div>
 </div>
 
 <!-- ============================================ -->
-<!-- FLOW 5: SHOP / E-COMMERCE                    -->
+<!-- FLOW 5: ADMIN / GOD MODE                     -->
+<!-- ============================================ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);">&#x1F6E1;</div>
+    <div>
+      <div class="section-title">Admin / God Mode Flow</div>
+      <div class="section-desc">Admin account logs in via normal patient login — elevated access to all data + scheduling controls</div>
+    </div>
+  </div>
+
+  <div class="scroll-container">
+    <div class="flow-grid" style="min-width:900px;">
+
+      <div class="flow-row">
+        <div class="node node-auth">
+          <div class="node-title">Login</div>
+          <div class="node-route">/login</div>
+          <div class="node-detail">admin@klaramd.com<br>is_admin = true in DB</div>
+        </div>
+
+        <div class="arrow">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="arrow-label">Patient session</div>
+            <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+          </div>
+        </div>
+
+        <div class="node node-entry">
+          <div class="node-title">Dashboard</div>
+          <div class="node-route">/dashboard</div>
+          <div class="node-detail">"Admin Panel" link visible<br>only when isAdmin = true</div>
+        </div>
+
+        <div class="arrow">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="arrow-label">"Admin Panel"</div>
+            <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+          </div>
+        </div>
+
+        <div class="node node-result" style="min-width:220px;">
+          <div class="node-title">Admin Panel</div>
+          <div class="node-route">/admin</div>
+          <div class="node-detail" style="text-align:left;">
+            <strong>4 Tabs:</strong><br>
+            1. Patients (all)<br>
+            2. Assessments (all)<br>
+            3. Appointments (all)<br>
+            4. Schedule (assign + edit)
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <svg width="24" height="32" viewBox="0 0 24 32"><line x1="12" y1="0" x2="12" y2="24" stroke="#94a3b8" stroke-width="2"/><polygon points="6,24 12,32 18,24" fill="#94a3b8"/></svg>
+        <div style="font-size:12px;color:#64748b;font-weight:600;">Admin Actions</div>
+      </div>
+
+      <div class="branch-paths" style="gap:24px;">
+        <div class="branch-path">
+          <div class="branch-path-label label-amber">Tab 4 — Schedule</div>
+          <div class="node node-result" style="min-width:200px;">
+            <div class="node-title">Pending Requests</div>
+            <div class="node-detail" style="text-align:left;">
+              Assign any provider<br>
+              Pick 15-min slot<br>
+              Book → confirmation email sent
+            </div>
+          </div>
+        </div>
+
+        <div class="branch-path">
+          <div class="branch-path-label label-amber">Tab 4 — Schedule</div>
+          <div class="node node-result" style="min-width:220px;">
+            <div class="node-title">Master Schedule</div>
+            <div class="node-detail" style="text-align:left;">
+              All upcoming appointments<br>
+              Edit any field (date, time,<br>
+              provider, duration, status)<br>
+              Update email sent on change
+            </div>
+          </div>
+        </div>
+
+        <div class="branch-path">
+          <div class="branch-path-label label-blue">Header action</div>
+          <div class="node node-clinical" style="min-width:160px;">
+            <div class="node-title">Take Assessment</div>
+            <div class="node-route">/assessment</div>
+            <div class="node-detail">Admin takes assessment<br>as themselves</div>
+          </div>
+        </div>
+
+        <div class="branch-path">
+          <div class="branch-path-label label-blue">Header action</div>
+          <div class="node node-clinical" style="min-width:180px;">
+            <div class="node-title">Start Ad-hoc Meeting</div>
+            <div class="node-detail" style="text-align:left;">
+              POST /api/admin/meeting<br>
+              Creates Daily.co room<br>
+              klara-adhoc-{id}, 4hr exp<br>
+              Opens in new tab
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="note">
+    <span class="note-icon">&#9432;</span>
+    <span><strong>Admin auth uses the normal patient session.</strong> <code>is_admin = true</code> on the patients row unlocks the Admin Panel link in the dashboard sidebar and gates all <code>/api/admin/*</code> routes. Password set via <code>POST /api/admin/setup</code> (dev only). The admin can edit all aspects of any appointment — changes to date/time or provider trigger an update email with .ics to patient and new provider.</span>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- FLOW 6: SHOP / E-COMMERCE                    -->
 <!-- ============================================ -->
 <div class="section">
   <div class="section-header">
     <div class="section-icon" style="background:linear-gradient(135deg,#22c55e,#10b981);">&#x1F6D2;</div>
     <div>
-      <div class="section-title">Shop / E-Commerce Flow</div>
+      <div class="section-title">Shop / E-Commerce Flow (Phase 4)</div>
       <div class="section-desc">Product browsing, cart, checkout (no auth required)</div>
     </div>
   </div>
@@ -1067,7 +1185,7 @@
         <td style="padding:10px 12px;font-family:monospace;color:#d946ef;">/subscribe</td>
         <td style="padding:10px 12px;">Subscription Paywall</td>
         <td style="padding:10px 12px;"><span style="color:#ef4444;">Required</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/assessment-results (on subscribe), /dashboard. Auto-redirects if already subscribed.</td>
+        <td style="padding:10px 12px;font-size:12px;">/assessment-results (on subscribe), /dashboard. Single plan: Klara Membership ($99/3 months, then $59/month). Auto-redirects if already subscribed.</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;">
         <td style="padding:10px 12px;font-family:monospace;color:#eab308;">/assessment-results</td>
@@ -1101,9 +1219,15 @@
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;">
         <td style="padding:10px 12px;font-family:monospace;color:#ec4899;">/provider</td>
-        <td style="padding:10px 12px;">Provider Dashboard (3 tabs)</td>
-        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public*</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/consultation. Tabs: Pending Requests (live DB — book appointments from patient availability), Today's Schedule, Patient Assessments (with treatment plans). API: GET /api/provider/requests, POST /api/provider/appointments.</td>
+        <td style="padding:10px 12px;">Provider Dashboard (4 tabs)</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Provider session</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/consultation. Tabs: Schedule (live appointments from DB), Pending Requests (book 15-min slots from patient availability), Availability (weekly schedule editor), Patient Assessments. Booking triggers confirmation email + .ics to patient and provider.</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
+        <td style="padding:10px 12px;font-family:monospace;color:#f59e0b;">/admin</td>
+        <td style="padding:10px 12px;">Admin Panel (4 tabs)</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Auth + isAdmin</span></td>
+        <td style="padding:10px 12px;font-size:12px;">Tabs: Patients, Assessments, Appointments, Schedule. Schedule tab: assign pending requests to any provider, edit all appointment fields (date/time/provider/duration/status), master schedule view. Header: Take Assessment, Start Ad-hoc Meeting (Daily.co). Edits send update emails.</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
         <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/shop</td>
@@ -1157,7 +1281,7 @@
 </div>
 
 <div style="text-align:center;color:#94a3b8;font-size:12px;padding:20px 0 40px;">
-  Generated from codebase analysis &mdash; eyecare-poc (KlaraMD) &mdash; Updated Mar 2026 with reversed scheduling model, native Supabase scheduler, and provider availability booking
+  Generated from codebase analysis &mdash; eyecare-poc (KlaraMD) &mdash; Updated Apr 2026: single Klara Membership plan, 15-min slots, admin panel, email notifications + .ics attachments, 1-hour reminders via cron-job.org
 </div>
 
 </body>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getClientIp } from "@/lib/server/request";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/server/db";
 import { createProviderSession, setProviderSessionCookie } from "@/lib/server/provider-session";
@@ -8,14 +9,6 @@ export const dynamic = "force-dynamic";
 
 const MAX_ATTEMPTS = 5;
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-
-function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
-}
 
 async function isRateLimited(ip: string): Promise<boolean> {
   const windowStart = new Date(Date.now() - WINDOW_MS).toISOString();

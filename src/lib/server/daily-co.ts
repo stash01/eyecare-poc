@@ -1,3 +1,5 @@
+import { db } from "@/lib/server/db";
+
 const DAILY_API_BASE = "https://api.daily.co/v1";
 
 /**
@@ -52,6 +54,21 @@ export async function createDailyRoom(
     console.error("[daily-co] Unexpected error:", err);
     return null;
   }
+}
+
+/**
+ * Creates a Daily.co room and stores the URL on the appointment row.
+ * Returns the video URL (or null if DAILY_API_KEY is not set).
+ */
+export async function createAndAttachVideoRoom(
+  appointmentId: string,
+  scheduledAt: string
+): Promise<string | null> {
+  const videoUrl = await createDailyRoom(appointmentId, scheduledAt);
+  if (videoUrl) {
+    await db.from("appointments").update({ video_room_url: videoUrl }).eq("id", appointmentId);
+  }
+  return videoUrl;
 }
 
 /**

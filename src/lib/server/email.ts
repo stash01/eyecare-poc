@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { db } from "@/lib/server/db";
 
 function getResend(): Resend {
   const apiKey = process.env.RESEND_API_KEY;
@@ -326,4 +327,43 @@ export async function sendPasswordResetEmail(
   if (error) {
     throw new Error(`Failed to send password reset email: ${error.message}`);
   }
+}
+
+/**
+ * Fetches patient + provider from DB by ID, then sends a confirmation (or update) email.
+ * Fire-and-forget safe — callers should wrap in try/catch and log errors.
+ */
+export async function sendConfirmationForIds({
+  appointmentId,
+  patientId,
+  providerId,
+  scheduledAt,
+  durationMinutes,
+  videoRoomUrl,
+  isUpdate = false,
+}: {
+  appointmentId: string;
+  patientId: string;
+  providerId: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  videoRoomUrl: string | null;
+  isUpdate?: boolean;
+}): Promise<void> {
+  const [{ data: patientRow }, { data: providerRow }] = await Promise.all([
+    db.from("patients").select("email, first_name, last_name").eq("id", patientId).single(),
+    db.from("providers").select("email, name, credentials").eq("id", providerId).single(),
+  ]);
+
+  if (!patientRow || !providerRow) return;
+
+  await sendAppointmentConfirmation({
+    appointmentId,
+    scheduledAt,
+    durationMinutes,
+    videoRoomUrl,
+    patient: { email: patientRow.email, firstName: patientRow.first_name, lastName: patientRow.last_name },
+    provider: { email: providerRow.email ?? "", name: providerRow.name, credentials: providerRow.credentials ?? "" },
+    isUpdate,
+  });
 }

@@ -2,18 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateSession } from "@/lib/server/session";
 import { db } from "@/lib/server/db";
 import { logAuditEvent } from "@/lib/server/audit";
-import { createDailyRoom } from "@/lib/server/daily-co";
-import { sendAppointmentConfirmation } from "@/lib/server/email";
+import { createAndAttachVideoRoom } from "@/lib/server/daily-co";
+import { sendConfirmationForIds } from "@/lib/server/email";
+import { getClientIp } from "@/lib/server/request";
 
 export const dynamic = "force-dynamic";
-
-function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
-}
 
 // GET /api/appointments — list current patient's appointments with provider names
 export async function GET() {
@@ -34,7 +27,6 @@ export async function GET() {
     return NextResponse.json({ error: "Failed to fetch appointments" }, { status: 500 });
   }
 
-  // Enrich with provider names
   const providerIds = Array.from(
     new Set((appointments ?? []).map((a) => a.provider_uuid).filter(Boolean))
   );
@@ -121,19 +113,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to create appointment" }, { status: 500 });
     }
 
-    // Create Daily.co video room (no-op if DAILY_API_KEY not set)
-    let videoUrl: string | null = null;
-    try {
-      videoUrl = await createDailyRoom(appointment.id, scheduled_at);
-      if (videoUrl) {
-        await db
-          .from("appointments")
-          .update({ video_room_url: videoUrl })
-          .eq("id", appointment.id);
-      }
-    } catch (videoErr) {
-      console.error("[appointments] Daily.co room creation failed:", videoErr);
-    }
+    const videoUrl = await createAndAttachVideoRoom(appointment.id, scheduled_at);
 
     await logAuditEvent(
       "patient",
@@ -144,22 +124,15 @@ export async function POST(req: NextRequest) {
       getClientIp(req)
     );
 
-    // Send confirmation emails (fire-and-forget — never block the booking response)
     try {
-      const [{ data: patientRow }, { data: providerRow }] = await Promise.all([
-        db.from("patients").select("email, first_name, last_name").eq("id", session.patientId).single(),
-        db.from("providers").select("email, name, credentials").eq("id", provider_id).single(),
-      ]);
-      if (patientRow && providerRow) {
-        await sendAppointmentConfirmation({
-          appointmentId: appointment.id,
-          scheduledAt: scheduled_at,
-          durationMinutes: duration_minutes,
-          videoRoomUrl: videoUrl,
-          patient: { email: patientRow.email, firstName: patientRow.first_name, lastName: patientRow.last_name },
-          provider: { email: providerRow.email, name: providerRow.name, credentials: providerRow.credentials ?? "" },
-        });
-      }
+      await sendConfirmationForIds({
+        appointmentId: appointment.id,
+        patientId: session.patientId,
+        providerId: provider_id,
+        scheduledAt: scheduled_at,
+        durationMinutes: duration_minutes,
+        videoRoomUrl: videoUrl,
+      });
     } catch (emailErr) {
       console.error("[appointments] Confirmation email failed:", emailErr);
     }

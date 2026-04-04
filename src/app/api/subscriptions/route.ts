@@ -1,19 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getClientIp } from "@/lib/server/request";
 import { validateSession } from "@/lib/server/session";
 import { db } from "@/lib/server/db";
 
-export const dynamic = "force-dynamic";
 import { logAuditEvent } from "@/lib/server/audit";
 
-const VALID_PLANS = ["klara_membership"];
+export const dynamic = "force-dynamic";
 
-function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
-}
+const VALID_PLANS = ["klara_membership"];
 
 // POST /api/subscriptions — set subscription plan
 // Phase 2: replace with Stripe Checkout session creation

@@ -1,21 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/server/db";
-
-export const dynamic = "force-dynamic";
 import { createSession, setSessionCookie } from "@/lib/server/session";
 import { logAuditEvent } from "@/lib/server/audit";
+import { getClientIp } from "@/lib/server/request";
+
+export const dynamic = "force-dynamic";
 
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MINUTES = 15;
-
-function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
-}
 
 export async function POST(req: NextRequest) {
   try {

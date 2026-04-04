@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getClientIp } from "@/lib/server/request";
 import { validateProviderSession } from "@/lib/server/provider-session";
 import { db } from "@/lib/server/db";
 
 export const dynamic = "force-dynamic";
-
-function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
-}
 
 // GET /api/provider/schedule
 // Returns the authenticated provider's appointments for today + next 7 days

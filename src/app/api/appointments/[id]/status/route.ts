@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getClientIp } from "@/lib/server/request";
 import { validateProviderSession } from "@/lib/server/provider-session";
 import { db } from "@/lib/server/db";
 import { logAuditEvent } from "@/lib/server/audit";
@@ -8,14 +9,6 @@ export const dynamic = "force-dynamic";
 
 const ALLOWED_STATUSES = ["completed", "no_show", "cancelled", "in_progress"] as const;
 type AllowedStatus = typeof ALLOWED_STATUSES[number];
-
-function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
-}
 
 // PATCH /api/appointments/[id]/status
 export async function PATCH(

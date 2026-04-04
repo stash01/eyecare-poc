@@ -1,18 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getClientIp } from "@/lib/server/request";
 import { createHash } from "crypto";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/server/db";
 import { logAuditEvent } from "@/lib/server/audit";
 
 export const dynamic = "force-dynamic";
-
-function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
-}
 
 export async function POST(req: NextRequest) {
   try {

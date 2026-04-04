@@ -2,22 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHash, randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/server/db";
-
-export const dynamic = "force-dynamic";
 import { encryptHealthCard } from "@/lib/server/crypto";
 import { logAuditEvent } from "@/lib/server/audit";
 import { createJanePatient } from "@/lib/server/jane-client";
 import { sendVerificationEmail } from "@/lib/server/email";
+import { getClientIp } from "@/lib/server/request";
+
+export const dynamic = "force-dynamic";
 
 const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
-}
 
 export async function POST(req: NextRequest) {
   try {

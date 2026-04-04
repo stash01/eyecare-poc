@@ -1,17 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getClientIp } from "@/lib/server/request";
 import { validateSession } from "@/lib/server/session";
 import { db } from "@/lib/server/db";
-
-export const dynamic = "force-dynamic";
 import { logAuditEvent } from "@/lib/server/audit";
 
-function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
-}
+export const dynamic = "force-dynamic";
 
 // GET /api/consultation-requests — patient's own requests with availability
 export async function GET() {
