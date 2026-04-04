@@ -3,44 +3,29 @@
 import { createContext, useContext, ReactNode } from "react";
 import { useAuth } from "./auth-context";
 
-export type SubscriptionPlan = "basic" | "premium" | "complete";
+export type SubscriptionPlan = "klara_membership";
 
-export const PLAN_DETAILS: Record<SubscriptionPlan, { name: string; price: number; features: string[] }> = {
-  basic: {
-    name: "Basic",
-    price: 19.99,
-    features: [
-      "Assessment results & severity score",
-      "Basic product recommendations",
-      "Symptom tracking history",
-    ],
-  },
-  premium: {
-    name: "Premium",
-    price: 39.99,
-    features: [
-      "Everything in Basic",
-      "Detailed treatment plan",
-      "Prescription suggestions",
-      "Priority booking",
-    ],
-  },
-  complete: {
-    name: "Complete",
-    price: 79.99,
-    features: [
-      "Everything in Premium",
-      "1 specialist consultation included",
-      "Procedural treatment guidance",
-      "Ongoing care coordination",
-    ],
-  },
+export const PLAN_DETAILS = {
+  name: "Klara Membership",
+  introPrice: 99,
+  introMonths: 3,
+  monthlyPrice: 59,
+  features: [
+    "Full dry eye assessment & severity score",
+    "Personalized treatment plan",
+    "Prescription suggestions",
+    "Specialist consultation booking",
+    "Symptom tracking history",
+    "Product recommendations",
+    "Procedural treatment guidance",
+    "Ongoing care coordination",
+  ],
 };
 
 interface SubscriptionContextType {
   isSubscribed: boolean;
   plan: SubscriptionPlan | null;
-  subscribe: (plan: SubscriptionPlan) => Promise<{ error?: string }>;
+  subscribe: () => Promise<{ error?: string }>;
   cancelSubscription: () => Promise<void>;
   isLoading: boolean;
 }
@@ -48,18 +33,17 @@ interface SubscriptionContextType {
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
-  // Subscription state is derived from the authenticated user object (set by /api/auth/me)
   const { user, isLoading, refreshUser } = useAuth();
 
   const plan = (user?.subscriptionPlan as SubscriptionPlan | null) ?? null;
 
-  async function subscribe(newPlan: SubscriptionPlan): Promise<{ error?: string }> {
+  async function subscribe(): Promise<{ error?: string }> {
     try {
       const res = await fetch("/api/subscriptions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ plan: newPlan }),
+        body: JSON.stringify({ plan: "klara_membership" }),
       });
 
       const data = await res.json();
@@ -68,7 +52,6 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         return { error: data.error ?? "Subscription failed" };
       }
 
-      // Refresh user to pick up the new subscription_plan from the server
       await refreshUser();
       return {};
     } catch {

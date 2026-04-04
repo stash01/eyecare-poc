@@ -5,7 +5,7 @@ import { db } from "@/lib/server/db";
 export const dynamic = "force-dynamic";
 import { logAuditEvent } from "@/lib/server/audit";
 
-const VALID_PLANS = ["basic", "premium", "complete"];
+const VALID_PLANS = ["klara_membership"];
 
 function getClientIp(req: NextRequest): string {
   return (
