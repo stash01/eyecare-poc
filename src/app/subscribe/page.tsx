@@ -1,21 +1,32 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  EmbeddedCheckoutProvider,
+  EmbeddedCheckout,
+} from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Eye, CheckCircle, Loader2, Shield } from "lucide-react";
+import { Eye, CheckCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useSubscription, PLAN_DETAILS } from "@/lib/subscription-context";
 
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+);
+
 export default function SubscribePage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+        </div>
+      }
+    >
       <SubscribePageContent />
     </Suspense>
   );
@@ -25,13 +36,19 @@ function SubscribePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { isSubscribed, subscribe, isLoading: subLoading } = useSubscription();
+  const { isSubscribed, isLoading: subLoading } = useSubscription();
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const assessmentParams = searchParams.toString();
 
   useEffect(() => {
-    if (!authLoading && !subLoading && isSubscribed && assessmentParams) {
-      router.push(`/assessment-results?${assessmentParams}`);
+    if (!authLoading && !subLoading && isSubscribed) {
+      if (assessmentParams) {
+        router.push(`/assessment-results?${assessmentParams}`);
+      } else {
+        router.push("/dashboard");
+      }
     }
   }, [authLoading, subLoading, isSubscribed, assessmentParams, router]);
 
@@ -41,10 +58,33 @@ function SubscribePageContent() {
     }
   }, [authLoading, isAuthenticated, router]);
 
+  const fetchClientSecret = useCallback(async () => {
+    setCheckoutError(null);
+    try {
+      const res = await fetch("/api/stripe/checkout-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ assessmentParams }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCheckoutError(data.error ?? "Failed to start checkout");
+        setShowCheckout(false);
+        return "";
+      }
+      return data.clientSecret as string;
+    } catch {
+      setCheckoutError("Network error. Please try again.");
+      setShowCheckout(false);
+      return "";
+    }
+  }, [assessmentParams]);
+
   if (authLoading || subLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-600 mx-auto" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
       </div>
     );
   }
@@ -56,20 +96,11 @@ function SubscribePageContent() {
       <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary-600 mx-auto mb-4" />
-          <p className="text-gray-600">Redirecting to your results...</p>
+          <p className="text-gray-600">Redirecting...</p>
         </div>
       </div>
     );
   }
-
-  const handleSubscribe = () => {
-    subscribe();
-    if (assessmentParams) {
-      router.push(`/assessment-results?${assessmentParams}`);
-    } else {
-      router.push("/dashboard");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
@@ -79,7 +110,10 @@ function SubscribePageContent() {
             <Eye className="h-8 w-8 text-primary-600" />
             <span className="text-xl font-semibold text-primary-900">KlaraMD</span>
           </Link>
-          <Link href="/dashboard" className="text-primary-700 hover:text-primary-800 text-sm">
+          <Link
+            href="/dashboard"
+            className="text-primary-700 hover:text-primary-800 text-sm"
+          >
             Back to Dashboard
           </Link>
         </nav>
@@ -97,28 +131,31 @@ function SubscribePageContent() {
             </p>
           </div>
 
-          <Card className="border-2 border-primary-500 shadow-xl">
+          <Card className="border-2 border-primary-500 shadow-xl mb-6">
             <CardContent className="pt-8 pb-8 px-8">
-              {/* Plan name */}
               <div className="text-center mb-6">
                 <span className="inline-block bg-primary-600 text-white text-xs font-semibold px-3 py-1 rounded-full mb-4">
                   All-inclusive
                 </span>
-                <h2 className="text-2xl font-bold text-gray-900">{PLAN_DETAILS.name}</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {PLAN_DETAILS.name}
+                </h2>
               </div>
 
-              {/* Pricing */}
               <div className="bg-primary-50 rounded-xl p-5 mb-6 text-center">
                 <div className="mb-1">
-                  <span className="text-4xl font-bold text-primary-900">${PLAN_DETAILS.introPrice}</span>
-                  <span className="text-primary-700 text-sm ml-1">/ first {PLAN_DETAILS.introMonths} months</span>
+                  <span className="text-4xl font-bold text-primary-900">
+                    ${PLAN_DETAILS.introPrice}
+                  </span>
+                  <span className="text-primary-700 text-sm ml-1">
+                    / first {PLAN_DETAILS.introMonths} months
+                  </span>
                 </div>
                 <div className="text-sm text-primary-600 font-medium">
                   then ${PLAN_DETAILS.monthlyPrice}/month
                 </div>
               </div>
 
-              {/* Features */}
               <ul className="space-y-3 mb-8">
                 {PLAN_DETAILS.features.map((feature, idx) => (
                   <li key={idx} className="flex items-start gap-3 text-sm">
@@ -128,16 +165,33 @@ function SubscribePageContent() {
                 ))}
               </ul>
 
-              <Button className="w-full text-base py-6" onClick={handleSubscribe}>
-                Get Started
-              </Button>
+              {!showCheckout && (
+                <Button
+                  className="w-full text-base py-6"
+                  onClick={() => setShowCheckout(true)}
+                >
+                  Get Started — Subscribe Now
+                </Button>
+              )}
 
-              <div className="flex items-center justify-center gap-2 mt-5 text-xs text-gray-400">
-                <Shield className="h-3.5 w-3.5" />
-                <span>Demo mode — no real charges will be made</span>
-              </div>
+              {checkoutError && (
+                <p className="text-sm text-red-600 text-center mt-3">
+                  {checkoutError}
+                </p>
+              )}
             </CardContent>
           </Card>
+
+          {showCheckout && (
+            <div id="stripe-checkout-container">
+              <EmbeddedCheckoutProvider
+                stripe={stripePromise}
+                options={{ fetchClientSecret }}
+              >
+                <EmbeddedCheckout />
+              </EmbeddedCheckoutProvider>
+            </div>
+          )}
         </div>
       </main>
     </div>

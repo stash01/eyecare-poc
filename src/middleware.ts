@@ -80,20 +80,29 @@ export function middleware(req: NextRequest) {
     );
   }
 
-  // CSP — allow Daily.co frames only on /consultation; block frames elsewhere
+  // CSP — allow Daily.co frames on /consultation, Stripe frames on checkout pages
+  const isStripeCheckout =
+    pathname === "/subscribe" ||
+    pathname.startsWith("/subscribe/") ||
+    pathname === "/shop/checkout";
+
   response.headers.set(
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob:",
+      "img-src 'self' data: blob: https://*.stripe.com",
       "font-src 'self'",
-      "connect-src 'self'",
-      isConsultation ? "frame-src https://*.daily.co" : "frame-src 'none'",
+      "connect-src 'self' https://api.stripe.com",
+      isConsultation
+        ? "frame-src https://*.daily.co"
+        : isStripeCheckout
+          ? "frame-src https://js.stripe.com"
+          : "frame-src 'none'",
       "object-src 'none'",
       "base-uri 'self'",
-      "form-action 'self'",
+      "form-action 'self' https://hooks.stripe.com",
     ].join("; ")
   );
 

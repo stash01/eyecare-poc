@@ -9,41 +9,12 @@ export const dynamic = "force-dynamic";
 
 const VALID_PLANS = ["klara_membership"];
 
-// POST /api/subscriptions — set subscription plan
-// Phase 2: replace with Stripe Checkout session creation
-export async function POST(req: NextRequest) {
-  const session = await validateSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const body = await req.json();
-  const { plan } = body;
-
-  if (!plan || !VALID_PLANS.includes(plan)) {
-    return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
-  }
-
-  const { error } = await db
-    .from("patients")
-    .update({ subscription_plan: plan, updated_at: new Date().toISOString() })
-    .eq("id", session.patientId);
-
-  if (error) {
-    return NextResponse.json({ error: "Failed to update subscription" }, { status: 500 });
-  }
-
-  await logAuditEvent(
-    "patient",
-    session.patientId,
-    "subscribe",
-    "patient",
-    session.patientId,
-    getClientIp(req),
-    { plan }
+// POST /api/subscriptions — superseded by POST /api/stripe/checkout-subscription
+export async function POST() {
+  return NextResponse.json(
+    { error: "Use /api/stripe/checkout-subscription for subscription checkout" },
+    { status: 410 }
   );
-
-  return NextResponse.json({ ok: true, plan });
 }
 
 // DELETE /api/subscriptions — cancel subscription

@@ -7,7 +7,7 @@ export type SubscriptionPlan = "klara_membership";
 
 export const PLAN_DETAILS = {
   name: "Klara Membership",
-  introPrice: 99,
+  introPrice: 129,
   introMonths: 3,
   monthlyPrice: 59,
   features: [
@@ -25,7 +25,6 @@ export const PLAN_DETAILS = {
 interface SubscriptionContextType {
   isSubscribed: boolean;
   plan: SubscriptionPlan | null;
-  subscribe: () => Promise<{ error?: string }>;
   cancelSubscription: () => Promise<void>;
   isLoading: boolean;
 }
@@ -36,28 +35,6 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { user, isLoading, refreshUser } = useAuth();
 
   const plan = (user?.subscriptionPlan as SubscriptionPlan | null) ?? null;
-
-  async function subscribe(): Promise<{ error?: string }> {
-    try {
-      const res = await fetch("/api/subscriptions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({ plan: "klara_membership" }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        return { error: data.error ?? "Subscription failed" };
-      }
-
-      await refreshUser();
-      return {};
-    } catch {
-      return { error: "Network error. Please try again." };
-    }
-  }
 
   async function cancelSubscription() {
     await fetch("/api/subscriptions", {
@@ -72,7 +49,6 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       value={{
         isSubscribed: plan !== null,
         plan,
-        subscribe,
         cancelSubscription,
         isLoading,
       }}
