@@ -244,9 +244,9 @@ export default function Home() {
         <div className="container mx-auto px-6 py-5">
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
             {[
-              { icon: Award,        text: "Fellowship-trained ophthalmologists" },
+              { icon: Award,        text: "Led by board-certified ophthalmologists" },
               { icon: Shield,       text: "PHIPA-compliant · Canadian data" },
-              { icon: CheckCircle,  text: "TFOS DEWS II evidence-based" },
+              { icon: CheckCircle,  text: "Evidence-based treatment protocols" },
               { icon: Clock,        text: "Same-week consultations" },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-2.5 text-stone-600">
@@ -500,15 +500,15 @@ const steps = [
   {
     icon: Heart,
     title: "Connect with a specialist",
-    description: "Book a video consultation with a fellowship-trained ophthalmologist who can prescribe treatment.",
+    description: "Book a video consultation with a board-certified ophthalmologist who can prescribe treatment.",
   },
 ];
 
 const trust = [
   {
     icon: Award,
-    title: "Fellowship-trained specialists",
-    description: "Board-certified ophthalmologists with subspecialty training in cornea and ocular surface disease.",
+    title: "Led by board-certified specialists",
+    description: "Board-certified ophthalmologists with deep expertise in dry eye disease and ocular surface care.",
   },
   {
     icon: Shield,
@@ -518,7 +518,7 @@ const trust = [
   {
     icon: CheckCircle,
     title: "Evidence-based assessment",
-    description: "Our assessment uses clinically validated questionnaires aligned with TFOS DEWS II guidelines.",
+    description: "Our assessment uses clinically validated questionnaires and evidence-based treatment protocols.",
   },
   {
     icon: Clock,

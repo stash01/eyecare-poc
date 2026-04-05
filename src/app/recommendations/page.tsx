@@ -341,7 +341,7 @@ function RecommendationsContent() {
               <div className="flex items-start gap-3 mb-4">
                 <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
                 <p className="text-sm text-gray-700">
-                  For severe or treatment-resistant dry eye, our fellowship-trained ophthalmologists
+                  For severe or treatment-resistant dry eye, our board-certified ophthalmologists
                   offer advanced procedural treatments. These can provide significant relief when
                   other approaches haven't been enough.
                 </p>
@@ -387,7 +387,7 @@ function RecommendationsContent() {
             </h3>
             <p className="text-gray-600 mb-4">
               {severity === "severe"
-                ? "Our fellowship-trained ophthalmologists can evaluate your condition and recommend the most effective treatment plan for your specific situation."
+                ? "Our board-certified ophthalmologists can evaluate your condition and recommend the most effective treatment plan for your specific situation."
                 : severity === "moderate"
                 ? "Our board-certified ophthalmologists can help determine if prescription treatments might be right for you."
                 : "If you've been trying these approaches for a few weeks and still aren't feeling better, that's okay — sometimes you need a little extra help. Our ophthalmologists can explore prescription options with you."}

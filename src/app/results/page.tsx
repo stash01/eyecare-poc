@@ -69,7 +69,7 @@ const severityConfigs: Record<Severity, SeverityConfig> = {
     borderColor: "border-red-200",
     icon: AlertCircle,
     recommendation:
-      "Based on your assessment results, we recommend scheduling a consultation with one of our fellowship-trained ophthalmologists. They can evaluate prescription treatments and procedural options tailored to your specific condition.",
+      "Based on your assessment results, we recommend scheduling a consultation with one of our board-certified ophthalmologists. They can evaluate prescription treatments and procedural options tailored to your specific condition.",
     showBooking: true,
     bookingUrgency: "Schedule Specialist Consultation",
   },

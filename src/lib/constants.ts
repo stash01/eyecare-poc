@@ -42,7 +42,7 @@ export const MESSAGING = {
   PLATFORM_TITLE: "KlaraMD - Board-Certified Ophthalmologist Care for Dry Eyes",
   PLATFORM_DESCRIPTION: "Get relief from dry, irritated eyes. Take our free assessment and receive personalized treatment recommendations from board-certified ophthalmologists in Ontario.",
   PROVIDER_TYPE: "board-certified ophthalmologists",
-  PROVIDER_TYPE_SINGULAR: "fellowship-trained ophthalmologist",
+  PROVIDER_TYPE_SINGULAR: "board-certified ophthalmologist",
   SPECIALIST_TITLE: "Ophthalmologist",
 } as const;
 

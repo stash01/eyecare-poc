@@ -378,23 +378,37 @@ function SectionCard({
                     {val}
                   </span>
                 </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={10}
-                  step={1}
-                  value={val}
-                  onChange={(e) =>
-                    setFormData((p) => ({
-                      ...p,
-                      symptomIntensities: {
-                        ...p.symptomIntensities,
-                        [symptom.key]: parseInt(e.target.value),
-                      },
-                    }))
-                  }
-                  className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-teal-600"
-                />
+                <div className="relative py-1">
+                  {/* Gradient track: green → yellow → red */}
+                  <div
+                    className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-2 rounded-full pointer-events-none"
+                    style={{
+                      background:
+                        "linear-gradient(to right, #22c55e 0%, #eab308 45%, #ef4444 100%)",
+                    }}
+                  />
+                  <input
+                    type="range"
+                    min={0}
+                    max={10}
+                    step={1}
+                    value={val}
+                    onChange={(e) =>
+                      setFormData((p) => ({
+                        ...p,
+                        symptomIntensities: {
+                          ...p.symptomIntensities,
+                          [symptom.key]: parseInt(e.target.value),
+                        },
+                      }))
+                    }
+                    className="relative w-full h-2 cursor-pointer appearance-none bg-transparent
+                      [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-transparent
+                      [&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-transparent
+                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-gray-300 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer
+                      [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-gray-300 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer"
+                  />
+                </div>
                 <div className="flex justify-between text-xs text-gray-400 mt-1">
                   <span>None</span>
                   <span>Worst imaginable</span>
