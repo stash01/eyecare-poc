@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { SymptomHistoryWidget } from "@/components/symptom-history-widget";
 import { useSymptomHistory } from "@/lib/symptom-history-context";
+import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 
 interface Appointment {
   id: string;
@@ -112,6 +113,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg-base)" }}>
+      <ImpersonationBanner />
 
       {/* ── Header ─────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-stone-200/80 shadow-sm">

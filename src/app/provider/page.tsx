@@ -16,6 +16,7 @@ import {
   PRESCRIPTION_TREATMENTS,
   PROCEDURAL_TREATMENTS,
 } from "@/lib/constants";
+import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -457,6 +458,7 @@ export default function ProviderDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <ImpersonationBanner />
       <header className="bg-white border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">

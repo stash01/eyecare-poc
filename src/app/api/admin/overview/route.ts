@@ -32,8 +32,8 @@ export async function GET() {
       .limit(200),
     db
       .from("providers")
-      .select("id, name, credentials, specialty")
-      .eq("active", true),
+      .select("id, name, credentials, specialty, email, active")
+      .order("name", { ascending: true }),
   ]);
 
   const patientMap = Object.fromEntries(
@@ -89,6 +89,8 @@ export async function GET() {
       name: p.name,
       credentials: p.credentials,
       specialty: p.specialty,
+      email: p.email,
+      active: p.active,
     })),
   });
 }

@@ -53,6 +53,8 @@ interface Provider {
   name: string;
   credentials: string;
   specialty: string;
+  email?: string;
+  active?: boolean;
 }
 
 interface AvailabilityBlock {
@@ -492,7 +494,7 @@ export default function AdminPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<"patients" | "assessments" | "appointments" | "schedule">("patients");
+  const [activeTab, setActiveTab] = useState<"patients" | "assessments" | "appointments" | "schedule" | "providers">("patients");
 
   // Overview data
   const [patients, setPatients] = useState<AdminPatient[]>([]);
@@ -615,6 +617,17 @@ export default function AdminPage() {
     }
   };
 
+  const handleImpersonate = async (type: "patient" | "provider", id: string) => {
+    const res = await fetch("/api/admin/impersonate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ type, id }),
+    });
+    const data = await res.json();
+    if (data.redirectTo) router.push(data.redirectTo);
+  };
+
   // Sort appointments by scheduled_at ascending for schedule view
   const upcomingAppointments = [...appointments]
     .filter((a) => a.status !== "cancelled")
@@ -633,6 +646,7 @@ export default function AdminPage() {
     { id: "assessments" as const,  label: "Assessments",  icon: ClipboardList, count: assessments.length },
     { id: "appointments" as const, label: "Appointments", icon: Calendar,      count: appointments.length },
     { id: "schedule" as const,     label: "Schedule",     icon: UserCheck,     count: pendingRequests.length },
+    { id: "providers" as const,    label: "Providers",    icon: Eye,           count: providers.length },
   ];
 
   return (
@@ -689,7 +703,7 @@ export default function AdminPage() {
       <div className="container mx-auto px-6 py-8">
 
         {/* Stat cards / tab switchers */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-5 gap-4 mb-6">
           {overviewTabs.map(({ id, label, icon: Icon, count }) => (
             <button
               key={id}
@@ -740,6 +754,7 @@ export default function AdminPage() {
                             <th className="px-6 py-3 font-medium">Joined</th>
                             <th className="px-6 py-3 font-medium">Assessments</th>
                             <th className="px-6 py-3 font-medium">Latest Severity</th>
+                            <th className="px-6 py-3 font-medium"></th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-stone-50">
@@ -755,6 +770,14 @@ export default function AdminPage() {
                                     {p.latestSeverity}
                                   </span>
                                 ) : <span className="text-stone-300 text-xs">—</span>}
+                              </td>
+                              <td className="px-6 py-3.5">
+                                <button
+                                  onClick={() => handleImpersonate("patient", p.id)}
+                                  className="text-xs text-primary-600 hover:text-primary-800 font-medium transition-colors"
+                                >
+                                  Log in as
+                                </button>
                               </td>
                             </tr>
                           ))}
@@ -864,6 +887,57 @@ export default function AdminPage() {
                                   className="inline-flex items-center gap-1 text-stone-400 hover:text-primary-600 text-xs transition-colors"
                                 >
                                   <Pencil className="h-3.5 w-3.5" /> Edit
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* ── Providers ─────────────────────────────────────── */}
+            {activeTab === "providers" && (
+              <Card>
+                <CardHeader><CardTitle className="text-base">All Providers</CardTitle></CardHeader>
+                <CardContent className="p-0">
+                  {providers.length === 0 ? (
+                    <div className="py-12 text-center text-stone-400">No providers found.</div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-stone-100 text-left text-xs text-stone-400 uppercase tracking-wide">
+                            <th className="px-6 py-3 font-medium">Name</th>
+                            <th className="px-6 py-3 font-medium">Specialty</th>
+                            <th className="px-6 py-3 font-medium">Email</th>
+                            <th className="px-6 py-3 font-medium">Status</th>
+                            <th className="px-6 py-3 font-medium"></th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-stone-50">
+                          {providers.map((p) => (
+                            <tr key={p.id} className="hover:bg-stone-50/50 transition-colors">
+                              <td className="px-6 py-3.5">
+                                <div className="font-medium text-stone-900">{p.name}</div>
+                                {p.credentials && <div className="text-xs text-stone-400">{p.credentials}</div>}
+                              </td>
+                              <td className="px-6 py-3.5 text-stone-500">{p.specialty}</td>
+                              <td className="px-6 py-3.5 text-stone-500">{p.email ?? "—"}</td>
+                              <td className="px-6 py-3.5">
+                                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${p.active ? "bg-green-100 text-green-700" : "bg-stone-100 text-stone-500"}`}>
+                                  {p.active ? "Active" : "Inactive"}
+                                </span>
+                              </td>
+                              <td className="px-6 py-3.5">
+                                <button
+                                  onClick={() => handleImpersonate("provider", p.id)}
+                                  className="text-xs text-primary-600 hover:text-primary-800 font-medium transition-colors"
+                                >
+                                  Log in as
                                 </button>
                               </td>
                             </tr>
