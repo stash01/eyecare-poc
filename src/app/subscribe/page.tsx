@@ -14,9 +14,11 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useSubscription, PLAN_DETAILS } from "@/lib/subscription-context";
 
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-);
+// Stripe is considered configured when the publishable key looks like a real key
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
+const stripeConfigured = stripeKey.length > 20 && !stripeKey.includes("...");
+const stripePromise = stripeConfigured ? loadStripe(stripeKey) : null;
+
 
 export default function SubscribePage() {
   return (
@@ -36,9 +38,10 @@ function SubscribePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { isSubscribed, isLoading: subLoading } = useSubscription();
+  const { isSubscribed, isLoading: subLoading, subscribe } = useSubscription();
   const [showCheckout, setShowCheckout] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [demoLoading, setDemoLoading] = useState(false);
 
   const assessmentParams = searchParams.toString();
 
@@ -57,6 +60,21 @@ function SubscribePageContent() {
       router.push("/register");
     }
   }, [authLoading, isAuthenticated, router]);
+
+  const handleDemoSubscribe = async () => {
+    setDemoLoading(true);
+    const result = await subscribe();
+    if (result.error) {
+      setCheckoutError(result.error);
+      setDemoLoading(false);
+      return;
+    }
+    if (assessmentParams) {
+      router.push(`/assessment-results?${assessmentParams}`);
+    } else {
+      router.push("/dashboard");
+    }
+  };
 
   const fetchClientSecret = useCallback(async () => {
     setCheckoutError(null);
@@ -168,9 +186,14 @@ function SubscribePageContent() {
               {!showCheckout && (
                 <Button
                   className="w-full text-base py-6"
-                  onClick={() => setShowCheckout(true)}
+                  disabled={demoLoading}
+                  onClick={stripeConfigured ? () => setShowCheckout(true) : handleDemoSubscribe}
                 >
-                  Get Started — Subscribe Now
+                  {demoLoading ? (
+                    <><Loader2 className="h-4 w-4 animate-spin mr-2" />Activating…</>
+                  ) : (
+                    "Get Started — Subscribe Now"
+                  )}
                 </Button>
               )}
 
@@ -182,7 +205,7 @@ function SubscribePageContent() {
             </CardContent>
           </Card>
 
-          {showCheckout && (
+          {showCheckout && stripePromise && (
             <div id="stripe-checkout-container">
               <EmbeddedCheckoutProvider
                 stripe={stripePromise}

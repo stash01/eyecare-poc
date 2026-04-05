@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, ArrowLeft, Shield, AlertTriangle, Phone, Loader2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import { useSubscription } from "@/lib/subscription-context";
 import { useSymptomHistory } from "@/lib/symptom-history-context";
 import {
   getFrequencySeverity,
@@ -604,6 +605,7 @@ function ReferralScreen({
 export default function AssessmentPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
+  const { isSubscribed } = useSubscription();
   const { addResult } = useSymptomHistory();
 
   const [phase, setPhase] = useState<Phase>("safety");
@@ -729,7 +731,12 @@ export default function AssessmentPage() {
         severity,
         priorTreatment: priorTreatment.toString(),
       });
-      router.push(`/subscribe?${params.toString()}`);
+      // Subscribed users go straight to results; unsubscribed go through paywall
+      if (isSubscribed) {
+        router.push(`/assessment-results?${params.toString()}`);
+      } else {
+        router.push(`/subscribe?${params.toString()}`);
+      }
     } catch (err) {
       console.error("[assessment] submit error:", err);
       setIsSubmitting(false);
