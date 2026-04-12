@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
         },
       },
     ],
-    return_url: `${baseUrl}/shop/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
+    return_url: `${baseUrl}/patient/shop/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
     metadata: { patientId: session.patientId },
   });
 

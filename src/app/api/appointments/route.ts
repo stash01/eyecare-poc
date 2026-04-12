@@ -8,7 +8,7 @@ import { getClientIp } from "@/lib/server/request";
 
 export const dynamic = "force-dynamic";
 
-// GET /api/appointments — list current patient's appointments with provider names
+// GET /api/appointments — list current patient's appointments
 export async function GET() {
   const session = await validateSession();
   if (!session) {
@@ -18,26 +18,13 @@ export async function GET() {
   const { data: appointments, error } = await db
     .from("appointments")
     .select(
-      "id, provider_uuid, scheduled_at, duration_minutes, appointment_type, status, video_room_url"
+      "id, scheduled_at, duration_minutes, appointment_type, status, video_room_url"
     )
     .eq("patient_id", session.patientId)
     .order("scheduled_at", { ascending: false });
 
   if (error) {
     return NextResponse.json({ error: "Failed to fetch appointments" }, { status: 500 });
-  }
-
-  const providerIds = Array.from(
-    new Set((appointments ?? []).map((a) => a.provider_uuid).filter(Boolean))
-  );
-  let providerMap: Record<string, { name: string; credentials: string; specialty: string }> = {};
-
-  if (providerIds.length > 0) {
-    const { data: providers } = await db
-      .from("providers")
-      .select("id, name, credentials, specialty")
-      .in("id", providerIds);
-    providerMap = Object.fromEntries((providers ?? []).map((p) => [p.id, p]));
   }
 
   const enriched = (appointments ?? []).map((apt) => ({
@@ -47,7 +34,7 @@ export async function GET() {
     appointmentType: apt.appointment_type,
     status: apt.status,
     videoRoomUrl: apt.video_room_url,
-    provider: providerMap[apt.provider_uuid] ?? null,
+    provider: { name: "KlaraMD Provider" },
   }));
 
   return NextResponse.json({ appointments: enriched });
