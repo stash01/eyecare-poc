@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
         providerId,
         scheduledAt: startAt,
         durationMinutes,
-        videoRoomUrl: videoRoomUrl ?? undefined,
+        videoRoomUrl: videoRoomUrl ?? null,
       })
     } catch (emailErr) {
       console.error("[emr/book] Confirmation email failed:", emailErr)
