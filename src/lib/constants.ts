@@ -9,34 +9,6 @@ export const SCORING = {
   },
 } as const;
 
-// Provider data - ophthalmologists only
-export const PROVIDERS = [
-  {
-    id: 1,
-    name: "Dr. Sarah Chen",
-    credentials: "MD, FRCSC",
-    specialty: "Ophthalmologist",
-    subspecialty: "Cornea & External Disease",
-    boardCertifications: ["Royal College of Physicians and Surgeons of Canada", "American Board of Ophthalmology"],
-    expertise: ["Dry Eye Disease", "Ocular Surface Disorders", "Corneal Conditions"],
-    cpsoNumber: "12345",
-    location: "Toronto, Ontario",
-    phone: "(416) 555-0100",
-  },
-  {
-    id: 2,
-    name: "Dr. James Wilson",
-    credentials: "MD, FRCSC",
-    specialty: "Ophthalmologist",
-    subspecialty: "Oculoplastics & Tear Film",
-    boardCertifications: ["Royal College of Physicians and Surgeons of Canada"],
-    expertise: ["Meibomian Gland Dysfunction", "Blepharitis", "Punctal Procedures"],
-    cpsoNumber: "67891",
-    location: "Toronto, Ontario",
-    phone: "(416) 555-0200",
-  },
-] as const;
-
 // Messaging constants
 export const MESSAGING = {
   PLATFORM_TITLE: "KlaraMD - Board-Certified Ophthalmologist Care for Dry Eyes",
@@ -101,7 +73,6 @@ export const MGD_INFO = {
   ],
 } as const;
 
-export type Provider = typeof PROVIDERS[number];
 export type PrescriptionTreatment = typeof PRESCRIPTION_TREATMENTS[number];
 export type ProceduralTreatment = typeof PROCEDURAL_TREATMENTS[number];
 

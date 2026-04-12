@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
   const { data: appointments, error } = await db
     .from("appointments")
-    .select("id, patient_id, provider_uuid, scheduled_at, duration_minutes, video_room_url")
+    .select("id, patient_id, scheduled_at, duration_minutes, video_room_url")
     .gte("scheduled_at", windowStart)
     .lte("scheduled_at", windowEnd)
     .is("reminder_sent_at", null)
@@ -35,23 +35,20 @@ export async function GET(req: NextRequest) {
   }
 
   const patientIds = Array.from(new Set(appointments.map((a) => a.patient_id)));
-  const providerIds = Array.from(new Set(appointments.map((a) => a.provider_uuid)));
 
-  const [{ data: patients }, { data: providers }] = await Promise.all([
-    db.from("patients").select("id, email, first_name").in("id", patientIds),
-    db.from("providers").select("id, email, name").in("id", providerIds),
-  ]);
+  const { data: patients } = await db
+    .from("patients")
+    .select("id, email, first_name")
+    .in("id", patientIds);
 
   const patientMap = Object.fromEntries((patients ?? []).map((p) => [p.id, p]));
-  const providerMap = Object.fromEntries((providers ?? []).map((p) => [p.id, p]));
 
   let sent = 0;
   for (const appt of appointments) {
     const patient = patientMap[appt.patient_id];
-    const provider = providerMap[appt.provider_uuid];
 
-    if (!patient || !provider || !provider.email) {
-      console.warn(`[cron/reminders] Missing patient or provider for appointment ${appt.id}`);
+    if (!patient) {
+      console.warn(`[cron/reminders] Missing patient for appointment ${appt.id}`);
       continue;
     }
 
@@ -62,7 +59,7 @@ export async function GET(req: NextRequest) {
         durationMinutes: appt.duration_minutes,
         videoRoomUrl: appt.video_room_url ?? null,
         patient: { email: patient.email, firstName: patient.first_name },
-        provider: { email: provider.email, name: provider.name },
+        provider: { email: "noreply@klaramd.com", name: "KlaraMD Provider" },
       });
 
       await db

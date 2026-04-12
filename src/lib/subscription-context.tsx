@@ -11,14 +11,12 @@ export const PLAN_DETAILS = {
   introMonths: 3,
   monthlyPrice: 59,
   features: [
-    "Full dry eye assessment & severity score",
-    "Personalized treatment plan",
-    "Prescription suggestions",
-    "Specialist consultation booking",
+    "Full dry eye severity score and clinical assessment",
+    "Personalized treatment recommendations",
+    "Prescription and procedural treatment guidance",
+    "Book video consultations with board-certified ophthalmologists",
     "Symptom tracking history",
-    "Product recommendations",
-    "Procedural treatment guidance",
-    "Ongoing care coordination",
+    "Access to the KlaraMD product shop",
   ],
 };
 

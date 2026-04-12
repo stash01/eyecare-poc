@@ -21,7 +21,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useSubscription } from "@/lib/subscription-context";
 import { useCart } from "@/lib/cart-context";
 import { getPathway, Severity, RiskTier } from "@/lib/assessment-utils";
-import { PRODUCTS, PROVIDERS, Product } from "@/lib/constants";
+import { PRODUCTS, Product } from "@/lib/constants";
 
 const SEVERITY_CONFIG: Record<
   Severity,
@@ -121,7 +121,7 @@ function AssessmentResultsContent() {
   const riskConfig = RISK_TIER_CONFIG[riskTier];
   const pathway = getPathway(severity, priorTreatment);
   const recommendedProducts = getRecommendedProducts(severity);
-  const provider = PROVIDERS[0];
+  const provider = { name: "KlaraMD Provider", credentials: "MD, FRCSC", specialty: "Ophthalmologist", subspecialty: "Cornea & External Disease", location: "Toronto, Ontario", phone: "(416) 555-0100" };
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) router.push("/register");

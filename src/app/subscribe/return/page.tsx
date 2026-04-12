@@ -44,14 +44,8 @@ function ReturnContent() {
           await refreshUser();
           setStatus("success");
 
-          // Forward remaining query params (assessmentParams) if present
-          const forward = new URLSearchParams(searchParams.toString());
-          forward.delete("session_id");
-          const target = forward.toString()
-            ? `/assessment-results?${forward.toString()}`
-            : "/dashboard";
-
-          setTimeout(() => router.push(target), 2500);
+          const returnPath = searchParams.get("return") ?? "/patient/results";
+          setTimeout(() => router.push(returnPath), 2500);
         } else if (data.status === "open") {
           // Payment not completed — send back to subscribe
           router.push("/subscribe");

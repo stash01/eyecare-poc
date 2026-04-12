@@ -330,16 +330,19 @@ export async function sendPasswordResetEmail(
 }
 
 /**
- * Fetches patient + provider from DB by ID, then sends a confirmation (or update) email.
+ * Sends a confirmation (or update) email using supplied provider name/credentials.
+ * The providers table was dropped in migration 011 — provider info is now passed directly.
  * Fire-and-forget safe — callers should wrap in try/catch and log errors.
  */
 export async function sendConfirmationForIds({
   appointmentId,
   patientId,
-  providerId,
+  providerId: _providerId,   // kept for API compatibility, no longer used for DB lookup
   scheduledAt,
   durationMinutes,
   videoRoomUrl,
+  providerName,
+  providerCredentials,
   isUpdate = false,
 }: {
   appointmentId: string;
@@ -347,23 +350,30 @@ export async function sendConfirmationForIds({
   providerId: string;
   scheduledAt: string;
   durationMinutes: number;
-  videoRoomUrl: string | null;
+  videoRoomUrl: string | null | undefined;
+  providerName?: string;
+  providerCredentials?: string;
   isUpdate?: boolean;
 }): Promise<void> {
-  const [{ data: patientRow }, { data: providerRow }] = await Promise.all([
-    db.from("patients").select("email, first_name, last_name").eq("id", patientId).single(),
-    db.from("providers").select("email, name, credentials").eq("id", providerId).single(),
-  ]);
+  const { data: patientRow } = await db
+    .from("patients")
+    .select("email, first_name, last_name")
+    .eq("id", patientId)
+    .single();
 
-  if (!patientRow || !providerRow) return;
+  if (!patientRow) return;
 
   await sendAppointmentConfirmation({
     appointmentId,
     scheduledAt,
     durationMinutes,
-    videoRoomUrl,
+    videoRoomUrl: videoRoomUrl ?? null,
     patient: { email: patientRow.email, firstName: patientRow.first_name, lastName: patientRow.last_name },
-    provider: { email: providerRow.email ?? "", name: providerRow.name, credentials: providerRow.credentials ?? "" },
+    provider: {
+      email: "noreply@klaramd.com",
+      name: providerName ?? "KlaraMD Provider",
+      credentials: providerCredentials ?? "",
+    },
     isUpdate,
   });
 }

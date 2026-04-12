@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { assessmentParams } = body as { assessmentParams?: string };
+  const { assessmentParams, returnPath } = body as { assessmentParams?: string; returnPath?: string };
 
   // Look up patient
   const { data: patient } = await db
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     mode: "subscription",
     customer: customerId,
     line_items: [{ price: introPriceId, quantity: 1 }],
-    return_url: `${returnUrl}${returnUrl.includes("?") ? "&" : "?"}session_id={CHECKOUT_SESSION_ID}`,
+    return_url: `${returnUrl}${returnUrl.includes("?") ? "&" : "?"}session_id={CHECKOUT_SESSION_ID}&return=${encodeURIComponent(returnPath ?? "/patient/results")}`,
     metadata: {
       patientId: session.patientId,
       assessmentParams: assessmentParams ?? "",
