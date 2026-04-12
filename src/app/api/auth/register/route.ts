@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/server/db";
 import { encryptHealthCard } from "@/lib/server/crypto";
 import { logAuditEvent } from "@/lib/server/audit";
-import { createJanePatient } from "@/lib/server/jane-client";
+import { emr } from "@/lib/server/emr";
 import { sendVerificationEmail } from "@/lib/server/email";
 import { getClientIp } from "@/lib/server/request";
 
@@ -104,25 +104,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ── Sync to Jane App (Phase 2 — no-op if not configured) ───────────────
+    // ── Sync to EMR (no-op in mock mode; will write to real EMR when configured) ─
     try {
-      const janePatientId = await createJanePatient({
+      const emrPatientId = await emr.ensurePatient({
         firstName: patient.first_name,
         lastName: patient.last_name,
         email: patient.email,
-        phone: phone?.trim(),
         dateOfBirth,
         healthCardNumber: healthCardNumber?.trim(),
       });
 
-      if (janePatientId) {
+      if (emrPatientId) {
         await db
           .from("patients")
-          .update({ jane_patient_id: janePatientId })
+          .update({ emr_patient_id: emrPatientId })
           .eq("id", patient.id);
       }
-    } catch (janeError) {
-      console.error("[register] Jane patient sync failed:", janeError);
+    } catch (emrError) {
+      console.error("[register] EMR patient sync failed:", emrError);
     }
 
     // ── Create email verification token ────────────────────────────────────
