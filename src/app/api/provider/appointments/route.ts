@@ -8,6 +8,66 @@ import { getClientIp } from "@/lib/server/request";
 
 export const dynamic = "force-dynamic";
 
+// GET /api/provider/appointments — returns today's scheduled appointments
+export async function GET() {
+  const session = await validateProviderSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999);
+
+  const { data: appointments, error } = await db
+    .from("appointments")
+    .select("id, scheduled_at, duration_minutes, status, video_room_url, patient_id, assessment_result_id")
+    .gte("scheduled_at", todayStart.toISOString())
+    .lte("scheduled_at", todayEnd.toISOString())
+    .eq("status", "scheduled")
+    .order("scheduled_at", { ascending: true });
+
+  if (error) {
+    return NextResponse.json({ error: "Failed to fetch appointments" }, { status: 500 });
+  }
+
+  const enriched = await Promise.all(
+    (appointments ?? []).map(async appt => {
+      const { data: patient } = await db
+        .from("patients")
+        .select("first_name, last_name")
+        .eq("id", appt.patient_id)
+        .single();
+
+      let assessmentSeverity: string | null = null;
+      let assessmentRiskTier: string | null = null;
+      if (appt.assessment_result_id) {
+        const { data: a } = await db
+          .from("assessment_results")
+          .select("severity, risk_tier")
+          .eq("id", appt.assessment_result_id)
+          .single();
+        assessmentSeverity = a?.severity ?? null;
+        assessmentRiskTier = a?.risk_tier ?? null;
+      }
+
+      return {
+        id: appt.id,
+        scheduledAt: appt.scheduled_at,
+        durationMinutes: appt.duration_minutes,
+        status: appt.status,
+        videoRoomUrl: appt.video_room_url,
+        patientName: patient ? `${patient.first_name} ${patient.last_name}` : "Unknown Patient",
+        assessmentSeverity,
+        assessmentRiskTier,
+      };
+    })
+  );
+
+  return NextResponse.json({ appointments: enriched });
+}
+
 // POST /api/provider/appointments — provider confirms a time for a pending consultation request
 export async function POST(req: NextRequest) {
   const session = await validateProviderSession();
