@@ -295,7 +295,7 @@
 <body>
 
 <h1>KlaraMD User Flow Diagram</h1>
-<p class="subtitle">EyeCare Telehealth Platform &mdash; Updated flow with reversed scheduling model: patients submit availability, providers book appointments</p>
+<p class="subtitle">EyeCare Telehealth Platform &mdash; EMR-integrated scheduling: patients book from live EMR availability slots; clinical notes pushed back to EMR post-consultation</p>
 
 <div class="legend">
   <div class="legend-item">
@@ -340,7 +340,7 @@
     <div class="section-icon" style="background:linear-gradient(135deg,#3b82f6,#10b981);">&#x1F9D1;</div>
     <div>
       <div class="section-title">New Patient Journey</div>
-      <div class="section-desc">First-time user: Home &rarr; Register &rarr; Dashboard &rarr; Assessment &rarr; Subscribe &rarr; Results</div>
+      <div class="section-desc">First-time user: Home &rarr; Register &rarr; Patient Dashboard &rarr; Assessment (free) &rarr; Results (soft gate) &rarr; Subscribe &rarr; Results (full) &rarr; Book via EMR</div>
     </div>
   </div>
 
@@ -376,8 +376,8 @@
         </div>
 
         <div class="node node-entry" style="min-width:200px;">
-          <div class="node-title">Dashboard (Hub)</div>
-          <div class="node-route">/dashboard</div>
+          <div class="node-title">Patient Dashboard</div>
+          <div class="node-route">/patient/dashboard</div>
           <div class="node-detail">3 pathway cards, appointments, prescriptions, symptom widget</div>
         </div>
       </div>
@@ -404,7 +404,7 @@
           <div class="branch-path-label label-green">Pathway 2</div>
           <div class="node node-clinical">
             <div class="node-title">Symptom Tracker</div>
-            <div class="node-route">/dashboard/symptom-tracker</div>
+            <div class="node-route">/patient/dashboard/symptom-tracker</div>
             <div class="node-detail">Full history, trend chart, assessment table with severity badges</div>
           </div>
         </div>
@@ -414,8 +414,9 @@
           <div class="branch-path-label label-amber">Pathway 3 (Main)</div>
           <div class="node node-clinical" style="min-width:200px;">
             <div class="node-title">Assessment</div>
-            <div class="node-route">/assessment</div>
+            <div class="node-route">/patient/assessment</div>
             <div class="node-detail" style="text-align:left;">
+              Free — no gate<br>
               <strong>Phase 1:</strong> Safety Screening (7 Qs)<br>
               <strong>Phase 2:</strong> DEWS3 Assessment (14 Qs)
             </div>
@@ -429,12 +430,25 @@
         <div style="font-size:12px;color:#64748b;font-weight:600;">Assessment completed (no red flags)</div>
       </div>
 
-      <!-- Row 3: Subscribe → Assessment Results -->
+      <!-- Row 3: Results (soft gate) → Subscribe → Results (full) -->
       <div class="flow-row">
+        <div class="node node-result" style="min-width:200px;">
+          <div class="node-title">Results (Teaser)</div>
+          <div class="node-route">/patient/results</div>
+          <div class="node-detail">Severity score visible; product recs + booking CTA blurred. Soft gate — unsubscribed users see teaser and subscribe prompt.</div>
+        </div>
+
+        <div class="arrow">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="arrow-label">Unsubscribed</div>
+            <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+          </div>
+        </div>
+
         <div class="node node-paywall" style="min-width:200px;">
           <div class="node-title">Subscribe (Paywall)</div>
           <div class="node-route">/subscribe</div>
-          <div class="node-detail">Klara Membership: $99/first 3 months, then $59/month. All features included. Auto-redirects if already subscribed.</div>
+          <div class="node-detail">Klara Membership: $99/first 3 months, then $59/month. Auto-redirects if already subscribed.</div>
         </div>
 
         <div class="arrow">
@@ -445,16 +459,16 @@
         </div>
 
         <div class="node node-result" style="min-width:220px;">
-          <div class="node-title">Assessment Results</div>
-          <div class="node-route">/assessment-results</div>
-          <div class="node-detail">Severity score, product recs by severity, Rx suggestions, procedural treatments, booking CTA</div>
+          <div class="node-title">Results (Full)</div>
+          <div class="node-route">/patient/results</div>
+          <div class="node-detail">Severity score, product recs by severity, Rx suggestions, procedural treatments, EMR booking CTA</div>
         </div>
       </div>
 
       <!-- Results branching -->
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
         <svg width="24" height="32" viewBox="0 0 24 32"><line x1="12" y1="0" x2="12" y2="24" stroke="#94a3b8" stroke-width="2"/><polygon points="6,24 12,32 18,24" fill="#94a3b8"/></svg>
-        <div style="font-size:12px;color:#64748b;font-weight:600;">Results page actions</div>
+        <div style="font-size:12px;color:#64748b;font-weight:600;">Results page actions (subscribed)</div>
       </div>
 
       <div class="branch-paths" style="gap:32px;">
@@ -463,6 +477,7 @@
           <div class="branch-path-label label-green">By Severity</div>
           <div class="node node-shop">
             <div class="node-title">Product Recommendations</div>
+            <div class="node-route">/patient/shop</div>
             <div class="node-detail" style="text-align:left;">
               Mild: tears + compresses<br>
               Moderate: + lid care, supplements, Rx<br>
@@ -471,13 +486,13 @@
           </div>
         </div>
 
-        <!-- Request consultation -->
+        <!-- Book via EMR -->
         <div class="branch-path">
           <div class="branch-path-label label-amber">CTA</div>
           <div class="node node-action">
-            <div class="node-title">Request Consultation</div>
-            <div class="node-route">/request-consultation</div>
-            <div class="node-detail">Select available time blocks; provider books specific slot</div>
+            <div class="node-title">Book Appointment</div>
+            <div class="node-route">/patient/booking</div>
+            <div class="node-detail">EMR-backed slot picker; fetches live availability from EMR adapter</div>
           </div>
         </div>
 
@@ -486,7 +501,7 @@
           <div class="branch-path-label label-red">Red Flags (Phase 1)</div>
           <div class="node node-danger" style="min-width:160px;">
             <div class="node-title">In-Person Referral</div>
-            <div class="node-route">/assessment (referral)</div>
+            <div class="node-route">/patient/assessment (referral)</div>
             <div class="node-detail">Emergency warning, find ophthalmologist, retake option</div>
           </div>
         </div>
@@ -497,31 +512,31 @@
 
   <div class="note">
     <span class="note-icon">&#9432;</span>
-    <span>Register redirects to <code>/dashboard</code>. Assessment completion → <code>/subscribe</code> (paywall). After subscribing → <code>/assessment-results</code> with severity-filtered product recs. The "Request Consultation" CTA now goes to <code>/request-consultation</code> (not <code>/booking</code>) — patients declare availability, providers book from the provider dashboard.</span>
+    <span>Register redirects to <code>/patient/dashboard</code>. Assessment (<code>/patient/assessment</code>) is free — no paywall. Results (<code>/patient/results</code>) are soft-gated: unsubscribed patients see a teaser with blurred recs and a subscribe prompt. After subscribing → full results with "Book Appointment" CTA linking to <code>/patient/booking</code> (EMR slot picker). Booking/dashboard/shop are hard-gated (subscription required).</span>
   </div>
 </div>
 
 <!-- ============================================ -->
-<!-- FLOW 2: CONSULTATION REQUEST & SCHEDULING    -->
+<!-- FLOW 2: EMR-BACKED BOOKING                   -->
 <!-- ============================================ -->
 <div class="section">
   <div class="section-header">
     <div class="section-icon" style="background:linear-gradient(135deg,#f97316,#3b82f6);">&#x1F4C5;</div>
     <div>
-      <div class="section-title">Consultation Request &amp; Scheduling Flow</div>
-      <div class="section-desc">Reversed model: patient declares availability &rarr; provider books the specific appointment</div>
+      <div class="section-title">EMR-Backed Booking &amp; Post-Consultation Flow</div>
+      <div class="section-desc">Patient picks from live EMR slots &rarr; appointment created in EMR &rarr; provider views detail &rarr; notes pushed back to EMR</div>
     </div>
   </div>
 
-  <!-- Phase 1: Patient side -->
-  <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Phase 1 — Patient Submits Availability</div>
+  <!-- Phase 1: Patient books -->
+  <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Phase 1 — Patient Books via EMR Slot Picker</div>
   <div class="scroll-container">
-    <div class="flow-row" style="min-width:1000px;justify-content:flex-start;">
+    <div class="flow-row" style="min-width:1100px;justify-content:flex-start;">
 
-      <div class="node node-result" style="min-width:200px;">
-        <div class="node-title">Assessment Results</div>
-        <div class="node-route">/assessment-results</div>
-        <div class="node-detail">"Request Consultation" CTA (linked to most recent assessment)</div>
+      <div class="node node-result" style="min-width:180px;">
+        <div class="node-title">Results (Full)</div>
+        <div class="node-route">/patient/results</div>
+        <div class="node-detail">"Book Appointment" CTA</div>
       </div>
 
       <div class="arrow">
@@ -533,8 +548,8 @@
 
       <div class="node node-entry" style="min-width:180px;">
         <div class="node-title">Patient Dashboard</div>
-        <div class="node-route">/dashboard</div>
-        <div class="node-detail">"Request a Specialist" banner CTA</div>
+        <div class="node-route">/patient/dashboard</div>
+        <div class="node-detail">"Book a Consultation" banner CTA</div>
       </div>
 
       <div class="arrow">
@@ -545,91 +560,75 @@
       </div>
 
       <div class="node node-action" style="min-width:200px;">
-        <div class="node-title">Request Consultation</div>
-        <div class="node-route">/request-consultation</div>
+        <div class="node-title">Book Appointment</div>
+        <div class="node-route">/patient/booking</div>
         <div class="node-detail" style="text-align:left;">
-          14-day grid (weekdays)<br>
-          Morning: 9am–12pm<br>
-          Afternoon: 1pm–5pm<br>
-          Optional notes for specialist
+          GET /api/emr/slots<br>
+          EMR adapter returns available slots<br>
+          Patient selects date + time
         </div>
       </div>
 
       <div class="arrow">
         <div style="display:flex;flex-direction:column;align-items:center;">
-          <div class="arrow-label">Submit</div>
+          <div class="arrow-label">"Confirm"</div>
           <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
         </div>
       </div>
 
-      <div class="node node-end" style="min-width:200px;">
-        <div class="node-title">Request Saved (DB)</div>
+      <div class="node node-end" style="min-width:220px;">
+        <div class="node-title">Appointment Created</div>
         <div class="node-detail" style="text-align:left;">
-          consultation_requests row (pending)<br>
-          patient_availability rows<br>
-          Auto-linked to latest assessment
+          POST /api/emr/book<br>
+          appointments row (scheduled)<br>
+          emr_appointment_id stored<br>
+          Confirmation email sent
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- Phase 2: Provider side -->
-  <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin:24px 0 12px;">Phase 2 — Provider Books the Appointment</div>
+  <!-- Phase 2: Consultation -->
+  <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin:24px 0 12px;">Phase 2 — Consultation &amp; Post-Consultation</div>
   <div class="scroll-container">
-    <div class="flow-row" style="min-width:1000px;justify-content:flex-start;">
-
-      <div class="node node-provider" style="min-width:220px;">
-        <div class="node-title">Provider Dashboard</div>
-        <div class="node-route">/provider</div>
-        <div class="node-detail" style="text-align:left;">
-          <strong>Pending Requests tab</strong><br>
-          Shows: patient name, severity,<br>
-          risk flags, patient notes,<br>
-          available time blocks
-        </div>
-      </div>
-
-      <div class="arrow">
-        <div style="display:flex;flex-direction:column;align-items:center;">
-          <div class="arrow-label">Select block</div>
-          <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
-        </div>
-      </div>
+    <div class="flow-row" style="min-width:1100px;justify-content:flex-start;">
 
       <div class="node node-provider" style="min-width:200px;">
-        <div class="node-title">Pick 15-min Slot</div>
+        <div class="node-title">Provider Dashboard</div>
+        <div class="node-route">/provider/dashboard</div>
         <div class="node-detail" style="text-align:left;">
-          Slots generated within<br>
-          selected availability block<br>
-          Assign to provider
+          Read-only list of appointments<br>
+          Status badges, upcoming schedule<br>
+          Click any row for detail
         </div>
       </div>
 
       <div class="arrow">
         <div style="display:flex;flex-direction:column;align-items:center;">
-          <div class="arrow-label">"Confirm Appointment"</div>
+          <div class="arrow-label">Select appt</div>
           <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
         </div>
       </div>
 
-      <div class="node node-end" style="min-width:200px;">
-        <div class="node-title">Appointment Created (DB)</div>
+      <div class="node node-provider" style="min-width:220px;">
+        <div class="node-title">Appointment Detail</div>
+        <div class="node-route">/provider/appointments/[id]</div>
         <div class="node-detail" style="text-align:left;">
-          appointments row (scheduled)<br>
-          consultation_request → scheduled<br>
-          Validates slot within window
+          Patient info + assessment data<br>
+          DEWS3 scores, risk flags<br>
+          Clinical notes, "Start Video" link
         </div>
       </div>
 
       <div class="arrow">
         <div style="display:flex;flex-direction:column;align-items:center;">
-          <div class="arrow-label">Join when live</div>
+          <div class="arrow-label">"Start Video"</div>
           <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
         </div>
       </div>
 
-      <div class="node node-clinical" style="min-width:200px;">
+      <div class="node node-clinical" style="min-width:180px;">
         <div class="node-title">Video Consultation</div>
         <div class="node-route">/consultation</div>
         <div class="node-detail" style="text-align:left;">
@@ -640,12 +639,29 @@
         </div>
       </div>
 
+      <div class="arrow">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="arrow-label">Post-consult</div>
+          <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+        </div>
+      </div>
+
+      <div class="node node-end" style="min-width:200px;">
+        <div class="node-title">Note → EMR</div>
+        <div class="node-detail" style="text-align:left;">
+          POST /api/emr/notes/retry<br>
+          emr_note_id stored on success<br>
+          note_push_status tracked<br>
+          Cron retries on failure
+        </div>
+      </div>
+
     </div>
   </div>
 
   <div class="note">
     <span class="note-icon">&#9432;</span>
-    <span><strong>Reversed scheduling model:</strong> Patients declare when they are free; providers review pending requests and book the specific 15-min appointment from within the patient's windows. On booking, confirmation emails with .ics calendar attachments are sent to both patient and provider. Reminder emails fire 1 hour before via cron-job.org. The old <code>/booking</code> page remains in the codebase but is no longer the primary consultation scheduling path.</span>
+    <span><strong>EMR adapter pattern:</strong> <code>EmrAdapter</code> interface + <code>MockEmrAdapter</code> — swap one line to connect a real EMR (e.g. Jane App). <code>/api/emr/slots</code> fetches live provider availability; <code>/api/emr/book</code> creates the appointment in both the EMR and the local DB (storing <code>emr_appointment_id</code>). After the consultation, clinical notes are pushed via <code>/api/emr/notes/retry</code>; failed pushes enter the <code>emr_note_retry_queue</code> and are retried by cron. Confirmation emails with .ics attachments are sent on booking; reminder emails fire 1 hour before via cron.</span>
   </div>
 </div>
 
@@ -690,8 +706,8 @@
         </div>
 
         <div class="node node-entry" style="min-width:200px;">
-          <div class="node-title">Dashboard (Hub)</div>
-          <div class="node-route">/dashboard</div>
+          <div class="node-title">Patient Dashboard</div>
+          <div class="node-route">/patient/dashboard</div>
           <div class="node-detail">Central hub with 3 pathway cards</div>
         </div>
       </div>
@@ -715,7 +731,7 @@
           <div class="branch-path-label label-green">Pathway</div>
           <div class="node node-clinical">
             <div class="node-title">Symptom Tracker</div>
-            <div class="node-route">/dashboard/symptom-tracker</div>
+            <div class="node-route">/patient/dashboard/symptom-tracker</div>
           </div>
         </div>
 
@@ -723,7 +739,7 @@
           <div class="branch-path-label label-amber">Pathway</div>
           <div class="node node-clinical">
             <div class="node-title">Take/Retake Assessment</div>
-            <div class="node-route">/assessment</div>
+            <div class="node-route">/patient/assessment</div>
           </div>
         </div>
 
@@ -738,9 +754,9 @@
         <div class="branch-path">
           <div class="branch-path-label label-amber">Specialist</div>
           <div class="node node-action">
-            <div class="node-title">Request Consultation</div>
-            <div class="node-route">/request-consultation</div>
-            <div class="node-detail">Availability grid → pending request</div>
+            <div class="node-title">Book Appointment</div>
+            <div class="node-route">/patient/booking</div>
+            <div class="node-detail">EMR slot picker → confirmed booking</div>
           </div>
         </div>
       </div>
@@ -749,7 +765,7 @@
 
   <div class="note">
     <span class="note-icon">&#9432;</span>
-    <span>Dashboard requires authentication. Unauthenticated users are redirected to <code>/login</code>. The "Request a Specialist Consultation" banner is always visible on the dashboard and navigates to <code>/request-consultation</code>. Once a provider books the request, the confirmed appointment appears in the dashboard's Upcoming Appointment card.</span>
+    <span>Dashboard requires authentication + subscription (hard gate). Unauthenticated users are redirected to <code>/login</code>. The "Book a Consultation" banner navigates to <code>/patient/booking</code> (EMR slot picker). Confirmed upcoming appointments appear in the dashboard's Upcoming Appointment card.</span>
   </div>
 </div>
 
@@ -761,7 +777,7 @@
     <div class="section-icon" style="background:linear-gradient(135deg,#ec4899,#a855f7);">&#x1FA7A;</div>
     <div>
       <div class="section-title">Provider Flow</div>
-      <div class="section-desc">Healthcare provider login, patient queue, assessments tab, and consultation</div>
+      <div class="section-desc">Healthcare provider login, read-only appointment list, appointment detail with patient assessment data, video consultation</div>
     </div>
   </div>
 
@@ -795,18 +811,35 @@
 
         <div class="node node-provider" style="min-width:220px;">
           <div class="node-title">Provider Dashboard</div>
-          <div class="node-route">/provider</div>
+          <div class="node-route">/provider/dashboard</div>
           <div class="node-detail" style="text-align:left;">
-            <strong>3 Tabs:</strong><br>
-            1. <strong>Pending Requests (live DB)</strong><br>
-            2. Today's Schedule<br>
-            3. Patient Assessments
+            Read-only appointment list<br>
+            Status badges (scheduled,<br>
+            completed, cancelled)<br>
+            Click any row for detail
           </div>
         </div>
 
         <div class="arrow">
           <div style="display:flex;flex-direction:column;align-items:center;">
-            <div class="arrow-label">"Start Consultation"</div>
+            <div class="arrow-label">Select appointment</div>
+            <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
+          </div>
+        </div>
+
+        <div class="node node-provider" style="min-width:220px;">
+          <div class="node-title">Appointment Detail</div>
+          <div class="node-route">/provider/appointments/[id]</div>
+          <div class="node-detail" style="text-align:left;">
+            Patient info, DEWS3 scores<br>
+            Risk flags, treatment plan<br>
+            Clinical notes, "Start Video"
+          </div>
+        </div>
+
+        <div class="arrow">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="arrow-label">"Start Video"</div>
             <svg viewBox="0 0 40 24"><line x1="0" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2"/><polygon points="32,6 40,12 32,18" fill="#94a3b8"/></svg>
           </div>
         </div>
@@ -817,97 +850,12 @@
           <div class="node-detail">Shared consultation room with patient</div>
         </div>
       </div>
-
-      <!-- Provider dashboard tabs -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-        <svg width="24" height="24" viewBox="0 0 24 24"><line x1="12" y1="0" x2="12" y2="16" stroke="#94a3b8" stroke-width="2"/><polygon points="6,16 12,24 18,16" fill="#94a3b8"/></svg>
-        <div style="font-size:12px;color:#64748b;font-weight:600;">Provider Dashboard Tabs</div>
-      </div>
-
-      <div class="branch-paths" style="gap:24px;">
-        <div class="branch-path">
-          <div class="branch-path-label label-pink">Tab 1 (Primary)</div>
-          <div class="node node-provider" style="min-width:220px;">
-            <div class="node-title">Pending Requests (live)</div>
-            <div class="node-detail" style="text-align:left;">
-              Fetches from DB in real-time<br>
-              Per request: patient name,<br>
-              severity, risk flags, notes,<br>
-              available blocks → slot picker<br>
-              → assign provider → book
-            </div>
-          </div>
-        </div>
-
-        <div class="branch-path">
-          <div class="branch-path-label label-pink">Tab 2</div>
-          <div class="node node-provider" style="min-width:180px;">
-            <div class="node-title">Today's Schedule</div>
-            <div class="node-detail" style="text-align:left;">
-              Live appointments from DB<br>
-              Status badges, Join video links<br>
-              15-min default slots
-            </div>
-          </div>
-        </div>
-
-        <div class="branch-path">
-          <div class="branch-path-label label-pink">Tab 3</div>
-          <div class="node node-provider" style="min-width:220px;">
-            <div class="node-title">Patient Assessments</div>
-            <div class="node-detail" style="text-align:left;">
-              Severity, scores, risk flags<br>
-              Expandable treatment plan:<br>
-              OTC recs, Rx (moderate+),<br>
-              Procedures (severe),<br>
-              condition-specific notes
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Provider sidebar nav -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-        <svg width="24" height="24" viewBox="0 0 24 24"><line x1="12" y1="0" x2="12" y2="16" stroke="#94a3b8" stroke-width="2"/><polygon points="6,16 12,24 18,16" fill="#94a3b8"/></svg>
-        <div style="font-size:12px;color:#64748b;font-weight:600;">Provider Sidebar Navigation (wireframe only)</div>
-      </div>
-
-      <div class="branch-paths" style="gap:24px;">
-        <div class="branch-path">
-          <div class="branch-path-label label-purple">Nav</div>
-          <div class="node node-end">
-            <div class="node-title">Schedule</div>
-            <div class="node-route">/provider/schedule</div>
-          </div>
-        </div>
-        <div class="branch-path">
-          <div class="branch-path-label label-purple">Nav</div>
-          <div class="node node-end">
-            <div class="node-title">Patient Records</div>
-            <div class="node-route">/provider/patients</div>
-          </div>
-        </div>
-        <div class="branch-path">
-          <div class="branch-path-label label-purple">Nav</div>
-          <div class="node node-end">
-            <div class="node-title">OHIP Billing</div>
-            <div class="node-route">/provider/billing</div>
-          </div>
-        </div>
-        <div class="branch-path">
-          <div class="branch-path-label label-purple">Nav</div>
-          <div class="node node-end">
-            <div class="node-title">Settings</div>
-            <div class="node-route">/provider/settings</div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
   <div class="note">
     <span class="note-icon">&#9432;</span>
-    <span><strong>Pending Requests tab is now the primary provider view.</strong> Requests load live from <code>consultation_requests</code> + <code>patient_availability</code> tables. Provider selects an availability block, picks a 15-min slot, and clicks "Confirm Appointment" — this writes to <code>appointments</code>, marks the request as scheduled, creates a Daily.co video room, and sends confirmation emails with .ics attachments to patient and provider.</span>
+    <span><strong>Provider portal is read-only.</strong> Patients book appointments via the EMR slot picker (<code>/patient/booking</code>); providers do not need to schedule directly. <code>/provider/dashboard</code> shows the appointment list. <code>/provider/appointments/[id]</code> shows full patient context — DEWS3 scores, risk flags, assessment history, and the clinical notes section. Post-consultation, notes are pushed to the EMR via <code>/api/emr/notes/retry</code> with automatic retry on failure.</span>
   </div>
 </div>
 
@@ -1037,7 +985,7 @@
     <div class="section-icon" style="background:linear-gradient(135deg,#22c55e,#10b981);">&#x1F6D2;</div>
     <div>
       <div class="section-title">Shop / E-Commerce Flow (Phase 4)</div>
-      <div class="section-desc">Product browsing, cart, checkout (no auth required)</div>
+      <div class="section-desc">Product browsing, cart, checkout — subscription required (hard gate under /patient/shop)</div>
     </div>
   </div>
 
@@ -1058,7 +1006,7 @@
 
       <div class="node node-shop">
         <div class="node-title">Shop</div>
-        <div class="node-route">/shop</div>
+        <div class="node-route">/patient/shop</div>
         <div class="node-detail">Product grid, category filter, add to cart</div>
       </div>
 
@@ -1071,7 +1019,7 @@
 
       <div class="node node-shop">
         <div class="node-title">Product Detail</div>
-        <div class="node-route">/shop/[productId]</div>
+        <div class="node-route">/patient/shop/[productId]</div>
         <div class="node-detail">Images, description, quantity, add to cart</div>
       </div>
 
@@ -1084,7 +1032,7 @@
 
       <div class="node node-shop">
         <div class="node-title">Cart</div>
-        <div class="node-route">/shop/cart</div>
+        <div class="node-route">/patient/shop/cart</div>
         <div class="node-detail">Items, quantities, subtotal, tax, free shipping threshold</div>
       </div>
 
@@ -1097,7 +1045,7 @@
 
       <div class="node node-shop">
         <div class="node-title">Checkout</div>
-        <div class="node-route">/shop/checkout</div>
+        <div class="node-route">/patient/shop/checkout</div>
         <div class="node-detail">Shipping info, payment, order summary</div>
       </div>
 
@@ -1110,7 +1058,7 @@
 
       <div class="node node-shop">
         <div class="node-title">Order Confirmation</div>
-        <div class="node-route">/shop/order-confirmation</div>
+        <div class="node-route">/patient/shop/order-confirmation</div>
         <div class="node-detail">Order #, delivery estimate, continue shopping</div>
       </div>
     </div>
@@ -1143,145 +1091,127 @@
         <td style="padding:10px 12px;font-family:monospace;color:#3b82f6;">/</td>
         <td style="padding:10px 12px;">Home / Landing Page</td>
         <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/register, /login, /dashboard, /shop</td>
+        <td style="padding:10px 12px;font-size:12px;">/register, /login, /patient/dashboard, /patient/shop</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
         <td style="padding:10px 12px;font-family:monospace;color:#a855f7;">/register</td>
         <td style="padding:10px 12px;">Patient Registration</td>
         <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/dashboard (on submit or if already auth'd)</td>
+        <td style="padding:10px 12px;font-size:12px;">/patient/dashboard (on submit or if already auth'd). Calls emr.ensurePatient() to create EMR patient record (emr_patient_id stored).</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;">
         <td style="padding:10px 12px;font-family:monospace;color:#a855f7;">/login</td>
         <td style="padding:10px 12px;">Login (Patient + Provider)</td>
         <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/dashboard (patient), /provider (provider)</td>
+        <td style="padding:10px 12px;font-size:12px;">/patient/dashboard (patient), /provider/dashboard (provider)</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
-        <td style="padding:10px 12px;font-family:monospace;color:#3b82f6;">/dashboard</td>
+        <td style="padding:10px 12px;font-family:monospace;color:#3b82f6;">/patient/dashboard</td>
         <td style="padding:10px 12px;">Patient Dashboard (Hub)</td>
-        <td style="padding:10px 12px;"><span style="color:#ef4444;">Required</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/blog, /dashboard/symptom-tracker, /assessment, /request-consultation, /consultation</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Auth + Sub</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/blog, /patient/dashboard/symptom-tracker, /patient/assessment, /patient/booking, /consultation</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;">
         <td style="padding:10px 12px;font-family:monospace;color:#3b82f6;">/blog</td>
         <td style="padding:10px 12px;">Blog &amp; Community (Placeholder)</td>
         <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/dashboard</td>
+        <td style="padding:10px 12px;font-size:12px;">/patient/dashboard</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
-        <td style="padding:10px 12px;font-family:monospace;color:#10b981;">/dashboard/symptom-tracker</td>
+        <td style="padding:10px 12px;font-family:monospace;color:#10b981;">/patient/dashboard/symptom-tracker</td>
         <td style="padding:10px 12px;">Symptom History &amp; Tracker</td>
         <td style="padding:10px 12px;"><span style="color:#ef4444;">Required</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/assessment, /dashboard</td>
+        <td style="padding:10px 12px;font-size:12px;">/patient/assessment, /patient/dashboard</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;">
-        <td style="padding:10px 12px;font-family:monospace;color:#10b981;">/assessment</td>
+        <td style="padding:10px 12px;font-family:monospace;color:#10b981;">/patient/assessment</td>
         <td style="padding:10px 12px;">Symptom Assessment (2-phase)</td>
-        <td style="padding:10px 12px;"><span style="color:#ef4444;">Required</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/subscribe (scores via query params) or referral screen</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Auth only (free)</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/patient/results (scores via query params) or referral screen. No subscription required.</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
+        <td style="padding:10px 12px;font-family:monospace;color:#eab308;">/patient/results</td>
+        <td style="padding:10px 12px;">Assessment Results</td>
+        <td style="padding:10px 12px;"><span style="color:#f97316;">Soft gate</span></td>
+        <td style="padding:10px 12px;font-size:12px;">Unsubscribed: teaser view → /subscribe. Subscribed: full results with product recs by severity, "Book Appointment" CTA → /patient/booking, /patient/shop.</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;">
         <td style="padding:10px 12px;font-family:monospace;color:#d946ef;">/subscribe</td>
         <td style="padding:10px 12px;">Subscription Paywall</td>
         <td style="padding:10px 12px;"><span style="color:#ef4444;">Required</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/assessment-results (on subscribe), /dashboard. Single plan: Klara Membership ($99/3 months, then $59/month). Auto-redirects if already subscribed.</td>
+        <td style="padding:10px 12px;font-size:12px;">/patient/results (on subscribe), /patient/dashboard. Single plan: Klara Membership ($99/3 months, then $59/month). Auto-redirects if already subscribed.</td>
       </tr>
-      <tr style="border-bottom:1px solid #f1f5f9;">
-        <td style="padding:10px 12px;font-family:monospace;color:#eab308;">/assessment-results</td>
-        <td style="padding:10px 12px;">Assessment Results &amp; Recommendations</td>
+      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
+        <td style="padding:10px 12px;font-family:monospace;color:#f97316;">/patient/booking</td>
+        <td style="padding:10px 12px;">EMR Slot Picker</td>
         <td style="padding:10px 12px;"><span style="color:#ef4444;">Auth + Sub</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/shop, /request-consultation, /dashboard. Products by severity, Rx suggestions, "Request Consultation" CTA (auto-links latest assessment).</td>
-      </tr>
-      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
-        <td style="padding:10px 12px;font-family:monospace;color:#f97316;">/request-consultation</td>
-        <td style="padding:10px 12px;">Patient Availability Submission</td>
-        <td style="padding:10px 12px;"><span style="color:#ef4444;">Required</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/dashboard (on submit). 14-day grid, morning/afternoon blocks. Creates consultation_request + patient_availability rows.</td>
+        <td style="padding:10px 12px;font-size:12px;">GET /api/emr/slots → live EMR availability. POST /api/emr/book on confirm → appointment created (emr_appointment_id stored). Confirmation email + .ics sent.</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;">
-        <td style="padding:10px 12px;font-family:monospace;color:#94a3b8;">/booking</td>
-        <td style="padding:10px 12px;">Provider Availability Booking (secondary)</td>
-        <td style="padding:10px 12px;"><span style="color:#ef4444;">Required</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/confirmation. Still functional (live provider availability from DB) but no longer the primary consultation path — use /request-consultation instead.</td>
-      </tr>
-      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
-        <td style="padding:10px 12px;font-family:monospace;color:#f97316;">/confirmation</td>
-        <td style="padding:10px 12px;">Booking Confirmation</td>
-        <td style="padding:10px 12px;"><span style="color:#ef4444;">Required</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/dashboard, /. Server component — fetches real appointment + provider from DB via ?id= param.</td>
-      </tr>
-      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
         <td style="padding:10px 12px;font-family:monospace;color:#10b981;">/consultation</td>
         <td style="padding:10px 12px;">Video Consultation</td>
         <td style="padding:10px 12px;"><span style="color:#22c55e;">Public*</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/dashboard (end call)</td>
+        <td style="padding:10px 12px;font-size:12px;">/patient/dashboard (end call)</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
+        <td style="padding:10px 12px;font-family:monospace;color:#ec4899;">/provider/dashboard</td>
+        <td style="padding:10px 12px;">Provider Dashboard</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Provider session</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/provider/appointments/[id]. Read-only appointment list with status badges. Patients book via EMR — no provider-side scheduling needed.</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;">
-        <td style="padding:10px 12px;font-family:monospace;color:#ec4899;">/provider</td>
-        <td style="padding:10px 12px;">Provider Dashboard (4 tabs)</td>
+        <td style="padding:10px 12px;font-family:monospace;color:#ec4899;">/provider/appointments/[id]</td>
+        <td style="padding:10px 12px;">Appointment Detail</td>
         <td style="padding:10px 12px;"><span style="color:#ef4444;">Provider session</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/consultation. Tabs: Schedule (live appointments from DB), Pending Requests (book 15-min slots from patient availability), Availability (weekly schedule editor), Patient Assessments. Booking triggers confirmation email + .ics to patient and provider.</td>
+        <td style="padding:10px 12px;font-size:12px;">/consultation ("Start Video"). Shows patient DEWS3 scores, risk flags, assessment history, clinical notes. Notes pushed to EMR via /api/emr/notes/retry post-consultation.</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
         <td style="padding:10px 12px;font-family:monospace;color:#f59e0b;">/admin</td>
         <td style="padding:10px 12px;">Admin Panel (4 tabs)</td>
         <td style="padding:10px 12px;"><span style="color:#ef4444;">Auth + isAdmin</span></td>
-        <td style="padding:10px 12px;font-size:12px;">Tabs: Patients, Assessments, Appointments, Schedule. Schedule tab: assign pending requests to any provider, edit all appointment fields (date/time/provider/duration/status), master schedule view. Header: Take Assessment, Start Ad-hoc Meeting (Daily.co). Edits send update emails.</td>
+        <td style="padding:10px 12px;font-size:12px;">Tabs: Patients, Assessments, Appointments, Schedule. Edit all appointment fields (date/time/provider/duration/status). Header: Take Assessment, Start Ad-hoc Meeting (Daily.co). Edits send update emails.</td>
       </tr>
-      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
-        <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/shop</td>
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/patient/shop</td>
         <td style="padding:10px 12px;">Product Listing</td>
-        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/shop/[productId], /shop/cart</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Auth + Sub</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/patient/shop/[productId], /patient/shop/cart</td>
       </tr>
-      <tr style="border-bottom:1px solid #f1f5f9;">
-        <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/shop/[productId]</td>
+      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
+        <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/patient/shop/[productId]</td>
         <td style="padding:10px 12px;">Product Detail</td>
-        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/shop, /shop/cart</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Auth + Sub</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/patient/shop, /patient/shop/cart</td>
       </tr>
-      <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
-        <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/shop/cart</td>
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/patient/shop/cart</td>
         <td style="padding:10px 12px;">Shopping Cart</td>
-        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/shop, /shop/checkout</td>
-      </tr>
-      <tr style="border-bottom:1px solid #f1f5f9;">
-        <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/shop/checkout</td>
-        <td style="padding:10px 12px;">Checkout</td>
-        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/shop/order-confirmation</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Auth + Sub</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/patient/shop, /patient/shop/checkout</td>
       </tr>
       <tr style="border-bottom:1px solid #f1f5f9;background:#fafafa;">
-        <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/shop/order-confirmation</td>
-        <td style="padding:10px 12px;">Order Confirmation</td>
-        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
-        <td style="padding:10px 12px;font-size:12px;">/shop, /</td>
-      </tr>
-      <tr style="border-bottom:1px solid #f1f5f9;">
-        <td style="padding:10px 12px;font-family:monospace;color:#94a3b8;">/results</td>
-        <td style="padding:10px 12px;">Legacy Results (unlinked)</td>
-        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
-        <td style="padding:10px 12px;font-size:12px;">Still accessible directly but not linked in navigation</td>
+        <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/patient/shop/checkout</td>
+        <td style="padding:10px 12px;">Checkout</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Auth + Sub</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/patient/shop/order-confirmation</td>
       </tr>
       <tr>
-        <td style="padding:10px 12px;font-family:monospace;color:#94a3b8;">/recommendations</td>
-        <td style="padding:10px 12px;">Legacy Recommendations (unlinked)</td>
-        <td style="padding:10px 12px;"><span style="color:#22c55e;">Public</span></td>
-        <td style="padding:10px 12px;font-size:12px;">Still accessible directly but not linked in navigation</td>
+        <td style="padding:10px 12px;font-family:monospace;color:#22c55e;">/patient/shop/order-confirmation</td>
+        <td style="padding:10px 12px;">Order Confirmation</td>
+        <td style="padding:10px 12px;"><span style="color:#ef4444;">Auth + Sub</span></td>
+        <td style="padding:10px 12px;font-size:12px;">/patient/shop, /</td>
       </tr>
     </tbody>
   </table>
 
   <div class="note">
     <span class="note-icon">&#9432;</span>
-    <span><strong>Public*</strong> = No auth guard in the current wireframe code, but would require auth in production. <strong>Auth + Sub</strong> = Requires both authentication and an active subscription; unsubscribed users are redirected to <code>/subscribe</code>. Legacy pages (<code>/results</code>, <code>/recommendations</code>) remain in codebase but are no longer linked from any navigation.</span>
+    <span><strong>Public*</strong> = No auth guard in the current wireframe code, but would require auth in production. <strong>Auth only</strong> = Requires login but not a subscription (assessment is free). <strong>Soft gate</strong> = Unsubscribed users see a teaser; full content requires subscription. <strong>Auth + Sub</strong> = Hard gate — requires both authentication and an active Klara Membership; unsubscribed users are redirected to <code>/subscribe</code>. <strong>EMR adapter:</strong> <code>MockEmrAdapter</code> used in dev/staging; swap to <code>JaneEmrAdapter</code> (or any <code>EmrAdapter</code> impl) in production via one-line config change.</span>
   </div>
 </div>
 
 <div style="text-align:center;color:#94a3b8;font-size:12px;padding:20px 0 40px;">
-  Generated from codebase analysis &mdash; eyecare-poc (KlaraMD) &mdash; Updated Apr 2026: single Klara Membership plan, 15-min slots, admin panel, email notifications + .ics attachments, 1-hour reminders via cron-job.org
+  Generated from codebase analysis &mdash; eyecare-poc (KlaraMD) &mdash; Updated Apr 2026: EMR adapter integration (MockEmrAdapter), /patient/* + /provider/* route restructure, soft-gated results, EMR-backed booking (/api/emr/slots + /api/emr/book), post-consultation note push (/api/emr/notes/retry), cron retry queue
 </div>
 
 </body>
