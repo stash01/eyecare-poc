@@ -2,11 +2,11 @@
   "crons": [
     {
       "path": "/api/cron/appointment-reminders",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 0 * * *"
     },
     {
       "path": "/api/emr/notes/retry",
-      "schedule": "*/30 * * * *"
+      "schedule": "0 2 * * *"
     }
   ]
 }
