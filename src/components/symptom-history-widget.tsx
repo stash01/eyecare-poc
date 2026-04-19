@@ -136,7 +136,7 @@ export function SymptomHistoryWidget() {
                 Complete an assessment to start tracking your symptoms over time.
               </p>
             </div>
-            <Link href="/assessment">
+            <Link href="/patient/assessment">
               <Button size="sm">Take Assessment</Button>
             </Link>
           </div>
@@ -182,7 +182,7 @@ export function SymptomHistoryWidget() {
           )}
 
           <div className="pt-1">
-            <Link href="/assessment">
+            <Link href="/patient/assessment">
               <Button variant="secondary" size="sm" className="w-full">
                 Retake Assessment
               </Button>

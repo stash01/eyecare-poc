@@ -670,7 +670,7 @@ export default function AdminPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Link href="/assessment">
+              <Link href="/patient/assessment">
                 <Button variant="secondary" size="sm" className="gap-2">
                   <ClipboardList className="h-4 w-4" />
                   Take Assessment
