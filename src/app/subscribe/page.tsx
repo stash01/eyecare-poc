@@ -50,7 +50,7 @@ function SubscribePageContent() {
       if (assessmentParams) {
         router.push(`/assessment-results?${assessmentParams}`);
       } else {
-        router.push("/dashboard");
+        router.push("/patient/dashboard");
       }
     }
   }, [authLoading, subLoading, isSubscribed, assessmentParams, router]);
@@ -72,7 +72,7 @@ function SubscribePageContent() {
     if (assessmentParams) {
       router.push(`/assessment-results?${assessmentParams}`);
     } else {
-      router.push("/dashboard");
+      router.push("/patient/dashboard");
     }
   };
 
@@ -129,7 +129,7 @@ function SubscribePageContent() {
             <span className="text-xl font-semibold text-primary-900">KlaraMD</span>
           </Link>
           <Link
-            href="/dashboard"
+            href="/patient/dashboard"
             className="text-primary-700 hover:text-primary-800 text-sm"
           >
             Back to Dashboard

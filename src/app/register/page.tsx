@@ -29,7 +29,7 @@ export default function RegisterPage() {
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push("/dashboard");
+      router.push("/patient/dashboard");
     }
   }, [isLoading, isAuthenticated, router]);
 

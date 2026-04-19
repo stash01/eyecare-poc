@@ -53,7 +53,7 @@ export default function BlogPage() {
               <Eye className="h-8 w-8 text-primary-600" />
               <span className="text-xl font-semibold text-primary-900">KlaraMD</span>
             </Link>
-            <Link href="/dashboard">
+            <Link href="/patient/dashboard">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Dashboard

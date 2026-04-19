@@ -101,7 +101,7 @@ function ReturnContent() {
               <Button variant="secondary" onClick={() => router.push("/subscribe")}>
                 Try Again
               </Button>
-              <Button onClick={() => router.push("/dashboard")}>
+              <Button onClick={() => router.push("/patient/dashboard")}>
                 Go to Dashboard
               </Button>
             </div>

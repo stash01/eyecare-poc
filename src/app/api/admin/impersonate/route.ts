@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     );
     setSessionCookie(newToken);
     displayName = `${patient.first_name} ${patient.last_name}`;
-    redirectTo = "/dashboard";
+    redirectTo = "/patient/dashboard";
   } else {
     const { data: provider, error } = await db
       .from("providers")

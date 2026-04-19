@@ -23,7 +23,7 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push("/dashboard");
+      router.push("/patient/dashboard");
     }
   }, [isLoading, isAuthenticated, router]);
 
@@ -43,7 +43,7 @@ export default function LoginPage() {
     if (userType === "provider") {
       router.push("/provider");
     } else {
-      router.push("/dashboard");
+      router.push("/patient/dashboard");
     }
   };
 

@@ -150,7 +150,7 @@ export default function Home() {
               </Link>
               {isAuthenticated ? (
                 <>
-                  <Link href="/dashboard" className="text-sm text-stone-600 hover:text-primary-700 transition-colors">
+                  <Link href="/patient/dashboard" className="text-sm text-stone-600 hover:text-primary-700 transition-colors">
                     Dashboard
                   </Link>
                   <button onClick={logout} className="text-sm text-stone-600 hover:text-primary-700 transition-colors">

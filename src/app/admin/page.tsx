@@ -521,7 +521,7 @@ export default function AdminPage() {
   const [meetingError, setMeetingError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authLoading && (!user || !user.isAdmin)) router.push("/dashboard");
+    if (!authLoading && (!user || !user.isAdmin)) router.push("/patient/dashboard");
   }, [authLoading, user, router]);
 
   useEffect(() => {
@@ -657,7 +657,7 @@ export default function AdminPage() {
         <div className="container mx-auto px-6 py-3.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Link href="/dashboard" className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors">
+              <Link href="/patient/dashboard" className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors">
                 <ArrowLeft className="h-4 w-4" />
                 <span className="text-sm">Dashboard</span>
               </Link>
